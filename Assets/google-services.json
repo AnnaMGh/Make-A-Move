@@ -1,0 +1,46 @@
+{
+  "project_info": {
+    "project_number": "383111176083",
+    "project_id": "make-a-move-4fc2c",
+    "storage_bucket": "make-a-move-4fc2c.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:383111176083:android:b30a376e292da43e1d1266",
+        "android_client_info": {
+          "package_name": "com.Triumvirate.MAM.android"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "383111176083-2udb41gb8tref8veri4pvqepjslqgn0l.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAMqacgGwliFCC9mn6QC6uZDlkC5A7JQpA"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "383111176083-2udb41gb8tref8veri4pvqepjslqgn0l.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "383111176083-bqih8rfr68qoqnb5qc6nq59pr7eblb81.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.Triumvirate.MAM.ios"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
