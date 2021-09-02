@@ -19,6 +19,9 @@ public class SwipeDetector : MonoBehaviour
 
     public float SWIPE_THRESHOLD = 20f;
 
+    enum SwipeDirection { LEFT, RIGHT, UP, DOWN, NONE };
+    private SwipeDirection currentSwipeDirection = SwipeDirection.NONE;
+
     private void Start()
     {
         if (gameManager == null)
@@ -133,6 +136,7 @@ public class SwipeDetector : MonoBehaviour
         //No Movement at-all
         else
         {
+            currentSwipeDirection = SwipeDirection.NONE;
             //Debug.Log("No Swipe!");
         }
     }
@@ -148,36 +152,51 @@ public class SwipeDetector : MonoBehaviour
     }
 
     //////////////////////////////////CALLBACK FUNCTIONS/////////////////////////////
+
     void OnSwipeUp()
     {
-        if (gameManager.cameraFront.transform.position.y < 27.5f)
+        if (currentSwipeDirection == SwipeDirection.UP
+           || currentSwipeDirection == SwipeDirection.NONE)
         {
-            gameManager.OrbitCamera(Vector3.up);
+            if (gameManager.cameraFront.transform.position.y < 27.5f)
+            {
+                gameManager.OnOrbit(Vector3.up);
+                currentSwipeDirection = SwipeDirection.UP;
+            }
         }
-
-        Debug.Log("Swipe UP");
     }
 
     void OnSwipeDown()
     {
-        if (gameManager.cameraFront.transform.position.y > 15f)
+        if (currentSwipeDirection == SwipeDirection.DOWN
+           || currentSwipeDirection == SwipeDirection.NONE)
         {
-            gameManager.OrbitCamera(Vector3.down);
+            if (gameManager.cameraFront.transform.position.y > 15f)
+            {
+                gameManager.OnOrbit(Vector3.down);
+                currentSwipeDirection = SwipeDirection.DOWN;
+            }
         }
-        Debug.Log("Swipe Down");
-
     }
 
     void OnSwipeLeft()
     {
-        gameManager.OrbitCamera(Vector3.left);
-        Debug.Log("Swipe Left");
+        if (currentSwipeDirection == SwipeDirection.LEFT
+           || currentSwipeDirection == SwipeDirection.NONE)
+        {
+            gameManager.OnOrbit(Vector3.left);
+            currentSwipeDirection = SwipeDirection.LEFT;
+        }
     }
 
     void OnSwipeRight()
     {
-        gameManager.OrbitCamera(Vector3.right);
-        Debug.Log("Swipe Right");
+        if (currentSwipeDirection == SwipeDirection.RIGHT
+            || currentSwipeDirection == SwipeDirection.NONE)
+        {
+            gameManager.OnOrbit(Vector3.right);
+            currentSwipeDirection = SwipeDirection.RIGHT;
+        }
     }
 
 }

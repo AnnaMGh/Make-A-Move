@@ -220,6 +220,10 @@ public class GameManager : MonoBehaviour
 
     private Cube GetCubeFromName(String cubeName)
     {
+        if (matrixHandler.MatrixOfCubes == null)
+        {
+            return null;
+        }
         cubeName = cubeName.Substring(cubeName.IndexOf("_") + 1);
         int i = Int32.Parse(cubeName.Substring(0, cubeName.IndexOf("_")));
         cubeName = cubeName.Substring(cubeName.IndexOf("_") + 1);
@@ -388,33 +392,33 @@ public class GameManager : MonoBehaviour
         else if (matrixHandler.CurrentLevel == 2)
         {
             tutorialHandler.ShowTutorial(7, cameraMain.WorldToScreenPoint(matrixHandler.NewPieceAvailable.GameObj.transform.position - new Vector3(0f, 0f, 0f)), Vector3.right, c_s_y, "Take the Rook, to enable a new chess piece", false, (objTutorial1) =>
-               {
-                   //exit
-               });
+            {
+                //exit
+            });
         }
         else if (matrixHandler.CurrentLevel == 4)
         {
             tutorialHandler.ShowTutorial(10, cameraMain.WorldToScreenPoint(matrixHandler.BlockArray[0].GameObj.transform.position - new Vector3(0f, 0f, 0f)), Vector3.right, c_s_y, "Push the block to take the shortcut. Careful it will cost you extra moves", false, (objTutorial1) =>
-               {
-                   //exit
-               });
+            {
+                //exit
+            });
         }
         else if (matrixHandler.CurrentLevel == 6)
         {
             tutorialHandler.ShowTutorial(11, cameraMain.WorldToScreenPoint(matrixHandler.BlockArray[5].GameObj.transform.position - new Vector3(0f, 0f, -0.5f)), Vector3.right, c_s_y, "You can't push more than 1 block simultaneously", false, (objTutorial1) =>
-               {
-                   //exit
-               });
+            {
+                //exit
+            });
         }
         if (matrixHandler.CurrentLevel == 19)
         {
             tutorialHandler.ShowTutorial(15, cameraMain.WorldToScreenPoint(matrixHandler.MatrixOfCubes[matrixHandler.EnablerArray[0].cubePoint.i, matrixHandler.EnablerArray[0].cubePoint.j].transform.position - new Vector3(0f, 0f, -0.5f)), Vector3.right, c_s_y, "You can't step on red cubes", false, (objTutorial15) =>
-             {
-                 tutorialHandler.ShowTutorial(16, cameraMain.WorldToScreenPoint(matrixHandler.EnablerArray[0].GameObj.transform.position - new Vector3(0f, 0f, -0.5f)), Vector3.right, c_s_y, "To enable them you need to push the matched colored button", false, (objTutorial16) =>
-                 {
-                     //exit
-                 });
-             });
+            {
+                tutorialHandler.ShowTutorial(16, cameraMain.WorldToScreenPoint(matrixHandler.EnablerArray[0].GameObj.transform.position - new Vector3(0f, 0f, -0.5f)), Vector3.right, c_s_y, "To enable them you need to push the matched colored button", false, (objTutorial16) =>
+                {
+                    //exit
+                });
+            });
         }
 
         //send event
@@ -544,32 +548,6 @@ public class GameManager : MonoBehaviour
         possibleNextBlocks.Clear();
     }
 
-    public void OrbitCamera(Vector3 direction)
-    {
-        if (!GlobalSingleton.GetInstance().gamePaused
-             && cameraMain == cameraFront
-             && matrixHandler.MatrixOfCubes != null
-           )
-        {
-            cameraFront.gameObject.transform.Translate(direction, Space.Self);
-
-
-            Vector3 orbitDirection = matrixHandler.MatrixOfCubes[7, 7].gameObject.transform.position
-                 - matrixHandler.MatrixOfCubes[0, 0].gameObject.transform.position;
-            Vector3 orbitPosition = matrixHandler.MatrixOfCubes[0, 0].gameObject.transform.position
-                + (orbitDirection / 2f);
-
-            float distance = (orbitPosition - cameraFront.transform.position).magnitude;
-            cameraFront.transform.LookAt(orbitPosition);
-            Vector3 newDistance = orbitPosition - cameraFront.transform.position;
-            float difference = newDistance.magnitude - distance;
-            if (distance > 1 || distance < 1)
-            {
-               // cameraFront.transform.transform.Translate(newDistance - newDistance.normalized * difference);
-            }
-
-        }
-    }
 
     #region From other classes
 
@@ -583,12 +561,12 @@ public class GameManager : MonoBehaviour
         {
             tutorialHandler.ShowTutorial(8, piecesHandler.GetObjectWorldPotionCentered(CustomPiece.PiecesTypeEnum.TYPE_ROOK, canvas),
                 Vector3.right, c_s_y, "A new piece type has been enabled", true, (objTutorial8) =>
-            {
-                tutorialHandler.ShowTutorial(9, imgChanges.transform.position + new Vector3(0f, 10f, 0f), Vector3.up, c_s_y, "Number of piece changes left", false, (objTutorial9) =>
-                   {
-                       //exit
-                   });
-            });
+                {
+                    tutorialHandler.ShowTutorial(9, imgChanges.transform.position + new Vector3(0f, 10f, 0f), Vector3.up, c_s_y, "Number of piece changes left", false, (objTutorial9) =>
+                    {
+                        //exit
+                    });
+                });
         }
         else if (type == CustomPiece.PiecesTypeEnum.TYPE_KNIGHT)
         {
@@ -598,9 +576,9 @@ public class GameManager : MonoBehaviour
                     tutorialHandler.ShowTutorial(13, cameraMain.WorldToScreenPoint(matrixHandler.BlockArray[0].GameObj.transform.position), Vector3.right, c_s_y, "KNIGHT is the only piece that can destroy blocks which lands on.", true, (objTutorial13) =>
                     {
                         tutorialHandler.ShowTutorial(14, cameraMain.WorldToScreenPoint(matrixHandler.MatrixOfCubes[3, 4].transform.position), Vector3.right, c_s_y, "KNIGHT is the only piece that can jump over obstacles (Cubes, Pieces, Holes).", false, (objTutorial14) =>
-                         {
-                             //exit
-                         });
+                        {
+                            //exit
+                        });
                     });
                 });
         }
@@ -660,6 +638,42 @@ public class GameManager : MonoBehaviour
         });
     }
 
+    public void OnOrbit(Vector3 direction)
+    {
+        if (!GlobalSingleton.GetInstance().gamePaused
+             && cameraMain == cameraFront
+             && matrixHandler.MatrixOfCubes != null
+           )
+        {
+            cameraFront.gameObject.transform.Translate(direction, Space.Self);
+
+
+            Vector3 orbitDirection = matrixHandler.MatrixOfCubes[7, 7].gameObject.transform.position
+                 - matrixHandler.MatrixOfCubes[0, 0].gameObject.transform.position;
+            Vector3 orbitPosition = matrixHandler.MatrixOfCubes[0, 0].gameObject.transform.position
+                + (orbitDirection / 2f);
+
+            float distance = (orbitPosition - cameraFront.transform.position).magnitude;
+            Debug.Log("Distance 1: " + (orbitPosition - cameraFront.transform.position));
+            cameraFront.transform.LookAt(orbitPosition);
+
+
+            GlobalSingleton.GetInstance().SetTimeAsync(1000, (obj) =>
+            {
+                Vector3 newDistance = orbitPosition - cameraFront.transform.position;
+                float difference = newDistance.magnitude - distance;
+                Debug.Log("Distance 1: " + distance + " | Disctance 2: "
+                    + newDistance + " | Difference: " + difference);
+                if (!(difference < 1 && difference > -1))
+                {
+                    cameraFront.transform.transform.Translate(newDistance - newDistance.normalized * difference);
+                    //cameraFront.transform.transform.Translate(Vector3.zero);
+                }
+            });
+
+
+        }
+    }
     #endregion
 
 
@@ -745,7 +759,7 @@ public class GameManager : MonoBehaviour
             InitializeLevel(Constants.TYPE_START);
 
             //orbit camera
-            OrbitCamera(Vector3.zero);
+            OnOrbit(Vector3.zero);
 
             GlobalSingleton.GetInstance().SetTimeAsync(10, (objAsync) =>
             {
@@ -953,7 +967,7 @@ public class GameManager : MonoBehaviour
         if (GlobalSingleton.GetInstance().gamePaused || swipeDetector.isSwiping)
         {
 #if UNITY_EDITOR
-           
+
 #else
                return;
 #endif
