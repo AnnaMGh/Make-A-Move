@@ -109,11 +109,12 @@ public class SwipeDetector : MonoBehaviour
             //Debug.Log("Vertical");
             if (fingerDown.y - fingerUp.y > 0)//up swipe
             {
-                OnSwipeUp();
+                OnSwipeDown();
+                
             }
             else if (fingerDown.y - fingerUp.y < 0)//Down swipe
             {
-                OnSwipeDown();
+                OnSwipeUp();
             }
             fingerUp = fingerDown;
         }
@@ -122,13 +123,14 @@ public class SwipeDetector : MonoBehaviour
         else if (HorizontalValMove() > SWIPE_THRESHOLD && HorizontalValMove() > VerticalMove())
         {
             //Debug.Log("Horizontal");
-            if (fingerDown.x - fingerUp.x > 0)//Right swipe
+            if (fingerDown.x - fingerUp.x > 0)// Right swipe
             {
-                OnSwipeRight();
+               
+                OnSwipeLeft();
             }
             else if (fingerDown.x - fingerUp.x < 0)//Left swipe
             {
-                OnSwipeLeft();
+                OnSwipeRight();
             }
             fingerUp = fingerDown;
         }
@@ -158,7 +160,7 @@ public class SwipeDetector : MonoBehaviour
         if (currentSwipeDirection == SwipeDirection.UP
            || currentSwipeDirection == SwipeDirection.NONE)
         {
-            if (gameManager.cameraFront.transform.position.y < 27.5f)
+            if (gameManager.cameraFront.transform.position.y < 25f)
             {
                 gameManager.OnOrbit(Vector3.up);
                 currentSwipeDirection = SwipeDirection.UP;
@@ -171,7 +173,7 @@ public class SwipeDetector : MonoBehaviour
         if (currentSwipeDirection == SwipeDirection.DOWN
            || currentSwipeDirection == SwipeDirection.NONE)
         {
-            if (gameManager.cameraFront.transform.position.y > 15f)
+            if (gameManager.cameraFront.transform.position.y > 10f)
             {
                 gameManager.OnOrbit(Vector3.down);
                 currentSwipeDirection = SwipeDirection.DOWN;

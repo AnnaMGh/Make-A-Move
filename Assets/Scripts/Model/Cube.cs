@@ -59,7 +59,7 @@ public class Cube : MonoBehaviour
     {
         if (lastEnabledStatus != enabledStatus)
         {
-            Debug.Log("Cube Update " + (mainColor!=null?"null":mainColor.ToString()));
+            //Debug.Log("Cube Update " + (mainColor!=null?"null":mainColor.ToString()));
             lastEnabledStatus = enabledStatus;
             cubeRenderer.enabled = enabledStatus;
             if (enabledStatus)
