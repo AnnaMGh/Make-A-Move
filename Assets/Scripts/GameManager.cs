@@ -66,6 +66,9 @@ public class GameManager : MonoBehaviour
     private bool gameFinished;
     private bool clickedNext;
 
+    private Vector3 orbitDistance = Vector3.zero;
+    private Vector3 orbitPosition = Vector3.zero;
+
 
     //string vvvalue = "not set";
 
@@ -645,33 +648,32 @@ public class GameManager : MonoBehaviour
              && matrixHandler.MatrixOfCubes != null
            )
         {
+            //move camera in direction received, by Space Self
+            //NOT Space World cuz the camera will rotate and tehere will be a mess
             cameraFront.gameObject.transform.Translate(direction, Space.Self);
 
-
-            Vector3 orbitDirection = matrixHandler.MatrixOfCubes[7, 7].gameObject.transform.position
-                 - matrixHandler.MatrixOfCubes[0, 0].gameObject.transform.position;
-            Vector3 orbitPosition = matrixHandler.MatrixOfCubes[0, 0].gameObject.transform.position
-                + (orbitDirection / 2f);
-
-            float distance = (orbitPosition - cameraFront.transform.position).magnitude;
-            Debug.Log("Distance 1: " + (orbitPosition - cameraFront.transform.position));
-            cameraFront.transform.LookAt(orbitPosition);
-
-
-            GlobalSingleton.GetInstance().SetTimeAsync(1000, (obj) =>
+            //calculate original distance and position
+            if (orbitDistance.Equals(Vector3.zero) || orbitPosition.Equals(Vector3.zero))
             {
-                Vector3 newDistance = orbitPosition - cameraFront.transform.position;
-                float difference = newDistance.magnitude - distance;
-                Debug.Log("Distance 1: " + distance + " | Disctance 2: "
-                    + newDistance + " | Difference: " + difference);
-                if (!(difference < 1 && difference > -1))
-                {
-                    cameraFront.transform.transform.Translate(newDistance - newDistance.normalized * difference);
-                    //cameraFront.transform.transform.Translate(Vector3.zero);
-                }
-            });
+                Vector3 orbitDir = matrixHandler.MatrixOfCubes[7, 7].gameObject.transform.position
+               - matrixHandler.MatrixOfCubes[0, 0].gameObject.transform.position;
 
-
+                orbitPosition = matrixHandler.MatrixOfCubes[0, 0].gameObject.transform.position
+                    + (orbitDir / 2f);
+                orbitDistance = orbitPosition - cameraFront.transform.position;
+            }
+        
+            //roate in Space World, cuz it roatate around a point out of the camera game object
+            cameraFront.transform.LookAt(orbitPosition);
+            
+            //check distance
+            Vector3 newOrbitDistance = orbitPosition - cameraFront.transform.position;
+            if (newOrbitDistance.magnitude != orbitDistance.magnitude)
+            {
+                float difference = newOrbitDistance.magnitude - orbitDistance.magnitude;
+                //move camera in space world
+                cameraFront.transform.transform.Translate(newOrbitDistance.normalized * difference, Space.World);
+            }
         }
     }
     #endregion
@@ -730,7 +732,6 @@ public class GameManager : MonoBehaviour
         panelPawnAnimation.GetComponent<Animator>().SetFloat("State", 0);
 
         piecesHandler.InitializePanelPieces(canvas);
-
 
         panelGame.SetActive(true);
         btnStart.enabled = true;
@@ -964,14 +965,9 @@ public class GameManager : MonoBehaviour
 
     public void OnClickPiece(int index)
     {
-        if (GlobalSingleton.GetInstance().gamePaused || swipeDetector.isSwiping)
+        if (GlobalSingleton.GetInstance().gamePaused)
         {
-#if UNITY_EDITOR
-
-#else
                return;
-#endif
-
         }
 
 
