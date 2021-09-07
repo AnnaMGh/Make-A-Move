@@ -152,8 +152,8 @@ public class GameManager : MonoBehaviour
         }
 
         //set sprites
-        spriteCameraFront = Resources.Load<Sprite>("Images/Icons/Camera_01");
-        spriteCameraTop = Resources.Load<Sprite>("Images/Icons/Camera_02");
+        spriteCameraFront = Resources.Load<Sprite>("Images/Icons/Camera3D");
+        spriteCameraTop = Resources.Load<Sprite>("Images/Icons/Camera2D");
 
         //set firebase
         StartCoroutine(FirebaseSingleton.GetInstance().ICheckFirebaseDependences((obj1) => { }));
@@ -292,7 +292,7 @@ public class GameManager : MonoBehaviour
     {
 
         //set camera
-        imgCamera.sprite = spriteCameraTop;
+        imgCamera.sprite = spriteCameraFront;
         cameraFront.gameObject.SetActive(true);
         cameraTop.gameObject.SetActive(false);
         cameraMain = cameraFront;
@@ -371,19 +371,34 @@ public class GameManager : MonoBehaviour
         //tutorial -> NO. 1
         if (matrixHandler.CurrentLevel == 1)
         {
+            moveEnabled = false;
             tutorialHandler.ShowTutorial(1, imgCurrentLevel.transform.position + new Vector3(0f, 10f, 0f), Vector3.up, c_s_y, "Current level", true, (objTutorial1) =>
             {
                 tutorialHandler.ShowTutorial(2, cameraMain.WorldToScreenPoint(pieceHandler.CurrentPieceGameObj.transform.position), Vector3.right, c_s_y, "Current chess piece", true, (objTutorial2) =>
                 {
-                    tutorialHandler.ShowTutorial(3, cameraMain.WorldToScreenPoint(matrixHandler.MatrixOfCubes[matrixHandler.FinishPoint.i, matrixHandler.FinishPoint.j].transform.position + new Vector3(0f, 0f, 1f)), Vector3.right, c_s_y, "Target", true, (objTutorial3) =>
+                    tutorialHandler.ShowTutorial(3, cameraMain.WorldToScreenPoint(matrixHandler.MatrixOfCubes[matrixHandler.FinishPoint.i, matrixHandler.FinishPoint.j].transform.position + Vector3.forward), Vector3.right, c_s_y, "Target", true, (objTutorial3) =>
                     {
-                        tutorialHandler.ShowTutorial(4, cameraMain.WorldToScreenPoint(arrowHandler.GetPositions()[CustomPiece.MovementTypeEnum.MOVEMENT_FORWARD]), Vector3.left, c_s_y, "Movement arrows according to piece type", true, (objTutorial4) =>
+                        Cube nextPossibleMoveCube = new Cube();
+                        foreach (KeyValuePair<Cube, CustomPiece.MovementTypeEnum> c in possibleNextMoves)
+                        {
+                            nextPossibleMoveCube = c.Key;
+                            break;
+                        }
+
+                        //tutorialHandler.ShowTutorial(4, cameraMain.WorldToScreenPoint(arrowHandler.GetPositions()[CustomPiece.MovementTypeEnum.MOVEMENT_FORWARD]), Vector3.left, c_s_y, "Movement arrows according to piece type", true, (objTutorial4) =>
+                        tutorialHandler.ShowTutorial(4, cameraMain.WorldToScreenPoint(nextPossibleMoveCube.transform.position + Vector3.forward) , Vector3.left, c_s_y, "Tap on the marked cubes to move the player", true, (objTutorial4) =>
                         {
                             tutorialHandler.ShowTutorial(5, imgMoves.transform.position + new Vector3(0f, 10f, 0f), Vector3.up, c_s_y, "Number of moves left", true, (objTutorial5) =>
                             {
-                                tutorialHandler.ShowTutorial(6, imgCamera.transform.position + new Vector3(-50f, -50f, 0f), Vector3.left, c_s_y, "Change camera perspective", false, (objTutorial6) =>
+                                float cameraSize = imgCamera.GetComponent<RectTransform>().rect.width / 2f * c_s_y;
+
+                                tutorialHandler.ShowTutorial(6, imgCamera.transform.position + new Vector3(-cameraSize, -cameraSize, 0f), Vector3.left, c_s_y, "Change camera perspective - Toggle between 2D and 3D", true, (objTutorial6) =>
                                 {
-                                    //exit
+                                    tutorialHandler.ShowTutorial(7, imgCamera.transform.position + new Vector3(-cameraSize, -cameraSize, 0f), Vector3.left, c_s_y, "While camera 3D is on you can rotate the view by SWIPING", false, (objTutorial7) =>
+                                    {
+                                        moveEnabled = true;
+                                        //exit
+                                    });
                                 });
                             });
                         });
@@ -394,31 +409,39 @@ public class GameManager : MonoBehaviour
         }
         else if (matrixHandler.CurrentLevel == 2)
         {
-            tutorialHandler.ShowTutorial(7, cameraMain.WorldToScreenPoint(matrixHandler.NewPieceAvailable.GameObj.transform.position - new Vector3(0f, 0f, 0f)), Vector3.right, c_s_y, "Take the Rook, to enable a new chess piece", false, (objTutorial1) =>
+            moveEnabled = false;
+            tutorialHandler.ShowTutorial(8, cameraMain.WorldToScreenPoint(matrixHandler.NewPieceAvailable.GameObj.transform.position - new Vector3(0f, 0f, 0f)), Vector3.right, c_s_y, "Take the Rook, to enable a new chess piece", false, (objTutorial1) =>
             {
+                moveEnabled = true;
                 //exit
             });
         }
         else if (matrixHandler.CurrentLevel == 4)
         {
-            tutorialHandler.ShowTutorial(10, cameraMain.WorldToScreenPoint(matrixHandler.BlockArray[0].GameObj.transform.position - new Vector3(0f, 0f, 0f)), Vector3.right, c_s_y, "Push the block to take the shortcut. Careful it will cost you extra moves", false, (objTutorial1) =>
+            moveEnabled = false;
+            tutorialHandler.ShowTutorial(11, cameraMain.WorldToScreenPoint(matrixHandler.BlockArray[0].GameObj.transform.position - new Vector3(0f, 0f, 0f)), Vector3.right, c_s_y, "Push the block to take the shortcut. Careful it will cost you extra moves", false, (objTutorial1) =>
             {
+                moveEnabled = true;
                 //exit
             });
         }
         else if (matrixHandler.CurrentLevel == 6)
         {
-            tutorialHandler.ShowTutorial(11, cameraMain.WorldToScreenPoint(matrixHandler.BlockArray[5].GameObj.transform.position - new Vector3(0f, 0f, -0.5f)), Vector3.right, c_s_y, "You can't push more than 1 block simultaneously", false, (objTutorial1) =>
+            moveEnabled = false;
+            tutorialHandler.ShowTutorial(12, cameraMain.WorldToScreenPoint(matrixHandler.BlockArray[5].GameObj.transform.position - new Vector3(0f, 0f, -0.5f)), Vector3.right, c_s_y, "You can't push more than 1 block simultaneously", false, (objTutorial1) =>
             {
+                moveEnabled = true;
                 //exit
             });
         }
-        if (matrixHandler.CurrentLevel == 19)
+        if (matrixHandler.CurrentLevel == 20)
         {
-            tutorialHandler.ShowTutorial(15, cameraMain.WorldToScreenPoint(matrixHandler.MatrixOfCubes[matrixHandler.EnablerArray[0].cubePoint.i, matrixHandler.EnablerArray[0].cubePoint.j].transform.position - new Vector3(0f, 0f, -0.5f)), Vector3.right, c_s_y, "You can't step on red cubes", false, (objTutorial15) =>
+            moveEnabled = false;
+            tutorialHandler.ShowTutorial(16, cameraMain.WorldToScreenPoint(matrixHandler.MatrixOfCubes[matrixHandler.EnablerArray[0].cubePoint.i, matrixHandler.EnablerArray[0].cubePoint.j].transform.position - new Vector3(0f, 0f, -0.5f)), Vector3.right, c_s_y, "You can't step on red cubes", false, (objTutorial15) =>
             {
-                tutorialHandler.ShowTutorial(16, cameraMain.WorldToScreenPoint(matrixHandler.EnablerArray[0].GameObj.transform.position - new Vector3(0f, 0f, -0.5f)), Vector3.right, c_s_y, "To enable them you need to push the matched colored button", false, (objTutorial16) =>
+                tutorialHandler.ShowTutorial(17, cameraMain.WorldToScreenPoint(matrixHandler.EnablerArray[0].GameObj.transform.position - new Vector3(0f, 0f, -0.5f)), Vector3.right, c_s_y, "To enable them you need to push the matched colored button", false, (objTutorial16) =>
                 {
+                    moveEnabled = true;
                     //exit
                 });
             });
@@ -562,24 +585,28 @@ public class GameManager : MonoBehaviour
 
         if (type == CustomPiece.PiecesTypeEnum.TYPE_ROOK)
         {
-            tutorialHandler.ShowTutorial(8, piecesHandler.GetObjectWorldPotionCentered(CustomPiece.PiecesTypeEnum.TYPE_ROOK, canvas),
+            moveEnabled = false;
+            tutorialHandler.ShowTutorial(9, piecesHandler.GetObjectWorldPotionCentered(CustomPiece.PiecesTypeEnum.TYPE_ROOK, canvas),
                 Vector3.right, c_s_y, "A new piece type has been enabled", true, (objTutorial8) =>
                 {
-                    tutorialHandler.ShowTutorial(9, imgChanges.transform.position + new Vector3(0f, 10f, 0f), Vector3.up, c_s_y, "Number of piece changes left", false, (objTutorial9) =>
+                    tutorialHandler.ShowTutorial(10, imgChanges.transform.position + new Vector3(0f, 10f, 0f), Vector3.up, c_s_y, "Number of piece changes left", false, (objTutorial9) =>
                     {
+                        moveEnabled = true;
                         //exit
                     });
                 });
         }
         else if (type == CustomPiece.PiecesTypeEnum.TYPE_KNIGHT)
         {
-            tutorialHandler.ShowTutorial(12, piecesHandler.GetObjectWorldPotionCentered(CustomPiece.PiecesTypeEnum.TYPE_KNIGHT, canvas),
+            moveEnabled = false;
+            tutorialHandler.ShowTutorial(13, piecesHandler.GetObjectWorldPotionCentered(CustomPiece.PiecesTypeEnum.TYPE_KNIGHT, canvas),
                 Vector3.right, c_s_y, "Knight piece has been enabled.", true, (objTutorial12) =>
                 {
-                    tutorialHandler.ShowTutorial(13, cameraMain.WorldToScreenPoint(matrixHandler.BlockArray[0].GameObj.transform.position), Vector3.right, c_s_y, "KNIGHT is the only piece that can destroy blocks which lands on.", true, (objTutorial13) =>
+                    tutorialHandler.ShowTutorial(14, cameraMain.WorldToScreenPoint(matrixHandler.BlockArray[0].GameObj.transform.position), Vector3.right, c_s_y, "KNIGHT is the only piece that can destroy blocks which lands on.", true, (objTutorial13) =>
                     {
-                        tutorialHandler.ShowTutorial(14, cameraMain.WorldToScreenPoint(matrixHandler.MatrixOfCubes[3, 4].transform.position), Vector3.right, c_s_y, "KNIGHT is the only piece that can jump over obstacles (Cubes, Pieces, Holes).", false, (objTutorial14) =>
+                        tutorialHandler.ShowTutorial(15, cameraMain.WorldToScreenPoint(matrixHandler.MatrixOfCubes[3, 4].transform.position), Vector3.right, c_s_y, "KNIGHT is the only piece that can jump over obstacles (Cubes, Pieces, Holes).", false, (objTutorial14) =>
                         {
+                            moveEnabled = true;
                             //exit
                         });
                     });
@@ -662,10 +689,10 @@ public class GameManager : MonoBehaviour
                     + (orbitDir / 2f);
                 orbitDistance = orbitPosition - cameraFront.transform.position;
             }
-        
+
             //roate in Space World, cuz it roatate around a point out of the camera game object
             cameraFront.transform.LookAt(orbitPosition);
-            
+
             //check distance
             Vector3 newOrbitDistance = orbitPosition - cameraFront.transform.position;
             if (newOrbitDistance.magnitude != orbitDistance.magnitude)
@@ -866,16 +893,20 @@ public class GameManager : MonoBehaviour
 
     public void OnClickCamera()
     {
+        if (!moveEnabled || GlobalSingleton.GetInstance().gamePaused) {
+            return;
+        }
+
         if (cameraMain == cameraFront)
         {
-            imgCamera.sprite = spriteCameraFront;
+            imgCamera.sprite = spriteCameraTop;
             cameraFront.gameObject.SetActive(false);
             cameraTop.gameObject.SetActive(true);
             cameraMain = cameraTop;
         }
         else
         {
-            imgCamera.sprite = spriteCameraTop;
+            imgCamera.sprite = spriteCameraFront;
             cameraFront.gameObject.SetActive(true);
             cameraTop.gameObject.SetActive(false);
             cameraMain = cameraFront;
@@ -967,7 +998,7 @@ public class GameManager : MonoBehaviour
     {
         if (GlobalSingleton.GetInstance().gamePaused)
         {
-               return;
+            return;
         }
 
 

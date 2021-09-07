@@ -174,14 +174,14 @@ public class PanelHandler : MonoBehaviour
     {
         if (txtTitle == null) { Initialize(); }
         PlayerPrefs.SetInt(Constants.KEY_SOUND, sound);
-        imgSounds.sprite = Resources.Load<Sprite>("Images/Icons/Sound_" + (1 - sound));
+        imgSounds.sprite = Resources.Load<Sprite>("Images/Icons/Sound_" + (sound));
     }
 
     public void ChangeColor(int color)
     {
         if (txtTitle == null) { Initialize(); }
         PlayerPrefs.SetInt(Constants.KEY_COLOR, color);
-        imgColor.sprite = Resources.Load<Sprite>("Images/Icons/Color_" + (1 - color));
+        imgColor.sprite = Resources.Load<Sprite>("Images/Icons/Color_" + (color));
     }
 
     public void ShowStars(int nrOfStartsToFill)

@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
+[System.Serializable]
 public class Cube : MonoBehaviour
 {
     public enum CubeType { TYPE_NORMAL, TYPE_NEXT, TYPE_UNAVAILABLE, TYPE_START, TYPE_FINISH, TYPE_NEW_PIECE, TYPE_BLOCK }
