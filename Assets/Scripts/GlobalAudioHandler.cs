@@ -6,7 +6,7 @@ public class GlobalAudioHandler : MonoBehaviour
 {
     public enum AudioType { START, GAME, GAME_OVER, FINISH, SILENCE };
 
-    private AudioSource audioSource;
+    private AudioSource[] audioSource;
     private AudioClip gameOverClip;
     private AudioClip finishClip;
     private AudioClip[] gameClips;
@@ -15,19 +15,23 @@ public class GlobalAudioHandler : MonoBehaviour
     private const float VOLUME_MAX = 0.7f;
     private const float VOLUME_MIN = 0.2f;
     private const float VOLUME_OFF = 0.2f;
-   
+
     private float lastVolumeBeforGameTypeOff;
 
     private AudioClip clipBeforeDisabled;
     private AudioType typeBeforeDisabled;
     private float clipTimeBeforeDisabled;
     private float volumeBeforeDisabled;
-   
+
+    private int s1 = 0;
+    private int s2 = 50;
+    private int s3 = 110;
+
 
     // Start is called before the first frame update
     void Awake()
     {
-        audioSource = this.GetComponent<AudioSource>();
+        audioSource = this.GetComponents<AudioSource>();
 
         //set audio clips
         gameOverClip = Resources.Load<AudioClip>("Sounds/game_over_sound");
@@ -39,29 +43,43 @@ public class GlobalAudioHandler : MonoBehaviour
     void Update()
     {
         //continue playing background music in GAME state
-        if (audioSource.enabled)
+        if (audioSource[0].enabled || audioSource[1])
         {
             if (currentType == AudioType.GAME)
             {
-                if (audioSource.clip.length - audioSource.time < 1f)
+                if (audioSource[0].clip.length - audioSource[0].time < 1f)
                 {
                     //play new loop
-                    audioSource.volume -= 0.005f;
-                    lastVolumeBeforGameTypeOff = audioSource.volume;
-                    if (audioSource.clip.length - audioSource.time < 0.01f)
+                    audioSource[0].volume -= 0.005f;
+                    lastVolumeBeforGameTypeOff = audioSource[0].volume;
+                    if (audioSource[0].clip.length - audioSource[0].time < 0.01f)
                     {
                         //play new loop
-                        audioSource.volume = VOLUME_OFF;
+                        audioSource[0].volume = VOLUME_OFF;
                         PlaySound(currentType);
                     }
                 }
                 else
                 {
-                    if (audioSource.volume < VOLUME_MAX)
+                    if (audioSource[0].volume < VOLUME_MAX)
                     {
-                        audioSource.volume += 0.001f;
+                        audioSource[0].volume += 0.001f;
                     }
                 }
+
+
+               /* if (audioSource.time > 20f && audioSource.time < 20.5f)
+                {
+                    audioSource.time = s2;
+                    Debug.Log("Change: " + audioSource.time);
+                }
+                else if (audioSource.time > 60 && audioSource.time < 60 + 0.5f)
+                {
+                    audioSource.time = s3;
+                    Debug.Log("Change: " + audioSource.time);
+                }*/
+
+               // Debug.Log("Time: " + audioSource[0].time);
             }
         }
     }
@@ -69,33 +87,35 @@ public class GlobalAudioHandler : MonoBehaviour
     private void ChooseGameLoop()
     {
         int random = Random.Range(0, gameClips.Length);
-        audioSource.clip = gameClips[random];
+        audioSource[0].clip = gameClips[random];
+       // audioSource.clip = gameClips[0];
     }
 
     public void EnableAudioSource(bool enable)
     {
-        if(!enable)
+        if (!enable)
         {
-            StoreCurrentData(true);  
-            
-            audioSource.Stop();
-            audioSource.enabled = false;
+            StoreCurrentData(true);
+
+            audioSource[0].Stop();
+            audioSource[0].enabled = false;
         }
         if (enable)
         {
-            audioSource.enabled = true;
+            audioSource[0].enabled = true;
             if (currentType == AudioType.GAME && typeBeforeDisabled == AudioType.GAME)
             {
-                audioSource.clip = clipBeforeDisabled;
-                audioSource.time = clipTimeBeforeDisabled;
-                audioSource.Play();
+                audioSource[0].clip = clipBeforeDisabled;
+                audioSource[0].time = clipTimeBeforeDisabled;
+                audioSource[0].Play();
             }
-            else {
+            else
+            {
                 PlaySound(AudioType.GAME);
             }
         }
 
-       
+
     }
 
     public void PlaySound(AudioType type)
@@ -113,7 +133,7 @@ public class GlobalAudioHandler : MonoBehaviour
         {
             case AudioType.START:
                 {
-                    audioSource.clip = null;
+                    audioSource[0].clip = null;
                     break;
                 }
             case AudioType.GAME:
@@ -124,12 +144,13 @@ public class GlobalAudioHandler : MonoBehaviour
                     }
                     else
                     {
-                        if (audioSource.volume == VOLUME_OFF)
+                        if (audioSource[0].volume == VOLUME_OFF)
                         {
                             volume = lastVolumeBeforGameTypeOff;
                         }
-                        else {
-                            volume = audioSource.volume;
+                        else
+                        {
+                            volume = audioSource[0].volume;
                         }
                     }
                     ChooseGameLoop();
@@ -137,45 +158,48 @@ public class GlobalAudioHandler : MonoBehaviour
                 }
             case AudioType.GAME_OVER:
                 {
-                    audioSource.clip = gameOverClip;
+                    audioSource[0].clip = gameOverClip;
                     break;
                 }
             case AudioType.FINISH:
                 {
-                    audioSource.clip = finishClip;
+                    audioSource[0].clip = finishClip;
                     break;
                 }
             case AudioType.SILENCE:
                 {
                     StoreCurrentData(false);
                     play = false;
-                    audioSource.clip = null;
+                    audioSource[0].clip = null;
                     break;
                 }
         }
 
-        if (play && audioSource.enabled)
+        if (play && audioSource[0].enabled)
         {
-            audioSource.Play();
+            audioSource[0].Play();
         }
-        else {
-            audioSource.Stop();
+        else
+        {
+            audioSource[0].Stop();
         }
 
-        audioSource.volume = volume;
-        audioSource.time = 0;
+        audioSource[0].volume = volume;
+        audioSource[0].time = 0;
         currentType = type;
     }
 
-    private void StoreCurrentData(bool store) {
+    private void StoreCurrentData(bool store)
+    {
         if (store)
         {
             typeBeforeDisabled = currentType;
-            clipBeforeDisabled = audioSource.clip;
-            clipTimeBeforeDisabled = audioSource.time;
-            volumeBeforeDisabled = audioSource.volume;
+            clipBeforeDisabled = audioSource[0].clip;
+            clipTimeBeforeDisabled = audioSource[0].time;
+            volumeBeforeDisabled = audioSource[0].volume;
         }
-        else {
+        else
+        {
             typeBeforeDisabled = AudioType.SILENCE;
             clipBeforeDisabled = null;
             clipTimeBeforeDisabled = 0;
