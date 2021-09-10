@@ -96,7 +96,7 @@ public class Interactable : MonoBehaviour
 
                 case InteractableType.BLOCK:
                     {
-                        // HandleBlock(other);
+                        HandleBlock(other, false);
                         break;
                     }
                 case InteractableType.ENABLER:
@@ -121,7 +121,7 @@ public class Interactable : MonoBehaviour
                     }
                 case InteractableType.BLOCK:
                     {
-                        HandleBlock(other.collider);
+                        HandleBlock(other.collider, true);
                         break;
                     }
                 case InteractableType.ENABLER:
@@ -134,21 +134,54 @@ public class Interactable : MonoBehaviour
         }
     }
 
-    private void HandleNewPiece() {
+    private void HandleNewPiece()
+    {
         collideOrTrigger = true;
         gameObject.SetActive(false);
         gameManager.OnNewPieceAvailable(this.gameObject.transform.parent.GetComponent<PieceHandler>().CurrentPiece.pieceType);
     }
 
-    private void HandleBlock(Collider collider)
+    private void HandleBlock(Collider collider, bool fromCollision)
     {
         collideOrTrigger = true;
         PieceHandler piece = collider.transform.parent.GetComponent<PieceHandler>();
 
-        //block is destroyed by Knight
-        if (piece.CurrentPiece.pieceType.Equals(CustomPiece.PiecesTypeEnum.TYPE_KNIGHT))
+        //if is from collision and its bishop or is from trigger and is something else than bishop => exit
+        if (!piece.CurrentPiece.pieceType.Equals(CustomPiece.PiecesTypeEnum.TYPE_KNIGHT) &&
+            ((!fromCollision && piece.CurrentPiece.pieceType.Equals(CustomPiece.PiecesTypeEnum.TYPE_BISHOP))
+            || (fromCollision && !piece.CurrentPiece.pieceType.Equals(CustomPiece.PiecesTypeEnum.TYPE_BISHOP))))
         {
+            Block block = (Block)receivedObject;
 
+
+            //check if the block with piece interact is the target one
+            if (block.oldPoint.i!=gameManager.GetPieceHandler().currentPoint.i
+                || block.oldPoint.j != gameManager.GetPieceHandler().currentPoint.j)
+            {
+                return;
+            }
+
+            Point newPoint = new Point(block.oldPoint.i + gameManager.GetPieceHandler().LastStep.Point.i, block.oldPoint.j + gameManager.GetPieceHandler().LastStep.Point.j);
+            bool canMove = gameManager.GetMatrixHandler().CheckIfCanStep(true, gameManager.GetPieceHandler().GetPoint(gameManager.GetPieceHandler().LastStep.Movement, 1));
+            canMove &= !gameManager.GetMatrixHandler().IsBlockOnPoint(newPoint);
+            if (canMove) //block is moved
+            {
+                goDown = !gameManager.GetMatrixHandler().CheckIfCanStep(false, gameManager.GetPieceHandler().GetPoint(gameManager.GetPieceHandler().LastStep.Movement, 1));
+                lastDirection = gameManager.GetPieceHandler().LastStep.Position;
+                block.oldPoint = newPoint;
+                stepsToMove += accuracy;
+            }
+            else //block stays same position
+            {
+                goDown = false;
+                gameManager.OnBlock(false, null, (int)gameManager.GetPieceHandler().LastStep.OpositeMovement); //back to previous position
+                collideOrTrigger = false;
+            }
+
+        }
+        //block is destroyed by Knight
+        else if (fromCollision && piece.CurrentPiece.pieceType.Equals(CustomPiece.PiecesTypeEnum.TYPE_KNIGHT))
+        {
             //make sound
             if (PlayerPrefs.GetInt(Constants.KEY_SOUND) == 1)
             {
@@ -171,24 +204,9 @@ public class Interactable : MonoBehaviour
             {
                 gameManager.OnBlock(false, (Block)receivedObject, -2); //refresh current position
             });
-            return;
         }
-
-        Block block = (Block)receivedObject;
-        Point newPoint = new Point(block.oldPoint.i + gameManager.GetPieceHandler().LastStep.Point.i, block.oldPoint.j + gameManager.GetPieceHandler().LastStep.Point.j);
-        bool canMove = gameManager.GetMatrixHandler().CheckIfCanStep(true, gameManager.GetPieceHandler().GetPoint(gameManager.GetPieceHandler().LastStep.Movement, 1));
-        canMove &= !gameManager.GetMatrixHandler().IsBlockOnPoint(newPoint);
-        if (canMove) //block is moved
+        else
         {
-            goDown = !gameManager.GetMatrixHandler().CheckIfCanStep(false, gameManager.GetPieceHandler().GetPoint(gameManager.GetPieceHandler().LastStep.Movement, 1));
-            lastDirection = gameManager.GetPieceHandler().LastStep.Position;
-            block.oldPoint = newPoint;
-            stepsToMove += accuracy;
-        }
-        else //block stays same position
-        {
-            goDown = false;
-            gameManager.OnBlock(false, null, (int)gameManager.GetPieceHandler().LastStep.OpositeMovement); //back to previous position
             collideOrTrigger = false;
         }
     }
@@ -215,6 +233,6 @@ public class Interactable : MonoBehaviour
             Color cubeColor = ((enabler.cubePoint.i + enabler.cubePoint.j) % 2 == 0 ? Constants.MATRIX_BOX_BLACK_COLOR : Constants.MATRIX_BOX_WHITE_COLOR);
             gameManager.GetMatrixHandler().ChangeCubeStatus(enabler.cubePoint, true, cubeColor);
 
-        }     
+        }
     }
 }

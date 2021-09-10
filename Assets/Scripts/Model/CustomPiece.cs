@@ -22,8 +22,11 @@ public class CustomPiece
     public PiecesTypeEnum pieceType;
     public MovementTypeEnum[] movementType;
     public int limitedMoves; //limited
-    public string meshName;
     public Point currentPoint;
+    public Mesh mesh;
+    public Material materialWhite;
+    public Material materialBlack;
+    public AudioClip audio;
 
 
     public void ChangePieceByType(PiecesTypeEnum pawnType)
@@ -46,7 +49,10 @@ public class CustomPiece
         this.pieceType = newPieceValues.pieceType;
         this.movementType = newPieceValues.movementType;
         this.limitedMoves = newPieceValues.limitedMoves;
-        this.meshName = newPieceValues.meshName;
+        this.mesh = newPieceValues.mesh;
+        this.materialWhite = newPieceValues.materialWhite;
+        this.materialBlack = newPieceValues.materialBlack;
+        this.audio = newPieceValues.audio;
     }
 
     public class Pawn : CustomPiece
@@ -56,7 +62,10 @@ public class CustomPiece
             pieceType = PiecesTypeEnum.TYPE_PAWN;
             movementType = new MovementTypeEnum[] { MovementTypeEnum.MOVEMENT_FORWARD };
             limitedMoves = 1; //limited
-            meshName = PiecesTypeEnum.TYPE_PAWN.ToString();
+            mesh = Resources.Load<Mesh>("Meshes/" + pieceType.ToString());
+            materialWhite = Resources.Load<Material>("Materials/" + pieceType.ToString() + "_material_" + "white" ); 
+            materialBlack = Resources.Load<Material>("Materials/" + pieceType.ToString() + "_material_" + "black");
+            audio = Resources.Load<AudioClip>("Sounds/Pieces/" + pieceType.ToString());
         }
     }
 
@@ -67,7 +76,10 @@ public class CustomPiece
             pieceType = PiecesTypeEnum.TYPE_ROOK;
             movementType = new MovementTypeEnum[] { MovementTypeEnum.MOVEMENT_FORWARD, MovementTypeEnum.MOVEMENT_BACKWARD, MovementTypeEnum.MOVEMENT_LEFT, MovementTypeEnum.MOVEMENT_RIGHT };
             limitedMoves = 0; // no limits
-            meshName = PiecesTypeEnum.TYPE_ROOK.ToString();
+            mesh = Resources.Load<Mesh>("Meshes/" + pieceType.ToString());
+            materialWhite = Resources.Load<Material>("Materials/" + pieceType.ToString() + "_material_" + "white");
+            materialBlack = Resources.Load<Material>("Materials/" + pieceType.ToString() + "_material_" + "black");
+            audio = Resources.Load<AudioClip>("Sounds/Pieces/" + pieceType.ToString());
         }
     }
 
@@ -87,7 +99,10 @@ public class CustomPiece
                 MovementTypeEnum.MOVEMENT_BACKWARD_RIGHT_L,
             };
             limitedMoves = 3; //limited
-            meshName = PiecesTypeEnum.TYPE_KNIGHT.ToString();
+            mesh = Resources.Load<Mesh>("Meshes/" + pieceType.ToString());
+            materialWhite = Resources.Load<Material>("Materials/" + pieceType.ToString() + "_material_" + "white");
+            materialBlack = Resources.Load<Material>("Materials/" + pieceType.ToString() + "_material_" + "black");
+            audio = Resources.Load<AudioClip>("Sounds/Pieces/" + pieceType.ToString());
         }
     }
 
@@ -98,7 +113,10 @@ public class CustomPiece
             pieceType = PiecesTypeEnum.TYPE_BISHOP;
             movementType = new MovementTypeEnum[] { MovementTypeEnum.MOVEMENT_DIAGONAL_FORWARD_LEFT, MovementTypeEnum.MOVEMENT_DIAGONAL_FORWARD_RIGHT, MovementTypeEnum.MOVEMENT_DIAGONAL_BACKWARD_LEFT, MovementTypeEnum.MOVEMENT_DIAGONAL_BACKWARD_RIGHT };
             limitedMoves = 0; // no limits
-            meshName = PiecesTypeEnum.TYPE_BISHOP.ToString();
+            mesh = Resources.Load<Mesh>("Meshes/" + pieceType.ToString());
+            materialWhite = Resources.Load<Material>("Materials/" + pieceType.ToString() + "_material_" + "white");
+            materialBlack = Resources.Load<Material>("Materials/" + pieceType.ToString() + "_material_" + "black");
+            audio = Resources.Load<AudioClip>("Sounds/Pieces/" + pieceType.ToString());
         }
     }
 
@@ -110,7 +128,10 @@ public class CustomPiece
             movementType = new MovementTypeEnum[] { MovementTypeEnum.MOVEMENT_FORWARD, MovementTypeEnum.MOVEMENT_BACKWARD, MovementTypeEnum.MOVEMENT_LEFT, MovementTypeEnum.MOVEMENT_RIGHT,
                             MovementTypeEnum.MOVEMENT_DIAGONAL_FORWARD_LEFT, MovementTypeEnum.MOVEMENT_DIAGONAL_FORWARD_RIGHT, MovementTypeEnum.MOVEMENT_DIAGONAL_BACKWARD_LEFT, MovementTypeEnum.MOVEMENT_DIAGONAL_BACKWARD_RIGHT };
             limitedMoves = 0; // no limits
-            meshName = PiecesTypeEnum.TYPE_QUEEN.ToString();
+            mesh = Resources.Load<Mesh>("Meshes/" + pieceType.ToString());
+            materialWhite = Resources.Load<Material>("Materials/" + pieceType.ToString() + "_material_" + "white");
+            materialBlack = Resources.Load<Material>("Materials/" + pieceType.ToString() + "_material_" + "black");
+            audio = Resources.Load<AudioClip>("Sounds/Pieces/" + pieceType.ToString());
         }
     }
 
@@ -122,7 +143,10 @@ public class CustomPiece
             movementType = new MovementTypeEnum[] { MovementTypeEnum.MOVEMENT_FORWARD, MovementTypeEnum.MOVEMENT_BACKWARD, MovementTypeEnum.MOVEMENT_LEFT, MovementTypeEnum.MOVEMENT_RIGHT,
             MovementTypeEnum.MOVEMENT_DIAGONAL_FORWARD_LEFT, MovementTypeEnum.MOVEMENT_DIAGONAL_FORWARD_RIGHT, MovementTypeEnum.MOVEMENT_DIAGONAL_BACKWARD_LEFT, MovementTypeEnum.MOVEMENT_DIAGONAL_BACKWARD_RIGHT };
             limitedMoves = 1; // limited
-            meshName = PiecesTypeEnum.TYPE_KING.ToString();
+            mesh = Resources.Load<Mesh>("Meshes/" + pieceType.ToString());
+            materialWhite = Resources.Load<Material>("Materials/" + pieceType.ToString() + "_material_" + "white");
+            materialBlack = Resources.Load<Material>("Materials/" + pieceType.ToString() + "_material_" + "black");
+            audio = Resources.Load<AudioClip>("Sounds/Pieces/" + pieceType.ToString());
         }
     }
 }

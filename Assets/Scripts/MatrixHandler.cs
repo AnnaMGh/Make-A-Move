@@ -161,7 +161,8 @@ public class MatrixHandler : MonoBehaviour
         //bool andActive = inMatrix && (justInMatrix? true : matrixOfCubes[p.i, p.j].activeInHierarchy);
         //bool andActive = inMatrix && (justInMatrix? true : matrixOfCubes[p.i, p.j].GetComponent<Renderer>().material.color.a >0);
         //bool andActive = inMatrix && (justInMatrix ? true : matrixOfCubes[p.i, p.j].GetComponent<Renderer>().material.color.a > 0);
-        bool andActive = inMatrix && (justInMatrix ? true : matrixOfCubes[p.i, p.j].GetComponent<Renderer>().enabled && !matrixOfCubes[p.i, p.j].needEnabler);
+       // bool andActive = inMatrix && (justInMatrix ? true : matrixOfCubes[p.i, p.j].GetComponent<Renderer>().enabled && !matrixOfCubes[p.i, p.j].needEnabler);
+        bool andActive = inMatrix && !matrixOfCubes[p.i, p.j].needEnabler && (justInMatrix ? true : matrixOfCubes[p.i, p.j].GetComponent<Renderer>().enabled);
         return inMatrix && andActive;
     }
 
@@ -205,7 +206,8 @@ public class MatrixHandler : MonoBehaviour
         {
             foreach (Block b in blockArray)
             {
-                if (b.oldPoint.i == point.i && b.oldPoint.j == point.j && b.GameObj.activeInHierarchy)
+                if (b.oldPoint.i == point.i && b.oldPoint.j == point.j 
+                    && b.GameObj!= null && b.GameObj.activeInHierarchy)
                 {
                     return true;
                 }
