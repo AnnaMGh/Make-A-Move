@@ -353,7 +353,7 @@ public class GameManager : MonoBehaviour
         piecesHandler.ChangePiecessAvailability(false, null);
         arrowHandler.ChangeArrowsAvailability(false, null);
 
-        pieceHandler.ChangeCustomPiece(CustomPiece.PiecesTypeEnum.TYPE_PAWN);
+        pieceHandler.ChangeCustomPiece(CustomPiece.PiecesTypeEnum.TYPE_PAWN, false);
         pieceHandler.CurrentPieceGameObj.transform.position = new Vector3(matrixHandler.MatrixOfCubes[matrixHandler.StartPoint.i, matrixHandler.StartPoint.j].transform.position.x, 1f, matrixHandler.MatrixOfCubes[matrixHandler.StartPoint.i, matrixHandler.StartPoint.j].transform.position.z);
         pieceHandler.CurrentPiece.currentPoint = new Point(matrixHandler.StartPoint.i, matrixHandler.StartPoint.j);
         piecesHandler.ChangePiecessAvailability(true, matrixHandler.PiecesAvailable);
@@ -386,22 +386,22 @@ public class GameManager : MonoBehaviour
                         }
 
                         //tutorialHandler.ShowTutorial(4, cameraMain.WorldToScreenPoint(arrowHandler.GetPositions()[CustomPiece.MovementTypeEnum.MOVEMENT_FORWARD]), Vector3.left, c_s_y, "Movement arrows according to piece type", true, (objTutorial4) =>
-                        tutorialHandler.ShowTutorial(4, cameraMain.WorldToScreenPoint(nextPossibleMoveCube.transform.position + Vector3.forward) , Vector3.left, c_s_y, "Tap on the marked cubes to move the player", true, (objTutorial4) =>
-                        {
-                            tutorialHandler.ShowTutorial(5, imgMoves.transform.position + new Vector3(0f, 10f, 0f), Vector3.up, c_s_y, "Number of moves left", true, (objTutorial5) =>
-                            {
-                                float cameraSize = imgCamera.GetComponent<RectTransform>().rect.width / 2f * c_s_y;
+                        tutorialHandler.ShowTutorial(4, cameraMain.WorldToScreenPoint(nextPossibleMoveCube.transform.position + Vector3.forward), Vector3.left, c_s_y, "Tap on the marked cubes to move the player", true, (objTutorial4) =>
+                       {
+                           tutorialHandler.ShowTutorial(5, imgMoves.transform.position + new Vector3(0f, 10f, 0f), Vector3.up, c_s_y, "Number of moves left", true, (objTutorial5) =>
+                           {
+                               float cameraSize = imgCamera.GetComponent<RectTransform>().rect.width / 2f * c_s_y;
 
-                                tutorialHandler.ShowTutorial(6, imgCamera.transform.position + new Vector3(-cameraSize, -cameraSize, 0f), Vector3.left, c_s_y, "Change camera perspective - Toggle between 2D and 3D", true, (objTutorial6) =>
-                                {
-                                    tutorialHandler.ShowTutorial(7, imgCamera.transform.position + new Vector3(-cameraSize, -cameraSize, 0f), Vector3.left, c_s_y, "While camera 3D is on you can rotate the view by SWIPING", false, (objTutorial7) =>
-                                    {
-                                        moveEnabled = true;
-                                        //exit
-                                    });
-                                });
-                            });
-                        });
+                               tutorialHandler.ShowTutorial(6, imgCamera.transform.position + new Vector3(-cameraSize, -cameraSize, 0f), Vector3.left, c_s_y, "Change camera perspective - Toggle between 2D and 3D", true, (objTutorial6) =>
+                               {
+                                   tutorialHandler.ShowTutorial(7, imgCamera.transform.position + new Vector3(-cameraSize, -cameraSize, 0f), Vector3.left, c_s_y, "While camera 3D is on you can rotate the view by SWIPING", false, (objTutorial7) =>
+                                   {
+                                       moveEnabled = true;
+                                       //exit
+                                   });
+                               });
+                           });
+                       });
                     });
                 });
             });
@@ -434,18 +434,19 @@ public class GameManager : MonoBehaviour
                 //exit
             });
         }
-        if (matrixHandler.CurrentLevel == 20)
+        else if (matrixHandler.CurrentLevel == 19)
         {
             moveEnabled = false;
-            tutorialHandler.ShowTutorial(16, cameraMain.WorldToScreenPoint(matrixHandler.MatrixOfCubes[matrixHandler.EnablerArray[0].cubePoint.i, matrixHandler.EnablerArray[0].cubePoint.j].transform.position - new Vector3(0f, 0f, -0.5f)), Vector3.right, c_s_y, "You can't step on red cubes", false, (objTutorial15) =>
+            tutorialHandler.ShowTutorial(16, cameraMain.WorldToScreenPoint(matrixHandler.MatrixOfCubes[matrixHandler.EnablerArray[0].cubePoint.i, matrixHandler.EnablerArray[0].cubePoint.j].transform.position), Vector3.right, c_s_y, "You can't step on red cubes", true, (objTutorial15) =>
             {
-                tutorialHandler.ShowTutorial(17, cameraMain.WorldToScreenPoint(matrixHandler.EnablerArray[0].GameObj.transform.position - new Vector3(0f, 0f, -0.5f)), Vector3.right, c_s_y, "To enable them you need to push the matched colored button", false, (objTutorial16) =>
+                tutorialHandler.ShowTutorial(17, cameraMain.WorldToScreenPoint(matrixHandler.EnablerArray[0].GameObj.transform.position), Vector3.left, c_s_y, "To enable them you need to push the matched colored button", false, (objTutorial16) =>
                 {
                     moveEnabled = true;
                     //exit
                 });
             });
         }
+
 
         //send event
         Firebase.Analytics.Parameter[] eventParams = {
@@ -531,6 +532,18 @@ public class GameManager : MonoBehaviour
                     canMove = GetMatrixHandler().CheckIfCanStep(true, GetPieceHandler()
                     .GetPointByPointDirection(direction, 1));
                 }
+                else if (pieceHandler.CurrentPiece.pieceType == CustomPiece.PiecesTypeEnum.TYPE_BISHOP)
+                {
+                    //check if has where to step and push the block
+                    canMove = GetMatrixHandler().CheckIfCanStep(true, GetPieceHandler()
+                    .GetPointByPointDirection(direction, 2));
+
+                    //check if has blocks in its way
+                    Point[] pp = pieceHandler.GetPointsBishopBlock(type, block.oldPoint);
+                    canMove &= !GetMatrixHandler().IsBlockOnPoint(newPoint);
+                    canMove &= !GetMatrixHandler().IsBlockOnPoint(pp[0]);
+                    canMove &= !GetMatrixHandler().IsBlockOnPoint(pp[1]);
+                }
                 else
                 {
                     canMove = GetMatrixHandler().CheckIfCanStep(true, GetPieceHandler()
@@ -546,7 +559,7 @@ public class GameManager : MonoBehaviour
                     block.ChangeToNextMove(true);
                     possibleNextBlocks.Add(block, type);
                 }
-                else if (block.GameObj.activeInHierarchy)
+                else if (block.GameObj != null && block.GameObj.activeInHierarchy)
                 {
                     //remove the cube from the list of next moves if block is above
                     possibleNextMoves.Remove(matrixHandler.MatrixOfCubes[block.oldPoint.i, block.oldPoint.j]);
@@ -574,6 +587,23 @@ public class GameManager : MonoBehaviour
         possibleNextBlocks.Clear();
     }
 
+    private void GameOver()
+    {
+        //clean cubes and blocks
+        CleanNextMovesAndBlocks();
+
+        gameOverHandler.ShowPanel();
+
+        canvas.enabled = false;
+        gameAdHandler.ShowInterstitialAd((objAd) =>
+        {
+            canvas.enabled = true;
+
+            //make sound
+            globalAudioHandler.PlaySound(GlobalAudioHandler.AudioType.GAME_OVER);
+        });
+    }
+
 
     #region From other classes
 
@@ -587,7 +617,7 @@ public class GameManager : MonoBehaviour
         {
             moveEnabled = false;
             tutorialHandler.ShowTutorial(9, piecesHandler.GetObjectWorldPotionCentered(CustomPiece.PiecesTypeEnum.TYPE_ROOK, canvas),
-                Vector3.right, c_s_y, "A new piece type has been enabled", true, (objTutorial8) =>
+                Vector3.right, c_s_y, "ROOK piece type has been enabled", true, (objTutorial8) =>
                 {
                     tutorialHandler.ShowTutorial(10, imgChanges.transform.position + new Vector3(0f, 10f, 0f), Vector3.up, c_s_y, "Number of piece changes left", false, (objTutorial9) =>
                     {
@@ -600,15 +630,37 @@ public class GameManager : MonoBehaviour
         {
             moveEnabled = false;
             tutorialHandler.ShowTutorial(13, piecesHandler.GetObjectWorldPotionCentered(CustomPiece.PiecesTypeEnum.TYPE_KNIGHT, canvas),
-                Vector3.right, c_s_y, "Knight piece has been enabled.", true, (objTutorial12) =>
+                Vector3.right, c_s_y, "KNIGHT piece has been enabled", true, (objTutorial12) =>
                 {
-                    tutorialHandler.ShowTutorial(14, cameraMain.WorldToScreenPoint(matrixHandler.BlockArray[0].GameObj.transform.position), Vector3.right, c_s_y, "KNIGHT is the only piece that can destroy blocks which lands on.", true, (objTutorial13) =>
+                    tutorialHandler.ShowTutorial(14, cameraMain.WorldToScreenPoint(matrixHandler.BlockArray[0].GameObj.transform.position), Vector3.right, c_s_y, "KNIGHT is the only piece that can destroy blocks which lands on", true, (objTutorial13) =>
                     {
-                        tutorialHandler.ShowTutorial(15, cameraMain.WorldToScreenPoint(matrixHandler.MatrixOfCubes[3, 4].transform.position), Vector3.right, c_s_y, "KNIGHT is the only piece that can jump over obstacles (Cubes, Pieces, Holes).", false, (objTutorial14) =>
+                        tutorialHandler.ShowTutorial(15, cameraMain.WorldToScreenPoint(matrixHandler.MatrixOfCubes[3, 4].transform.position), Vector3.right, c_s_y, "KNIGHT is the only piece that can jump over obstacles (Cubes, Pieces, Holes)", false, (objTutorial14) =>
                         {
                             moveEnabled = true;
                             //exit
                         });
+                    });
+                });
+        }
+        else if (type == CustomPiece.PiecesTypeEnum.TYPE_BISHOP)
+        {
+            moveEnabled = false;
+            tutorialHandler.ShowTutorial(18, piecesHandler.GetObjectWorldPotionCentered(CustomPiece.PiecesTypeEnum.TYPE_BISHOP, canvas),
+                Vector3.right, c_s_y, "BISHOP piece has been enabled", true, (objTutorial18) =>
+                {
+                    tutorialHandler.ShowTutorial(19, cameraMain.WorldToScreenPoint(matrixHandler.MatrixOfCubes[matrixHandler.BlockArray[3].oldPoint.i, matrixHandler.BlockArray[3].oldPoint.j].transform.position), Vector3.right, c_s_y, "BISHOP can push blocks diagonally", true, (objTutorial19) =>
+                    {
+                        Vector3 direction = matrixHandler.MatrixOfCubes[matrixHandler.BlockArray[5].oldPoint.i, matrixHandler.BlockArray[5].oldPoint.j].transform.position;
+                        direction += Vector3.forward/2f;
+                        direction += Vector3.right/2f;
+                        
+                        tutorialHandler.ShowTutorial(20, cameraMain.WorldToScreenPoint(direction), Vector3.right, c_s_y, "If the blocks are surrounded by other blocks, BISHOP can't push them", false, (objTutorial20) =>
+                        {
+                            moveEnabled = true;
+                                //exit
+
+                            });
+
                     });
                 });
         }
@@ -635,17 +687,10 @@ public class GameManager : MonoBehaviour
             piecesHandler.ChangePiecessAvailability(true, matrixHandler.PiecesAvailable);
             matrixHandler.RecalculateMoves(block.cost);
             txtMoves.SetText(matrixHandler.MovesAvailable.ToString());
-            if (matrixHandler.MovesAvailable < 0)
+            if (matrixHandler.MovesAvailable <= 0)
             {
-                gameOverHandler.ShowPanel();
-                canvas.enabled = false;
-                gameAdHandler.ShowInterstitialAd((objAd) =>
-                {
-                    canvas.enabled = true;
-                });
+                GameOver();
             }
-
-
         }
         else
         {
@@ -654,8 +699,12 @@ public class GameManager : MonoBehaviour
             {
                 matrixHandler.RecalculateMoves(block.cost);
                 txtMoves.SetText(matrixHandler.MovesAvailable.ToString());
-            }
+                if (matrixHandler.MovesAvailable <= 0)
+                {
+                    GameOver();
+                }
 
+            }
             pieceHandler.RestoreToPos(pieceHandler.currentPoint, matrixHandler.MatrixOfCubes[pieceHandler.currentPoint.i, pieceHandler.currentPoint.j].transform.position);
         }
 
@@ -663,8 +712,13 @@ public class GameManager : MonoBehaviour
         {
             //restore movement if damaged (outside and inside)
             RestorePosition();
-            //check next moves
-            CheckNextMoves();
+            if (matrixHandler.MovesAvailable > 0)
+            {
+                //check next moves
+                CheckNextMoves();
+            }
+
+
         });
     }
 
@@ -777,7 +831,7 @@ public class GameManager : MonoBehaviour
         piecesHandler.ChangePiecessAvailability(false, null);
 
         //change values
-        pieceHandler.ChangeCustomPiece(CustomPiece.PiecesTypeEnum.TYPE_PAWN);
+        pieceHandler.ChangeCustomPiece(CustomPiece.PiecesTypeEnum.TYPE_PAWN, false);
         arrowHandler.ChangeArrowsAvailability(true, pieceHandler.CurrentPiece.movementType);
 
         //make matrix
@@ -893,7 +947,8 @@ public class GameManager : MonoBehaviour
 
     public void OnClickCamera()
     {
-        if (!moveEnabled || GlobalSingleton.GetInstance().gamePaused) {
+        if (!moveEnabled || GlobalSingleton.GetInstance().gamePaused)
+        {
             return;
         }
 
@@ -915,7 +970,7 @@ public class GameManager : MonoBehaviour
 
     public void OnClickArrow(int index)
     {
-        Debug.Log("OnClickArrow | Move:" + (moveEnabled ? "enabled" : "disabled") + " | Paused:" + (GlobalSingleton.GetInstance().gamePaused ? "enabled" : "disabled"));
+        //  Debug.Log("OnClickArrow | Move:" + (moveEnabled ? "enabled" : "disabled") + " | Paused:" + (GlobalSingleton.GetInstance().gamePaused ? "enabled" : "disabled"));
         if (!moveEnabled || GlobalSingleton.GetInstance().gamePaused) { return; }
 
         CustomPiece.MovementTypeEnum mov = (CustomPiece.MovementTypeEnum)index;
@@ -935,6 +990,7 @@ public class GameManager : MonoBehaviour
                     matrixHandler.RecalculateMoves(1);
                     txtMoves.SetText(matrixHandler.MovesAvailable.ToString());
                     txtCurrentLevel.SetText(matrixHandler.CurrentLevel.ToString());
+                    //Debug.Log("Recalculate onClickArrow: " + txtMoves.text);
 
                     //restore position if damaged (outside and inside)
                     RestorePosition();
@@ -966,19 +1022,7 @@ public class GameManager : MonoBehaviour
                     }
                     else if (matrixHandler.MovesAvailable <= 0)
                     {
-                        //clean cubes and blocks
-                        CleanNextMovesAndBlocks();
-
-                        gameOverHandler.ShowPanel();
-
-                        canvas.enabled = false;
-                        gameAdHandler.ShowInterstitialAd((objAd) =>
-                        {
-                            canvas.enabled = true;
-
-                            //make sound
-                            globalAudioHandler.PlaySound(GlobalAudioHandler.AudioType.GAME_OVER);
-                        });
+                        GameOver();
                     }
                     else
                     {
@@ -1005,7 +1049,7 @@ public class GameManager : MonoBehaviour
         if (matrixHandler.ChangesAvailable > 0 && matrixHandler.IsPieceChangeAvailable(index) && (int)pieceHandler.CurrentPiece.pieceType != index)
         {
             arrowHandler.ChangeArrowsAvailability(false, pieceHandler.CurrentPiece.movementType);
-            pieceHandler.ChangeCustomPiece((CustomPiece.PiecesTypeEnum)index);
+            pieceHandler.ChangeCustomPiece((CustomPiece.PiecesTypeEnum)index, true);
             arrowHandler.ChangeArrowsAvailability(true, pieceHandler.CurrentPiece.movementType);
             matrixHandler.RecalculateChanges(1);
             txtChanges.SetText(matrixHandler.ChangesAvailable.ToString());

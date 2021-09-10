@@ -13,6 +13,12 @@ public class PieceHandler : MonoBehaviour
     public Point currentPoint;
 
     private GameObject currentPieceGameObj;
+    private GameObject currentPieceGameObjChild;
+    private MeshFilter currentPieceGameObjChildMF;
+    private MeshRenderer currentPieceGameObjChildMR;
+    private Rigidbody currentPieceGameObjChildRB;
+    private BoxCollider[] currentPieceGameObjChildBCs;
+    private AudioSource currentPieceGameObjAudio;
     private CustomPiece currentPiece;
     private Dictionary<CustomPiece.MovementTypeEnum, Step> movementVectorDictionary;
     private Dictionary<CustomPiece.PiecesTypeEnum, CustomPiece> customPiecesDictionary;
@@ -24,7 +30,6 @@ public class PieceHandler : MonoBehaviour
     private Delegates.ObjectDelegate movementFinishedDelegate;
 
     private AudioClip movementClip;
-    private AudioClip changeClip;
 
 
     // Start is called before the first frame update
@@ -32,14 +37,24 @@ public class PieceHandler : MonoBehaviour
     {
         if (gameManager == null)
         {
-            try {
+            try
+            {
                 gameManager = GameObject.Find("GameManager").GetComponent<GameManager>();
             }
             catch (Exception e) { Debug.Log("No GameManager found in PieceHandler: " + e.Message); }
         }
+
+        //get game object components
         currentPieceGameObj = gameObject;
+        currentPieceGameObjChild = currentPieceGameObj.transform.GetChild(0).gameObject;
+        currentPieceGameObjChildMF = currentPieceGameObjChild.GetComponent<MeshFilter>();
+        currentPieceGameObjChildMR = currentPieceGameObjChild.GetComponent<MeshRenderer>();
+        currentPieceGameObjChildRB = currentPieceGameObjChild.GetComponent<Rigidbody>();
+        currentPieceGameObjChildBCs = currentPieceGameObjChild.GetComponents<BoxCollider>();
+        currentPieceGameObjAudio = currentPieceGameObj.transform.GetChild(1).GetComponent<AudioSource>();
         currentPiece = new CustomPiece();
 
+        //create movement dictionary
         movementVectorDictionary = new Dictionary<CustomPiece.MovementTypeEnum, Step>
         {
             { CustomPiece.MovementTypeEnum.MOVEMENT_FORWARD,
@@ -79,13 +94,13 @@ public class PieceHandler : MonoBehaviour
 
 
         movementClip = Resources.Load<AudioClip>("Sounds/piece_movement_01");
-        changeClip = Resources.Load<AudioClip>("Sounds/piece_change_01");
     }
 
     // Update is called once per frame
     void Update()
     {
-        if (currentPiece == null) {
+        if (currentPiece == null)
+        {
             return;
         }
         currentPoint = currentPiece.currentPoint;
@@ -112,8 +127,8 @@ public class PieceHandler : MonoBehaviour
                 {
                     lastStep.SplitPos = false;
                     gameObject.transform.position = new Vector3((float)Math.Round(gameObject.transform.position.x, 0), gameObject.transform.position.y, (float)Math.Round(gameObject.transform.position.z));
-                    currentPieceGameObj.transform.GetChild(0).GetComponents<BoxCollider>()[(int)currentPiece.pieceType].isTrigger = false;
-                    currentPieceGameObj.transform.GetChild(0).GetComponent<Rigidbody>().useGravity = true;
+                    currentPieceGameObjChildBCs[(int)currentPiece.pieceType].isTrigger = false;
+                    currentPieceGameObjChildRB.useGravity = true;
                     movementFinishedDelegate?.Invoke(true);
                 }
 
@@ -121,49 +136,50 @@ public class PieceHandler : MonoBehaviour
         }
     }
 
-    public void ChangeCustomPiece(CustomPiece.PiecesTypeEnum type)
+    public void ChangeCustomPiece(CustomPiece.PiecesTypeEnum type, bool withSound)
     {
-        //make sound
-        if (PlayerPrefs.GetInt(Constants.KEY_SOUND) == 1)
-        {
-            currentPieceGameObj.transform.GetChild(1).GetComponent<AudioSource>().clip = changeClip;
-            currentPieceGameObj.transform.GetChild(1).GetComponent<AudioSource>().Play();
-        }
-
         //activate new collider
-        currentPieceGameObj.transform.GetChild(0).GetComponents<BoxCollider>()[(int)type].enabled = true;
-        currentPieceGameObj.transform.GetChild(0).GetComponents<BoxCollider>()[(int)currentPiece.pieceType].isTrigger = false;
-        currentPieceGameObj.transform.GetChild(0).GetComponent<Rigidbody>().useGravity = true;
+        currentPieceGameObjChildBCs[(int)type].enabled = true;
+        currentPieceGameObjChildBCs[(int)currentPiece.pieceType].isTrigger = false;
+        currentPieceGameObjChildRB.useGravity = true;
 
         //deactivate old collider
         if ((int)currentPiece.pieceType != (int)type)
         {
-            currentPieceGameObj.transform.GetChild(0).GetComponents<BoxCollider>()[(int)currentPiece.pieceType].enabled = false;
+            currentPieceGameObjChildBCs[(int)currentPiece.pieceType].enabled = false;
         }
-
 
         //change piece
         currentPiece.ChangePieceByType(type);
-        //change mesh
-        currentPieceGameObj.transform.GetChild(0).GetComponent<MeshFilter>().sharedMesh = Resources.Load<Mesh>("Meshes/" + currentPiece.meshName);
+
+        //change mesh   
+        currentPieceGameObjChildMF.sharedMesh = currentPiece.mesh;
+
         //change material
-        currentPieceGameObj.transform.GetChild(0).GetComponent<MeshRenderer>().material = Resources.Load<Material>("Materials/" + currentPiece.meshName + "_material_" + (PlayerPrefs.GetInt(Constants.KEY_COLOR) == 0 ? "white" : "black"));
+        currentPieceGameObjChildMR.material = (PlayerPrefs.GetInt(Constants.KEY_COLOR) == 0 ? currentPiece.materialWhite : currentPiece.materialBlack);
 
         //positon a bit higer to have the fall effect
         gameObject.transform.Translate(0f, 0.25f, 0f, Space.World);
+
+        //make sound
+        if (withSound && PlayerPrefs.GetInt(Constants.KEY_SOUND) == 1)
+        {
+            currentPieceGameObjAudio.clip = currentPiece.audio;
+            currentPieceGameObjAudio.Play();
+        }
     }
 
     public void ChangeNewAvailableCustomPiece(CustomPiece.PiecesTypeEnum type)
     {
         currentPieceGameObj.transform.localScale = new Vector3(0.5f, 0.5f, 0.5f);
-        currentPieceGameObj.transform.GetChild(0).GetComponent<Interactable>().enabled = true;
-        ChangeCustomPiece(type);
+        currentPieceGameObjChild.GetComponent<Interactable>().enabled = true;
+        ChangeCustomPiece(type, false);
     }
 
     public void ChangeColor()
     {
         //change color material
-        currentPieceGameObj.transform.GetChild(0).GetComponent<MeshRenderer>().material = Resources.Load<Material>("Materials/" + currentPiece.meshName + "_material_" + (PlayerPrefs.GetInt(Constants.KEY_COLOR) == 0 ? "white" : "black"));
+        currentPieceGameObjChildMR.material = (PlayerPrefs.GetInt(Constants.KEY_COLOR) == 0 ? currentPiece.materialWhite : currentPiece.materialBlack);
     }
 
     public void MakeMovement(CustomPiece.MovementTypeEnum movement, int n, Delegates.ObjectDelegate objDelegate)
@@ -171,8 +187,8 @@ public class PieceHandler : MonoBehaviour
         //handle sound
         if (PlayerPrefs.GetInt(Constants.KEY_SOUND) == 1)
         {
-            currentPieceGameObj.transform.GetChild(1).GetComponent<AudioSource>().clip = movementClip;
-            currentPieceGameObj.transform.GetChild(1).GetComponent<AudioSource>().Play();
+            currentPieceGameObjAudio.clip = movementClip;
+            currentPieceGameObjAudio.Play();
         }
 
         GlobalSingleton.GetInstance().SetTimeAsync(50, (o) =>
@@ -186,8 +202,15 @@ public class PieceHandler : MonoBehaviour
             //if knight => flow
             if (currentPiece.pieceType == CustomPiece.PiecesTypeEnum.TYPE_KNIGHT)
             {
-                currentPieceGameObj.transform.GetChild(0).GetComponent<Rigidbody>().useGravity = false;
-                currentPieceGameObj.transform.GetChild(0).GetComponents<BoxCollider>()[(int)currentPiece.pieceType].isTrigger = true;
+                currentPieceGameObjChildRB.useGravity = false;
+                currentPieceGameObjChildBCs[(int)currentPiece.pieceType].isTrigger = true;
+            }
+
+            //if bishow => deactivate collider
+            if (currentPiece.pieceType == CustomPiece.PiecesTypeEnum.TYPE_BISHOP)
+            {
+                currentPieceGameObjChildRB.useGravity = false;
+                currentPieceGameObjChildBCs[(int)currentPiece.pieceType].isTrigger = true;
             }
 
 
@@ -198,8 +221,8 @@ public class PieceHandler : MonoBehaviour
                 currentPiece.currentPoint.j += lastStep.Point.j;
                 gameObject.transform.position = new Vector3((float)Math.Round(gameObject.transform.position.x, 0), gameObject.transform.position.y, (float)Math.Round(gameObject.transform.position.z));
 
-                currentPieceGameObj.transform.GetChild(0).GetComponents<BoxCollider>()[(int)currentPiece.pieceType].isTrigger = false;
-                currentPieceGameObj.transform.GetChild(0).GetComponent<Rigidbody>().useGravity = true;
+                currentPieceGameObjChildBCs[(int)currentPiece.pieceType].isTrigger = false;
+                currentPieceGameObjChildRB.useGravity = true;
                 movementFinishedDelegate?.Invoke(true);
             }
 
@@ -218,14 +241,49 @@ public class PieceHandler : MonoBehaviour
             currentPiece.currentPoint.j + n * direction.j);
     }
 
+    public Point[] GetPointsBishopBlock(CustomPiece.MovementTypeEnum movement, Point blockPoint)
+    {
+        Point[] bishopBlockPoints = new Point[2];
+        if (movement.Equals(CustomPiece.MovementTypeEnum.MOVEMENT_DIAGONAL_FORWARD_LEFT))
+        {
+            Point forwardPoint = movementVectorDictionary[CustomPiece.MovementTypeEnum.MOVEMENT_FORWARD].Point;
+            Point leftPoint = movementVectorDictionary[CustomPiece.MovementTypeEnum.MOVEMENT_LEFT].Point;
+            bishopBlockPoints[0] = new Point(blockPoint.i + forwardPoint.i, blockPoint.j + forwardPoint.j);
+            bishopBlockPoints[1] = new Point(blockPoint.i + leftPoint.i, blockPoint.j + leftPoint.j);
+        }
+        else if (movement.Equals(CustomPiece.MovementTypeEnum.MOVEMENT_DIAGONAL_BACKWARD_LEFT))
+        {
+            Point backwardPoint = movementVectorDictionary[CustomPiece.MovementTypeEnum.MOVEMENT_BACKWARD].Point;
+            Point leftPoint = movementVectorDictionary[CustomPiece.MovementTypeEnum.MOVEMENT_LEFT].Point;
+            bishopBlockPoints[0] = new Point(blockPoint.i + backwardPoint.i, blockPoint.j + backwardPoint.j);
+            bishopBlockPoints[1] = new Point(blockPoint.i + leftPoint.i, blockPoint.j + leftPoint.j);
+        }
+        else if (movement.Equals(CustomPiece.MovementTypeEnum.MOVEMENT_DIAGONAL_FORWARD_RIGHT))
+        {
+            Point forwardPoint = movementVectorDictionary[CustomPiece.MovementTypeEnum.MOVEMENT_FORWARD].Point;
+            Point rightPoint = movementVectorDictionary[CustomPiece.MovementTypeEnum.MOVEMENT_RIGHT].Point;
+            bishopBlockPoints[0] = new Point(blockPoint.i + forwardPoint.i, blockPoint.j + forwardPoint.j);
+            bishopBlockPoints[1] = new Point(blockPoint.i + rightPoint.i, blockPoint.j + rightPoint.j);
+        }
+        else if (movement.Equals(CustomPiece.MovementTypeEnum.MOVEMENT_DIAGONAL_BACKWARD_RIGHT))
+        {
+            Point backwardPoint = movementVectorDictionary[CustomPiece.MovementTypeEnum.MOVEMENT_BACKWARD].Point;
+            Point rightPoint = movementVectorDictionary[CustomPiece.MovementTypeEnum.MOVEMENT_RIGHT].Point;
+            bishopBlockPoints[0] = new Point(blockPoint.i + backwardPoint.i, blockPoint.j + backwardPoint.j);
+            bishopBlockPoints[1] = new Point(blockPoint.i + rightPoint.i, currentPoint.j + rightPoint.j);
+        }
+
+        return bishopBlockPoints;
+    }
+
 
     public void RestoreToPos(Point p, Vector3 position)
     {
         currentPiece.currentPoint = p;
         currentPieceGameObj.transform.position = new Vector3(position.x, 1f, position.z);
         currentPieceGameObj.transform.localRotation = Quaternion.identity;
-        currentPieceGameObj.transform.GetChild(0).localRotation = Quaternion.identity;
-        currentPieceGameObj.transform.GetChild(0).localPosition = new Vector3(0f, currentPieceGameObj.transform.GetChild(0).transform.localPosition.y, 0f);
+        currentPieceGameObjChild.transform.localRotation = Quaternion.identity;
+        currentPieceGameObjChild.transform.localPosition = new Vector3(0f, currentPieceGameObj.transform.GetChild(0).transform.localPosition.y, 0f);
     }
 
     public void DestroyPiece()
