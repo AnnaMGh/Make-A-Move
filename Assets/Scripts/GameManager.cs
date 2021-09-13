@@ -437,7 +437,7 @@ public class GameManager : MonoBehaviour
         else if (matrixHandler.CurrentLevel == 19)
         {
             moveEnabled = false;
-            tutorialHandler.ShowTutorial(16, cameraMain.WorldToScreenPoint(matrixHandler.MatrixOfCubes[matrixHandler.EnablerArray[0].cubePoint.i, matrixHandler.EnablerArray[0].cubePoint.j].transform.position), Vector3.right, c_s_y, "You can't step on red cubes", true, (objTutorial15) =>
+            tutorialHandler.ShowTutorial(16, cameraMain.WorldToScreenPoint(matrixHandler.MatrixOfCubes[matrixHandler.EnablerArray[0].cubePoint.i, matrixHandler.EnablerArray[0].cubePoint.j].transform.position), Vector3.left, c_s_y, "You can't step on red cubes", true, (objTutorial15) =>
             {
                 tutorialHandler.ShowTutorial(17, cameraMain.WorldToScreenPoint(matrixHandler.EnablerArray[0].GameObj.transform.position), Vector3.left, c_s_y, "To enable them you need to push the matched colored button", false, (objTutorial16) =>
                 {

@@ -102,6 +102,7 @@ public class Cube : MonoBehaviour
         Color cubeColor = ((point.i + point.j) % 2 == 0 ? Constants.MATRIX_BOX_BLACK_COLOR : Constants.MATRIX_BOX_WHITE_COLOR);
         ChangeCubeType(cubeColor, Constants.MATRIX_PILLAR_COLOR_01, cubeColor, false);
         previousType = CubeType.TYPE_NORMAL;
+        needEnabler = false;
     }
 
     public void ChangeCubeType(Color cubeColor, Color pillarColor, Color particleColor, bool particleVisibility)
