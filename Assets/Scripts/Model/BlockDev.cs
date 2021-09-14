@@ -13,6 +13,9 @@ public class BlockDev : MonoBehaviour
 
     private int minLimit = -1;
     private int maxLimit = 8;
+    private int minCost = 0;
+    private int maxCost = 21;
+
 
     private void Initialize()
     {
@@ -47,7 +50,7 @@ public class BlockDev : MonoBehaviour
         {
             return "Block " + blockNr + " cost not added";
         }
-        if (!CheckNrInRange(Int32.Parse(impBlockCost.text)))
+        if (!CheckCostInRange(Int32.Parse(impBlockCost.text)))
         {
             return "Block " + blockNr + " cost not in matrix range";
         }
@@ -72,6 +75,11 @@ public class BlockDev : MonoBehaviour
 
     private bool CheckNrInRange(int nr) {
         return (nr > minLimit && nr < maxLimit);
+    }
+
+    private bool CheckCostInRange(int nr)
+    {
+        return (nr > minCost && nr < maxCost);
     }
 
     public Block GetBlock() {

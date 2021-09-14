@@ -64,6 +64,7 @@ public class GameManager : MonoBehaviour
 
     private bool moveEnabled = true;
     private bool gameFinished;
+    private bool levelFinished;
     private bool clickedNext;
 
     private Vector3 orbitDistance = Vector3.zero;
@@ -359,8 +360,8 @@ public class GameManager : MonoBehaviour
         piecesHandler.ChangePiecessAvailability(true, matrixHandler.PiecesAvailable);
         arrowHandler.ChangeArrowsAvailability(true, pieceHandler.CurrentPiece.movementType);
 
-        //check next possible moves
-        moveEnabled = true;
+        //
+        levelFinished = false;
 
         //unblock next movement
         moveEnabled = true;
@@ -687,7 +688,7 @@ public class GameManager : MonoBehaviour
             piecesHandler.ChangePiecessAvailability(true, matrixHandler.PiecesAvailable);
             matrixHandler.RecalculateMoves(block.cost);
             txtMoves.SetText(matrixHandler.MovesAvailable.ToString());
-            if (matrixHandler.MovesAvailable <= 0)
+            if (matrixHandler.MovesAvailable <= 0 && !levelFinished)
             {
                 GameOver();
             }
@@ -699,7 +700,7 @@ public class GameManager : MonoBehaviour
             {
                 matrixHandler.RecalculateMoves(block.cost);
                 txtMoves.SetText(matrixHandler.MovesAvailable.ToString());
-                if (matrixHandler.MovesAvailable <= 0)
+                if (matrixHandler.MovesAvailable <= 0 && !levelFinished)
                 {
                     GameOver();
                 }
@@ -997,6 +998,7 @@ public class GameManager : MonoBehaviour
 
                     if (matrixHandler.CheckGoNextLevel(pieceHandler.CurrentPieceGameObj.transform.position))
                     {
+                        levelFinished = true;
                         //clean cubes and blocks
                         CleanNextMovesAndBlocks();
 
