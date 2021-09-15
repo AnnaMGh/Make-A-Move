@@ -31,11 +31,11 @@ public class GameAdHandler : MonoBehaviour
         if (Constants.CURRENT_PLATFORM == Constants.PLATFORM_ANDROID)
         {
             adUnitId = Constants.DEVELOPMENT_BANNER_ID_ANDROID;
-            //adUnitId = Constants.LIVE_INTERSTITIAL_ID_ANDROID;
+            //adUnitId = Constants.LIVE_BANNER_ID_ANDROID;
         }
         else if (Constants.CURRENT_PLATFORM == Constants.PLATFORM_IOS)
         {
-            adUnitId = Constants.LIVE_BANNER_ID_ANDROID;
+            adUnitId = Constants.DEVELOPMENT_BANNER_ID_ANDROID;
         }
 
         // Create a 320x50 banner at the top of the screen.

@@ -64,6 +64,7 @@ public class GameManager : MonoBehaviour
 
     private bool moveEnabled = true;
     private bool gameFinished;
+    private bool levelFinished;
     private bool clickedNext;
 
     private Vector3 orbitDistance = Vector3.zero;
@@ -359,8 +360,8 @@ public class GameManager : MonoBehaviour
         piecesHandler.ChangePiecessAvailability(true, matrixHandler.PiecesAvailable);
         arrowHandler.ChangeArrowsAvailability(true, pieceHandler.CurrentPiece.movementType);
 
-        //check next possible moves
-        moveEnabled = true;
+        //
+        levelFinished = false;
 
         //unblock next movement
         moveEnabled = true;
@@ -437,7 +438,7 @@ public class GameManager : MonoBehaviour
         else if (matrixHandler.CurrentLevel == 19)
         {
             moveEnabled = false;
-            tutorialHandler.ShowTutorial(16, cameraMain.WorldToScreenPoint(matrixHandler.MatrixOfCubes[matrixHandler.EnablerArray[0].cubePoint.i, matrixHandler.EnablerArray[0].cubePoint.j].transform.position), Vector3.right, c_s_y, "You can't step on red cubes", true, (objTutorial15) =>
+            tutorialHandler.ShowTutorial(16, cameraMain.WorldToScreenPoint(matrixHandler.MatrixOfCubes[matrixHandler.EnablerArray[0].cubePoint.i, matrixHandler.EnablerArray[0].cubePoint.j].transform.position), Vector3.left, c_s_y, "You can't step on red cubes", true, (objTutorial15) =>
             {
                 tutorialHandler.ShowTutorial(17, cameraMain.WorldToScreenPoint(matrixHandler.EnablerArray[0].GameObj.transform.position), Vector3.left, c_s_y, "To enable them you need to push the matched colored button", false, (objTutorial16) =>
                 {
@@ -687,7 +688,7 @@ public class GameManager : MonoBehaviour
             piecesHandler.ChangePiecessAvailability(true, matrixHandler.PiecesAvailable);
             matrixHandler.RecalculateMoves(block.cost);
             txtMoves.SetText(matrixHandler.MovesAvailable.ToString());
-            if (matrixHandler.MovesAvailable <= 0)
+            if (matrixHandler.MovesAvailable <= 0 && !levelFinished)
             {
                 GameOver();
             }
@@ -699,7 +700,7 @@ public class GameManager : MonoBehaviour
             {
                 matrixHandler.RecalculateMoves(block.cost);
                 txtMoves.SetText(matrixHandler.MovesAvailable.ToString());
-                if (matrixHandler.MovesAvailable <= 0)
+                if (matrixHandler.MovesAvailable <= 0 && !levelFinished)
                 {
                     GameOver();
                 }
@@ -997,6 +998,7 @@ public class GameManager : MonoBehaviour
 
                     if (matrixHandler.CheckGoNextLevel(pieceHandler.CurrentPieceGameObj.transform.position))
                     {
+                        levelFinished = true;
                         //clean cubes and blocks
                         CleanNextMovesAndBlocks();
 
