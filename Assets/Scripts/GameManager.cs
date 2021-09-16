@@ -533,7 +533,9 @@ public class GameManager : MonoBehaviour
                     canMove = GetMatrixHandler().CheckIfCanStep(true, GetPieceHandler()
                     .GetPointByPointDirection(direction, 1));
                 }
-                else if (pieceHandler.CurrentPiece.pieceType == CustomPiece.PiecesTypeEnum.TYPE_BISHOP)
+                else if (pieceHandler.CurrentPiece.pieceType == CustomPiece.PiecesTypeEnum.TYPE_BISHOP
+                    || (pieceHandler.CurrentPiece.pieceType == CustomPiece.PiecesTypeEnum.TYPE_QUEEN)
+                    && pieceHandler.IsDiagonalMovement(type))
                 {
                     //check if has where to step and push the block
                     canMove = GetMatrixHandler().CheckIfCanStep(true, GetPieceHandler()
@@ -545,7 +547,7 @@ public class GameManager : MonoBehaviour
                     canMove &= !GetMatrixHandler().IsBlockOnPoint(pp[0]);
                     canMove &= !GetMatrixHandler().IsBlockOnPoint(pp[1]);
                 }
-                else
+                else 
                 {
                     canMove = GetMatrixHandler().CheckIfCanStep(true, GetPieceHandler()
                     .GetPointByPointDirection(direction, 2));
@@ -652,17 +654,29 @@ public class GameManager : MonoBehaviour
                     tutorialHandler.ShowTutorial(19, cameraMain.WorldToScreenPoint(matrixHandler.MatrixOfCubes[matrixHandler.BlockArray[3].oldPoint.i, matrixHandler.BlockArray[3].oldPoint.j].transform.position), Vector3.right, c_s_y, "BISHOP can push blocks diagonally", true, (objTutorial19) =>
                     {
                         Vector3 direction = matrixHandler.MatrixOfCubes[matrixHandler.BlockArray[5].oldPoint.i, matrixHandler.BlockArray[5].oldPoint.j].transform.position;
-                        direction += Vector3.forward/2f;
-                        direction += Vector3.right/2f;
-                        
+                        direction += Vector3.forward / 2f;
+                        direction += Vector3.right / 2f;
+
                         tutorialHandler.ShowTutorial(20, cameraMain.WorldToScreenPoint(direction), Vector3.right, c_s_y, "If the blocks are surrounded by other blocks, BISHOP can't push them", false, (objTutorial20) =>
                         {
                             moveEnabled = true;
-                                //exit
+                            //exit
 
-                            });
+                        });
 
                     });
+                });
+        }
+        else if (type == CustomPiece.PiecesTypeEnum.TYPE_QUEEN)
+        {
+            moveEnabled = false;
+            tutorialHandler.ShowTutorial(21, piecesHandler.GetObjectWorldPotionCentered(CustomPiece.PiecesTypeEnum.TYPE_QUEEN, canvas),
+                Vector3.right, c_s_y, "QUEEN piece has been enabled", false, (objTutorial18) =>
+                {
+
+                    moveEnabled = true;
+                    //exit
+
                 });
         }
     }
@@ -1042,7 +1056,7 @@ public class GameManager : MonoBehaviour
 
     public void OnClickPiece(int index)
     {
-        if (GlobalSingleton.GetInstance().gamePaused)
+        if (!moveEnabled || GlobalSingleton.GetInstance().gamePaused)
         {
             return;
         }

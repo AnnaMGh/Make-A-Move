@@ -199,7 +199,7 @@ GameObject:
   - component: {fileID: 8259733760305622277}
   - component: {fileID: 7774180918023601210}
   m_Layer: 5
-  m_Name: ImpBlockCost
+  m_Name: ImpResistance
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -640,9 +640,9 @@ GameObject:
   - component: {fileID: 1991360966018607045}
   - component: {fileID: 295486792905792316}
   - component: {fileID: 2320789324252258900}
-  - component: {fileID: 3607651882803123489}
+  - component: {fileID: 1562832123735946464}
   m_Layer: 5
-  m_Name: BlockDev
+  m_Name: BreakableDev
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -709,7 +709,7 @@ MonoBehaviour:
   m_FillOrigin: 0
   m_UseSpriteMesh: 0
   m_PixelsPerUnitMultiplier: 1
---- !u!114 &3607651882803123489
+--- !u!114 &1562832123735946464
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -718,7 +718,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 6026970860361037572}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 2821e9e73cc609c41b7e39209f65e761, type: 3}
+  m_Script: {fileID: 11500000, guid: 85ea564457d585e4196d572243ba0fbc, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
 --- !u!1 &6040511199074202437
@@ -1095,7 +1095,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: 'cost
+  m_text: 'res
 
 '
   m_isRightToLeft: 0
@@ -1364,7 +1364,7 @@ GameObject:
   - component: {fileID: 3759884065975055017}
   - component: {fileID: 3845424315138697421}
   m_Layer: 5
-  m_Name: TxBlockLbl
+  m_Name: TxLbl
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1417,7 +1417,9 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: 'Block:'
+  m_text: 'Breakable:
+
+'
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
   m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}

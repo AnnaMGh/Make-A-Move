@@ -11,6 +11,7 @@ public class Cube : MonoBehaviour
     public Point point;
     public bool enabledStatus;
     public bool needEnabler;
+    public bool isBreaked;
 
     private bool lastEnabledStatus;
     private GameManager gameManager;

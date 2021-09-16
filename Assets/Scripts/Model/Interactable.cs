@@ -6,7 +6,7 @@ using UnityEngine.SceneManagement;
 
 public class Interactable : MonoBehaviour
 {
-    public enum InteractableType { NEW_PIECE_AVAILABLE, BLOCK, ENABLER, ENEMY }
+    public enum InteractableType { NEW_PIECE_AVAILABLE, BLOCK, ENABLER, BREAKABLE, ENEMY }
 
     public InteractableType interactableType;
 
@@ -148,8 +148,13 @@ public class Interactable : MonoBehaviour
 
         //if is from collision and its bishop or is from trigger and is something else than bishop => exit
         if (!piece.CurrentPiece.pieceType.Equals(CustomPiece.PiecesTypeEnum.TYPE_KNIGHT) &&
-            ((!fromCollision && piece.CurrentPiece.pieceType.Equals(CustomPiece.PiecesTypeEnum.TYPE_BISHOP))
-            || (fromCollision && !piece.CurrentPiece.pieceType.Equals(CustomPiece.PiecesTypeEnum.TYPE_BISHOP))))
+            (
+            (fromCollision && !piece.IsDiagonalMovement(piece.LastStep.Movement))
+            // (!fromCollision && piece.CurrentPiece.pieceType.Equals(CustomPiece.PiecesTypeEnum.TYPE_BISHOP))
+            || (!fromCollision && piece.IsDiagonalMovement(piece.LastStep.Movement))
+          //  || (fromCollision && !piece.CurrentPiece.pieceType.Equals(CustomPiece.PiecesTypeEnum.TYPE_BISHOP))
+           
+            ))
         {
             Block block = (Block)receivedObject;
 
@@ -158,6 +163,7 @@ public class Interactable : MonoBehaviour
             if (block.oldPoint.i!=gameManager.GetPieceHandler().currentPoint.i
                 || block.oldPoint.j != gameManager.GetPieceHandler().currentPoint.j)
             {
+                collideOrTrigger = false;
                 return;
             }
 

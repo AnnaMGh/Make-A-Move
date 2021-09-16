@@ -19,6 +19,7 @@ public class MatrixHandler : MonoBehaviour
     public PieceAvailable NewPieceAvailable { get { return newPieceAvailable; } }
     public Block[] BlockArray { get { return blockArray; } }
     public Enabler[] EnablerArray { get { return enablerArray; } }
+    public Breakable[] BreakableArray { get { return breakableArray; } }
 
     private Cube[,] matrixOfCubes; // i = - ; j = |
     private int matrixIndexLength;
@@ -34,9 +35,11 @@ public class MatrixHandler : MonoBehaviour
     private PieceAvailable newPieceAvailable;
     private Block[] blockArray;
     private Enabler[] enablerArray;
+    private Breakable[] breakableArray;
     private bool fromGame;
     private GameObject prefabBlock;
     private GameObject prefabEnabler;
+    private GameObject prefabBreakable;
 
 
 
@@ -47,6 +50,7 @@ public class MatrixHandler : MonoBehaviour
     {
         prefabBlock = (GameObject)Resources.Load("Prefabs/Block", typeof(GameObject));
         prefabEnabler = (GameObject)Resources.Load("Prefabs/Enabler", typeof(GameObject));
+        prefabBreakable = (GameObject)Resources.Load("Prefabs/Breakable", typeof(GameObject));
     }
 
     public void InitializeMatrix(int level, bool fromGame, Delegates.ObjectDelegate objDelegateReceived)
@@ -146,10 +150,7 @@ public class MatrixHandler : MonoBehaviour
 
     public void GoLevel(int level, Delegates.ObjectDelegate objDelegateReceived)
     {
-        RestoreDisabledCubes();
-        RemoveNewPieceAvailable();
-        RemoveBlocks();
-        RemoveEnabler();
+        CleanMatrix();
         objDelegate = (obj) => { objDelegateReceived?.Invoke(obj); };
         DesignMatrix(matrixOfCubes, level);
     }
@@ -161,7 +162,7 @@ public class MatrixHandler : MonoBehaviour
         //bool andActive = inMatrix && (justInMatrix? true : matrixOfCubes[p.i, p.j].activeInHierarchy);
         //bool andActive = inMatrix && (justInMatrix? true : matrixOfCubes[p.i, p.j].GetComponent<Renderer>().material.color.a >0);
         //bool andActive = inMatrix && (justInMatrix ? true : matrixOfCubes[p.i, p.j].GetComponent<Renderer>().material.color.a > 0);
-       // bool andActive = inMatrix && (justInMatrix ? true : matrixOfCubes[p.i, p.j].GetComponent<Renderer>().enabled && !matrixOfCubes[p.i, p.j].needEnabler);
+        // bool andActive = inMatrix && (justInMatrix ? true : matrixOfCubes[p.i, p.j].GetComponent<Renderer>().enabled && !matrixOfCubes[p.i, p.j].needEnabler);
         bool andActive = inMatrix && !matrixOfCubes[p.i, p.j].needEnabler && (justInMatrix ? true : matrixOfCubes[p.i, p.j].GetComponent<Renderer>().enabled);
         return inMatrix && andActive;
     }
@@ -206,8 +207,8 @@ public class MatrixHandler : MonoBehaviour
         {
             foreach (Block b in blockArray)
             {
-                if (b.oldPoint.i == point.i && b.oldPoint.j == point.j 
-                    && b.GameObj!= null && b.GameObj.activeInHierarchy)
+                if (b.oldPoint.i == point.i && b.oldPoint.j == point.j
+                    && b.GameObj != null && b.GameObj.activeInHierarchy)
                 {
                     return true;
                 }
@@ -229,7 +230,21 @@ public class MatrixHandler : MonoBehaviour
                 }
             }
         }
+        return false;
+    }
 
+    public bool IsCubeBreaked(Point point)
+    {
+        if (breakableArray != null && breakableArray.Length > 0)
+        {
+            foreach (Breakable e in breakableArray)
+            {
+                if (e.point.i == point.i && e.point.j == point.j && !matrixOfCubes[e.point.i, e.point.j].isBreaked)
+                {
+                    return true;
+                }
+            }
+        }
         return false;
     }
 
@@ -250,10 +265,9 @@ public class MatrixHandler : MonoBehaviour
     private void AddBlock(Block block, int nr)
     {
         block.SetGameObject(
-            Instantiate(prefabBlock, 
-            matrixOfCubes[block.oldPoint.i, block.oldPoint.j].transform.position 
-            + new Vector3(0f, 1f, 0f) + new Vector3((fromGame ? 0f : 0f), 0f, 0f), 
-            Quaternion.identity));
+            Instantiate(prefabBlock,
+            matrixOfCubes[block.oldPoint.i, block.oldPoint.j].transform.position
+            + new Vector3(0f, 1f, 0f), Quaternion.identity));
         block.ChangeGameObjectName(nr);
         block.ChangeDesign();
         block.GameObj.GetComponent<Interactable>().SetObject(block);
@@ -261,11 +275,22 @@ public class MatrixHandler : MonoBehaviour
 
     private void AddEnabler(Enabler enabler)
     {
-        enabler.SetGameObject(Instantiate(prefabEnabler, matrixOfCubes[enabler.enablerPoint.i, enabler.enablerPoint.j].transform.position + new Vector3(0f, 0.5f, 0f), Quaternion.identity));
+        enabler.SetGameObject(Instantiate(prefabEnabler,
+            matrixOfCubes[enabler.enablerPoint.i, enabler.enablerPoint.j].transform.position
+            + new Vector3(0f, 0.5f, 0f), Quaternion.identity));
         enabler.ChangeDesign();
         enabler.GameObj.GetComponent<Interactable>().SetObject(enabler);
         matrixOfCubes[enabler.cubePoint.i, enabler.cubePoint.j].needEnabler = true;
         matrixOfCubes[enabler.cubePoint.i, enabler.cubePoint.j].GetComponent<Renderer>().material.color = enabler.color;
+    }
+
+    private void AddBreakable(Breakable breakable)
+    {
+        breakable.SetGameObject(Instantiate(prefabBreakable,
+            matrixOfCubes[breakable.point.i, breakable.point.j].transform.position
+            + new Vector3(0f, 0.5f, 0f), Quaternion.identity));
+        breakable.ChangeDesign();
+        breakable.GameObj.GetComponent<Interactable>().SetObject(breakable);
     }
 
     private void RemoveNewPieceAvailable()
@@ -290,7 +315,7 @@ public class MatrixHandler : MonoBehaviour
         blockArray = null;
     }
 
-    private void RemoveEnabler()
+    private void RemoveEnablers()
     {
         if (enablerArray != null)
         {
@@ -302,12 +327,25 @@ public class MatrixHandler : MonoBehaviour
         enablerArray = null;
     }
 
+    private void RemoveBreakables()
+    {
+        if (breakableArray != null)
+        {
+            foreach (Breakable obj in breakableArray)
+            {
+                Destroy(obj.GameObj);
+            }
+        }
+        breakableArray = null;
+    }
+
     private void CleanMatrix()
     {
         RestoreDisabledCubes();
         RemoveNewPieceAvailable();
         RemoveBlocks();
-        RemoveEnabler();
+        RemoveEnablers();
+        RemoveBreakables();
     }
 
     #region design
@@ -359,6 +397,7 @@ public class MatrixHandler : MonoBehaviour
         else { newPieceAvailable = null; }
         blockArray = level.block;
         enablerArray = level.enabler;
+        breakableArray = level.breakable;
 
         //make base
         matrixOfCubes[startPoint.i, startPoint.j].SetCubeType(Cube.CubeType.TYPE_START);
@@ -392,9 +431,18 @@ public class MatrixHandler : MonoBehaviour
         //enabler
         if (enablerArray != null && enablerArray.Length > 0)
         {
-            foreach (Enabler enabler in enablerArray)
+            foreach (Enabler obj in enablerArray)
             {
-                AddEnabler(enabler);
+                AddEnabler(obj);
+            }
+        }
+
+        //breakable
+        if (breakableArray != null && breakableArray.Length > 0)
+        {
+            foreach (Breakable obj in breakableArray)
+            {
+                AddBreakable(obj);
             }
         }
 
