@@ -53,6 +53,9 @@ public class DevelopmentManager : MonoBehaviour
     public TMP_InputField impEnablerNr;
     public GameObject contentEnablers;
     public List<EnablerDev> enablerDevList;
+    public TMP_InputField impBreakableNr;
+    public GameObject contentBreakable;
+    public List<BreakableDev> breakableDevList;
 
 
     [Header("3. New")]
@@ -77,6 +80,7 @@ public class DevelopmentManager : MonoBehaviour
     private DevelopmentType developmentType;
     private GameObject prefabBlock;
     private GameObject prefabEnabler;
+    private GameObject prefabBreakable;
     private TextAsset[] textAssets;
     private int currentLevel;
     private Level level;
@@ -118,6 +122,7 @@ public class DevelopmentManager : MonoBehaviour
         //prefabs
         prefabBlock = Resources.Load<GameObject>("Prefabs/BlockDev");
         prefabEnabler = Resources.Load<GameObject>("Prefabs/EnablerDev");
+        prefabBreakable = Resources.Load<GameObject>("Prefabs/BreakableDev");
 
         //set sprites
         spriteCameraFront = Resources.Load<Sprite>("Images/Icons/Camera_01");
@@ -246,6 +251,28 @@ public class DevelopmentManager : MonoBehaviour
                 enablerDevList.Add(enablerkDev);
             }
         }
+        
+        //breakable
+        if (breakableDevList != null && breakableDevList.Count > 0)
+        {
+            int count = breakableDevList.Count;
+            for (int i = count - 1; i >= 0; i--)
+            {
+                Destroy(breakableDevList[i].gameObject);
+                breakableDevList.Remove(breakableDevList[i]);
+            }
+        }
+        impBreakableNr.text = (matrixHandler.BreakableArray == null ? "0" : matrixHandler.BreakableArray.Length.ToString());
+        breakableDevList = new List<BreakableDev>();
+        if (matrixHandler.BreakableArray != null && matrixHandler.BreakableArray.Length > 0)
+        {
+            for (int i = 0; i < matrixHandler.BreakableArray.Length; i++)
+            {
+                BreakableDev breakableDev = Instantiate(prefabBreakable, contentBreakable.transform).GetComponent<BreakableDev>();
+                breakableDev.SetData(i + 1, -1, matrixHandler.MatrixOfCubes.GetLength(0), matrixHandler.BreakableArray[i]);
+                breakableDevList.Add(breakableDev);
+            }
+        }
         initialize = false;
     }
 
@@ -346,6 +373,32 @@ public class DevelopmentManager : MonoBehaviour
             for (int i = 0; i < blockDevList.Count; i++)
             {
                 string check = blockDevList[i].CheckData(i);
+                if (check != null)
+                {
+                    return check;
+                }
+            }
+        }  
+        
+        //enabler
+        if (enablerDevList != null && enablerDevList.Count > 0)
+        {
+            for (int i = 0; i < enablerDevList.Count; i++)
+            {
+                string check = enablerDevList[i].CheckData(i);
+                if (check != null)
+                {
+                    return check;
+                }
+            }
+        } 
+        
+        //breakable
+        if (breakableDevList != null && breakableDevList.Count > 0)
+        {
+            for (int i = 0; i < breakableDevList.Count; i++)
+            {
+                string check = breakableDevList[i].CheckData(i);
                 if (check != null)
                 {
                     return check;
@@ -512,6 +565,38 @@ public class DevelopmentManager : MonoBehaviour
 
     }
 
+    public void OnChangeStateOfBreakableNr()
+    {
+        if (!initialize)
+        {
+            int count = breakableDevList.Count;
+            int difference = count - Int32.Parse(impBreakableNr.text);
+
+            if (difference > 0)
+            {
+                //need to remove
+                for (int i = count - 1; i > count - 1 - difference; i--)
+                {
+                    Destroy(breakableDevList[i].gameObject);
+                    breakableDevList.Remove(breakableDevList[i]);
+                }
+            }
+            else
+            {
+                //need to add
+                for (int i = 0; i < Math.Abs(difference); i++)
+                {
+                    BreakableDev breakableDev = Instantiate(prefabBreakable, contentBreakable.transform).GetComponent<BreakableDev>();
+                    breakableDev.SetData(breakableDevList.Count + 1, -1, matrixHandler.MatrixOfCubes.GetLength(0), new Breakable());
+                    breakableDevList.Add(breakableDev);
+                }
+
+            }
+        }
+
+    }
+  
+
     public void OnClickRefresh()
     {
         string check = CheckData();
@@ -582,21 +667,32 @@ public class DevelopmentManager : MonoBehaviour
         {
             for (int i = 0; i < blockDevList.Count; i++)
             {
-                blockCubes.Add(blockDevList[i].GetBlock());
+                blockCubes.Add(blockDevList[i].GetObject());
             }
         }
         level.block = blockCubes.ToArray();
 
         //enabler 
-        List<Enabler> enablerCuber = new List<Enabler>();
+        List<Enabler> enablerCubes = new List<Enabler>();
         if (enablerDevList != null && enablerDevList.Count > 0)
         {
             for (int i = 0; i < enablerDevList.Count; i++)
             {
-                enablerCuber.Add(enablerDevList[i].GetEnabler());
+                enablerCubes.Add(enablerDevList[i].GetObject());
             }
         }
-        level.enabler = enablerCuber.ToArray();
+        level.enabler = enablerCubes.ToArray(); 
+        
+        //breakable 
+        List<Breakable> breakableCubes = new List<Breakable>();
+        if (breakableDevList != null && breakableDevList.Count > 0)
+        {
+            for (int i = 0; i < breakableDevList.Count; i++)
+            {
+                breakableCubes.Add(breakableDevList[i].GetObject());
+            }
+        }
+        level.breakable = breakableCubes.ToArray();
 
 
         matrixHandler.MatrixDesignLevel(level);

@@ -4,7 +4,7 @@ using System;
 using UnityEngine;
 using TMPro;
 
-public class BlockDev : MonoBehaviour
+public class BlockDev : InteractableDev
 {
     private TMP_Text impBlockLbl;
     private TMP_InputField impBlockCost;
@@ -82,7 +82,7 @@ public class BlockDev : MonoBehaviour
         return (nr > minCost && nr < maxCost);
     }
 
-    public Block GetBlock() {
+    public Block GetObject() {
 
         string check = CheckData(0);
         if (check != null)

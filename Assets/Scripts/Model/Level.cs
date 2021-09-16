@@ -13,6 +13,7 @@ public class Level
     public Point finishPoint;
     public Block[] block;
     public Enabler[] enabler;
+    public Breakable[] breakable;
     //public Enemy[] enemy;
     public Point[] disabledPoints;
    

@@ -4,7 +4,7 @@ using UnityEngine;
 using TMPro;
 using System;
 
-public class EnablerDev : MonoBehaviour
+public class EnablerDev : InteractableDev
 {
     private TMP_Text impEnablerLbl;
     private TMP_InputField impEnablerPointI;
@@ -113,7 +113,7 @@ public class EnablerDev : MonoBehaviour
         return (nr > minLimit && nr < maxLimit);
     }
 
-    public Enabler GetEnabler()
+    public Enabler GetObject()
     {
         string check = CheckData(0);
         if (check != null)

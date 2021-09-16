@@ -182,6 +182,19 @@ public class PieceHandler : MonoBehaviour
         currentPieceGameObjChildMR.material = (PlayerPrefs.GetInt(Constants.KEY_COLOR) == 0 ? currentPiece.materialWhite : currentPiece.materialBlack);
     }
 
+    public bool IsDiagonalMovement(CustomPiece.MovementTypeEnum movement)
+    {
+        if (movement.Equals(CustomPiece.MovementTypeEnum.MOVEMENT_DIAGONAL_FORWARD_LEFT)
+            || movement.Equals(CustomPiece.MovementTypeEnum.MOVEMENT_DIAGONAL_FORWARD_RIGHT)
+            || movement.Equals(CustomPiece.MovementTypeEnum.MOVEMENT_DIAGONAL_BACKWARD_LEFT)
+            || movement.Equals(CustomPiece.MovementTypeEnum.MOVEMENT_DIAGONAL_BACKWARD_RIGHT)
+            )
+        {
+            return true;
+        }
+        return false;
+    }
+
     public void MakeMovement(CustomPiece.MovementTypeEnum movement, int n, Delegates.ObjectDelegate objDelegate)
     {
         //handle sound
@@ -205,14 +218,25 @@ public class PieceHandler : MonoBehaviour
                 currentPieceGameObjChildRB.useGravity = false;
                 currentPieceGameObjChildBCs[(int)currentPiece.pieceType].isTrigger = true;
             }
+            /*  //if bishow => deactivate collider
+              else if (currentPiece.pieceType == CustomPiece.PiecesTypeEnum.TYPE_BISHOP)
+              {
+                  currentPieceGameObjChildRB.useGravity = false;
+                  currentPieceGameObjChildBCs[(int)currentPiece.pieceType].isTrigger = true;
+              }
+              //if queen => deactivate collider
+              else if (currentPiece.pieceType == CustomPiece.PiecesTypeEnum.TYPE_QUEEN
+              && IsDiagonalMovement(movement))
+              {
+                  currentPieceGameObjChildRB.useGravity = false;
+                  currentPieceGameObjChildBCs[(int)currentPiece.pieceType].isTrigger = true;
+              }*/
 
-            //if bishow => deactivate collider
-            if (currentPiece.pieceType == CustomPiece.PiecesTypeEnum.TYPE_BISHOP)
+            else if (IsDiagonalMovement(movement))
             {
                 currentPieceGameObjChildRB.useGravity = false;
                 currentPieceGameObjChildBCs[(int)currentPiece.pieceType].isTrigger = true;
             }
-
 
             if (n == 0)
             {
