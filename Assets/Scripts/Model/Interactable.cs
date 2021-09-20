@@ -29,7 +29,7 @@ public class Interactable : MonoBehaviour
         }
 
 
-        if (interactableType == InteractableType.BLOCK)
+        if (interactableType == InteractableType.BLOCK || interactableType == InteractableType.BREAKABLE)
         {
             particles = this.gameObject.transform.GetChild(this.gameObject.transform.childCount - 1).GetComponent<ParticleSystem>();
             particles.gameObject.SetActive(false);
@@ -103,6 +103,21 @@ public class Interactable : MonoBehaviour
                     {
                         HandleEnabler();
                         break;
+                    } 
+            }
+        }
+    }
+
+    private void OnTriggerExit(Collider other)
+    {
+        if (other != null && other.gameObject.tag != null && other.gameObject.tag.Equals("Player"))
+        {
+            switch (interactableType)
+            {
+                    case InteractableType.BREAKABLE:
+                    {
+                        HandleBreakable();
+                        break;
                     }
             }
         }
@@ -129,7 +144,6 @@ public class Interactable : MonoBehaviour
                         HandleEnabler();
                         break;
                     }
-
             }
         }
     }
@@ -239,6 +253,36 @@ public class Interactable : MonoBehaviour
             Color cubeColor = ((enabler.cubePoint.i + enabler.cubePoint.j) % 2 == 0 ? Constants.MATRIX_BOX_BLACK_COLOR : Constants.MATRIX_BOX_WHITE_COLOR);
             gameManager.GetMatrixHandler().ChangeCubeStatus(enabler.cubePoint, true, cubeColor);
 
+        }
+    }
+
+    private void HandleBreakable()
+    {
+        if (!collideOrTrigger)
+        {
+            collideOrTrigger = true;
+
+            Breakable breakable = (Breakable)receivedObject;
+
+            //check if the block with piece interact is the target one
+          /*  if (breakable.point.i != gameManager.GetPieceHandler().currentPoint.i
+                || breakable.point.j != gameManager.GetPieceHandler().currentPoint.j)
+            {
+                collideOrTrigger = false;
+                return;
+            }*/
+
+            //make sound
+            if (PlayerPrefs.GetInt(Constants.KEY_SOUND) == 1)
+            {
+                AudioSource audio = this.gameObject.GetComponent<AudioSource>();
+                audio.Play();
+            }
+
+
+            gameManager.OnBreakable(breakable);
+
+            collideOrTrigger = false;
         }
     }
 }

@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 
 [System.Serializable]
-public class Breakable 
+public class Breakable
 {
     public GameObject GameObj { get { return gameObj; } }
 
@@ -21,9 +21,32 @@ public class Breakable
         this.enablerRenderer = this.gameObj.GetComponent<Renderer>();
     }
 
+    public void ChangeGameObjectName(int nr)
+    {
+        this.gameObj.name = Interactable.InteractableType.BREAKABLE.ToString() + "_" + nr;
+    }
+
     public void ChangeDesign()
     {
         //change color
         enablerRenderer.material.color = color;
     }
+
+    public bool IsBroken()
+    {
+        return currentResistance >= maxResistance;
+    }
+
+    public void SteppedOver()
+    {
+        currentResistance++;
+    }
+
+    public int GetBreakableIndex()
+    {
+        int index = maxResistance - currentResistance;
+        return index < 0 ? 0 : index;
+    }
+
+    
 }

@@ -16,7 +16,7 @@ public class BreakableDev : InteractableDev
     private int maxLimit = 8;
 
     private readonly int minResistance = 1;
-    private readonly int maxResistance = 21;
+    private readonly int maxResistance = 4;
 
     private void Initialize()
     {

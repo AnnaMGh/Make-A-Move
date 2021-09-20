@@ -5,7 +5,7 @@ using UnityEngine;
 [System.Serializable]
 public class Cube : MonoBehaviour
 {
-    public enum CubeType { TYPE_NORMAL, TYPE_NEXT, TYPE_UNAVAILABLE, TYPE_START, TYPE_FINISH, TYPE_NEW_PIECE, TYPE_BLOCK }
+    public enum CubeType { TYPE_NORMAL, TYPE_NEXT, TYPE_UNAVAILABLE, TYPE_START, TYPE_FINISH, TYPE_NEW_PIECE, TYPE_BLOCK, TYPE_BREAKABLE }
 
 
     public Point point;
@@ -19,6 +19,8 @@ public class Cube : MonoBehaviour
 
     private Renderer cubeRenderer;
     private Renderer pillarRenderer;
+    private Material baseMaterial;
+    private Material breakableMaterial;
     private GameObject particlesParent;
     private ParticleSystem[] particles;
 
@@ -49,7 +51,7 @@ public class Cube : MonoBehaviour
         cubeRenderer = this.GetComponent<Renderer>();
         pillarRenderer = this.gameObject.transform.GetChild(0).GetComponent<Renderer>();
         particlesParent = this.gameObject.transform.GetChild(1).gameObject;
-
+        baseMaterial = Resources.Load<Material>("Materials/CubeMaterial");
         particles = particlesParent.transform.GetComponentsInChildren<ParticleSystem>();
 
         this.enabledStatus = lastEnabledStatus = false;
@@ -74,7 +76,7 @@ public class Cube : MonoBehaviour
                 {
                     ChangeCubeStatus(enabledStatus, mainColor);
                 }
-              
+
             }
             else
             {
@@ -92,7 +94,7 @@ public class Cube : MonoBehaviour
         this.cubeRenderer.enabled = false;
         SetCubeType(CubeType.TYPE_UNAVAILABLE);
         this.pillarRenderer.material.color = Constants.MATRIX_PILLAR_COLOR_01;
-        StandardShaderUtils.ChangeRenderMode(this.pillarRenderer.material, GlobalSingleton.GetInstance().GetMainCubesBlendMode()); 
+        StandardShaderUtils.ChangeRenderMode(this.pillarRenderer.material, GlobalSingleton.GetInstance().GetMainCubesBlendMode());
         this.particlesParent.SetActive(false);
     }
 
@@ -101,20 +103,23 @@ public class Cube : MonoBehaviour
         lastEnabledStatus = enabledStatus = true;
         cubeRenderer.enabled = true;
         Color cubeColor = ((point.i + point.j) % 2 == 0 ? Constants.MATRIX_BOX_BLACK_COLOR : Constants.MATRIX_BOX_WHITE_COLOR);
-        ChangeCubeType(cubeColor, Constants.MATRIX_PILLAR_COLOR_01, cubeColor, false);
+        ChangeCubeType(cubeColor, Constants.MATRIX_PILLAR_COLOR_01, baseMaterial, cubeColor, false);
         previousType = CubeType.TYPE_NORMAL;
         needEnabler = false;
+        isBreaked = false;
     }
 
-    public void ChangeCubeType(Color cubeColor, Color pillarColor, Color particleColor, bool particleVisibility)
+    public void ChangeCubeType(Color cubeColor, Color pillarColor, Material cubeMaterial, Color particleColor, bool particleVisibility)
     {
         if (cubeRenderer == null)
         {
             return;
         }
         //cube color
+        cubeRenderer.material = cubeMaterial;
         cubeRenderer.material.color = cubeColor;
         pillarRenderer.material.color = pillarColor;
+
 
         //particle
         if (SystemInfo.systemMemorySize > Constants.RAM_HIGH && particleVisibility)
@@ -122,12 +127,14 @@ public class Cube : MonoBehaviour
             ChangeParticlesColor(particleColor);
             particlesParent.SetActive(true);
         }
-        else {
+        else
+        {
             particlesParent.SetActive(false);
         }
     }
 
-    private void ChangeParticlesColor(Color particleColor) {
+    private void ChangeParticlesColor(Color particleColor)
+    {
         foreach (ParticleSystem particle in particles)
         {
             particle.Stop();
@@ -140,11 +147,12 @@ public class Cube : MonoBehaviour
     public void RestoreCube()
     {
         RestoreEvenColorCubes();
-        pillarRenderer.material.color =Constants.MATRIX_PILLAR_COLOR_01;
+        pillarRenderer.material.color = Constants.MATRIX_PILLAR_COLOR_01;
         particlesParent.SetActive(false);
     }
 
-    public void ChangeCubeStatus(bool status, Color color) {
+    public void ChangeCubeStatus(bool status, Color color)
+    {
         //gameObject.SetActive(true);
         enabledStatus = status;
         cubeRenderer.material.color = mainColor = color;
@@ -157,6 +165,7 @@ public class Cube : MonoBehaviour
         bool particleVisibility = false;
         Color particleColor = new Color();
         Color cubeColor = new Color();
+        Material cubeMaterial = baseMaterial;
         Color pillarColor = Constants.MATRIX_PILLAR_COLOR_01;
 
         switch (type)
@@ -167,25 +176,31 @@ public class Cube : MonoBehaviour
                     particleVisibility = false;
                     int even = ((point.i + point.j) % 2 == 0 ? 0 : 1);
                     cubeColor = new Color(even, even, even, 1f);
+                    cubeMaterial = baseMaterial;
                     break;
                 }
             case CubeType.TYPE_NEXT:
                 {
                     cubeColor = Constants.MATRIX_BOX_NEXT_COLOR;
+                    cubeMaterial = baseMaterial;
 
                     if (previousType == CubeType.TYPE_FINISH || previousType == CubeType.TYPE_START)
                     {
                         particleVisibility = true;
-                        if (previousType == CubeType.TYPE_FINISH) {
+                        if (previousType == CubeType.TYPE_FINISH)
+                        {
                             cubeColor = Constants.MATRIX_BOX_FINISH_NEXT_COLOR;
                             particleColor = Constants.MATRIX_BOX_FINISH_COLOR;
                         }
-                        else {
+                        else
+                        {
                             cubeColor = Constants.MATRIX_BOX_START_NEXT_COLOR;
                             particleColor = Constants.MATRIX_BOX_START_COLOR;
                         }
+                    } else if (previousType == CubeType.TYPE_BREAKABLE) {
+                        cubeMaterial = breakableMaterial;
                     }
-                  
+
                     break;
                 }
             case CubeType.TYPE_UNAVAILABLE:
@@ -194,6 +209,7 @@ public class Cube : MonoBehaviour
                     particleVisibility = false;
                     int even = ((point.i + point.j) % 2 == 0 ? 0 : 1);
                     cubeColor = new Color(even, even, even, 0f);
+                    cubeMaterial = baseMaterial;
                     pillarColor = Constants.MATRIX_PILLAR_COLOR_02;
                     break;
                 }
@@ -211,6 +227,7 @@ public class Cube : MonoBehaviour
                     particleVisibility = true;
                     particleColor = (Constants.MATRIX_BOX_FINISH_COLOR + new Color(0.1f, 0.1f, 0.1f));
                     cubeColor = Constants.MATRIX_BOX_FINISH_COLOR;
+                    cubeMaterial = baseMaterial;
                     break;
                 }
             case CubeType.TYPE_NEW_PIECE:
@@ -218,6 +235,7 @@ public class Cube : MonoBehaviour
                     previousType = type;
                     particleVisibility = false;
                     cubeColor = Constants.MATRIX_BOX_NEW_PIECE_COLOR;
+                    cubeMaterial = baseMaterial;
                     break;
                 }
             case CubeType.TYPE_BLOCK:
@@ -225,14 +243,29 @@ public class Cube : MonoBehaviour
                     previousType = type;
                     particleVisibility = false;
                     cubeColor = Constants.MATRIX_BLOCK_COLOR_01;
+                    cubeMaterial = baseMaterial;
+                    break;
+                }
+            case CubeType.TYPE_BREAKABLE:
+                {
+                    previousType = type;
+                    particleVisibility = false;
+                    cubeColor = breakableMaterial.color;
+                    cubeMaterial = breakableMaterial;
                     break;
                 }
         }
-        ChangeCubeType(cubeColor, pillarColor, particleColor, particleVisibility);
+        ChangeCubeType(cubeColor, pillarColor, cubeMaterial, particleColor, particleVisibility);
     }
 
-    public CubeType GetPreviousType() {
+    public CubeType GetPreviousType()
+    {
         return previousType;
+    }
+
+    public void SetBreakableMaterial(Material material)
+    {
+        breakableMaterial = material;
     }
 
 
