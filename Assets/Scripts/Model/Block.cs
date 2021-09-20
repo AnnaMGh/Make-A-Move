@@ -68,6 +68,6 @@ public class Block
 
     public void ChangeGameObjectName(int nr)
     {
-        this.gameObj.name = "Block_" + nr;
+        this.gameObj.name = Interactable.InteractableType.BLOCK.ToString() +"_" + nr;
     }
 }

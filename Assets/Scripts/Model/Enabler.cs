@@ -24,6 +24,11 @@ public class Enabler
     public void ChangeDesign()
     {
         //change color
-        enablerRenderer.material.color = color;                                           
+        enablerRenderer.material.color = color;
+    }
+
+    public void ChangeGameObjectName(int nr)
+    {
+        this.gameObj.name = Interactable.InteractableType.ENABLER.ToString() + "_" + nr;
     }
 }

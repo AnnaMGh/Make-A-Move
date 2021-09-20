@@ -207,7 +207,7 @@ public class GameManager : MonoBehaviour
                     OnClickArrow((int)possibleNextMoves[cube]);
                 }
             }
-            else if (raycastHit.collider.name.Contains("Block"))
+            else if (raycastHit.collider.name.Contains(Interactable.InteractableType.BLOCK.ToString()))
             {
                 //Debug.Log(raycastHit.collider.name);
                 //vvvalue = raycastHit.collider.name;
@@ -737,6 +737,21 @@ public class GameManager : MonoBehaviour
         });
     }
 
+    public void OnBreakable(Breakable breakable)
+    {
+        breakable.SteppedOver();
+
+        GetMatrixHandler().ChangeBreakableStatus(
+               breakable.GetBreakableIndex(),
+                new Point(breakable.point.i, breakable.point.j));
+
+        if (breakable.IsBroken())
+        {
+            breakable.GameObj.transform.GetChild(0).gameObject.SetActive(true);
+            Destroy(breakable.GameObj, 1f);
+        }
+    }
+
     public void OnOrbit(Vector3 direction)
     {
         if (!GlobalSingleton.GetInstance().gamePaused
@@ -1061,6 +1076,12 @@ public class GameManager : MonoBehaviour
             return;
         }
 
+        if (matrixHandler.GetBreakableBreakableBox(pieceHandler.currentPoint) != null)
+        {
+            OnBreakable(matrixHandler.GetBreakableBreakableBox(pieceHandler.currentPoint));
+            pieceHandler.BlaBla();
+        }
+            
 
         if (matrixHandler.ChangesAvailable > 0 && matrixHandler.IsPieceChangeAvailable(index) && (int)pieceHandler.CurrentPiece.pieceType != index)
         {

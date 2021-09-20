@@ -195,6 +195,14 @@ public class PieceHandler : MonoBehaviour
         return false;
     }
 
+
+
+    public void BlaBla() {
+        currentPieceGameObjChildRB.useGravity = true;
+        currentPieceGameObjChildBCs[(int)currentPiece.pieceType].isTrigger = true;
+    }
+
+
     public void MakeMovement(CustomPiece.MovementTypeEnum movement, int n, Delegates.ObjectDelegate objDelegate)
     {
         //handle sound
