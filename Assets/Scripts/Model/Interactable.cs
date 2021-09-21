@@ -20,6 +20,8 @@ public class Interactable : MonoBehaviour
     private int accuracy = 10;
     private bool goDown;
 
+    private Point destinationPoint;
+
     // Start is called before the first frame update
     void Start()
     {
@@ -103,7 +105,12 @@ public class Interactable : MonoBehaviour
                     {
                         HandleEnabler();
                         break;
-                    } 
+                    }
+                case InteractableType.BREAKABLE:
+                    {
+                        HandleBreakable(true);
+                        break;
+                    }
             }
         }
     }
@@ -116,7 +123,7 @@ public class Interactable : MonoBehaviour
             {
                     case InteractableType.BREAKABLE:
                     {
-                        HandleBreakable();
+                        HandleBreakable(false);
                         break;
                     }
             }
@@ -174,8 +181,8 @@ public class Interactable : MonoBehaviour
 
 
             //check if the block with piece interact is the target one
-            if (block.oldPoint.i!=gameManager.GetPieceHandler().currentPoint.i
-                || block.oldPoint.j != gameManager.GetPieceHandler().currentPoint.j)
+            if (block.oldPoint.i!=gameManager.GetPieceHandler().CurrentPiece.currentPoint.i
+                || block.oldPoint.j != gameManager.GetPieceHandler().CurrentPiece.currentPoint.j)
             {
                 collideOrTrigger = false;
                 return;
@@ -256,21 +263,26 @@ public class Interactable : MonoBehaviour
         }
     }
 
-    private void HandleBreakable()
+    private void HandleBreakable(bool isFromEnterTrigger)
     {
-        if (!collideOrTrigger)
+        if (isFromEnterTrigger)
+        {
+            destinationPoint = new Point(gameManager.GetPieceHandler().CurrentPiece.currentPoint.i,
+                 gameManager.GetPieceHandler().CurrentPiece.currentPoint.j);
+        }
+        else if (!collideOrTrigger)
         {
             collideOrTrigger = true;
 
             Breakable breakable = (Breakable)receivedObject;
 
             //check if the block with piece interact is the target one
-          /*  if (breakable.point.i != gameManager.GetPieceHandler().currentPoint.i
-                || breakable.point.j != gameManager.GetPieceHandler().currentPoint.j)
+            if (breakable.point.i != destinationPoint.i
+                || breakable.point.j != destinationPoint.j)
             {
                 collideOrTrigger = false;
                 return;
-            }*/
+            }
 
             //make sound
             if (PlayerPrefs.GetInt(Constants.KEY_SOUND) == 1)

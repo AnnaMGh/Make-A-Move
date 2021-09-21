@@ -211,6 +211,12 @@ public class PanelHandler : MonoBehaviour
         GlobalSingleton.GetInstance().gamePaused = true;
     }
 
+    public void ChangeTitleSubtitle(string title, string subtitle) {
+        if (txtTitle == null) { Initialize(); }
+        txtTitle.text = title;
+        txtSubTitle.text = subtitle;   
+    }
+
     public void ShowPanel(int level, Delegates.ObjectDelegate receivedShowPanelDelegate)
     {
         if (txtTitle == null) { Initialize(); }

@@ -2662,7 +2662,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f7bd32c8de9b1fd458c7f99a35383303, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  texture: {fileID: 0}
 --- !u!1 &461837759 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 7934601561924156747, guid: 61d20e6c3ee21ba40aa03406e9f5f5de,
@@ -9081,6 +9080,11 @@ PrefabInstance:
       propertyPath: m_IsActive
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 1892183555213757274, guid: 61d20e6c3ee21ba40aa03406e9f5f5de,
+        type: 3}
+      propertyPath: m_IsActive
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 2487090807612403284, guid: 61d20e6c3ee21ba40aa03406e9f5f5de,
         type: 3}
       propertyPath: m_IsActive
@@ -9095,6 +9099,31 @@ PrefabInstance:
         type: 3}
       propertyPath: m_IsActive
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4828631116398813608, guid: 61d20e6c3ee21ba40aa03406e9f5f5de,
+        type: 3}
+      propertyPath: m_text
+      value: ' - Woops this should not happened! -'
+      objectReference: {fileID: 0}
+    - target: {fileID: 4828631116398813608, guid: 61d20e6c3ee21ba40aa03406e9f5f5de,
+        type: 3}
+      propertyPath: m_textAlignment
+      value: 65535
+      objectReference: {fileID: 0}
+    - target: {fileID: 4828631116398813608, guid: 61d20e6c3ee21ba40aa03406e9f5f5de,
+        type: 3}
+      propertyPath: m_TextStyleHashCode
+      value: -1183493901
+      objectReference: {fileID: 0}
+    - target: {fileID: 4828631116398813608, guid: 61d20e6c3ee21ba40aa03406e9f5f5de,
+        type: 3}
+      propertyPath: m_VerticalAlignment
+      value: 512
+      objectReference: {fileID: 0}
+    - target: {fileID: 4828631116398813608, guid: 61d20e6c3ee21ba40aa03406e9f5f5de,
+        type: 3}
+      propertyPath: m_HorizontalAlignment
+      value: 2
       objectReference: {fileID: 0}
     - target: {fileID: 6891709886197797476, guid: 61d20e6c3ee21ba40aa03406e9f5f5de,
         type: 3}

@@ -162,6 +162,10 @@ public class GameManager : MonoBehaviour
         CheckFirstLaunch();
         HandlePatricle();
         InitiateUI();
+
+        //todo test tutorial
+        //PlayerPrefs.SetInt(Constants.KEY_TUTORIAL_STATE, 21);
+
     }
 
     // Update is called once per frame
@@ -355,8 +359,8 @@ public class GameManager : MonoBehaviour
         arrowHandler.ChangeArrowsAvailability(false, null);
 
         pieceHandler.ChangeCustomPiece(CustomPiece.PiecesTypeEnum.TYPE_PAWN, false);
-        pieceHandler.CurrentPieceGameObj.transform.position = new Vector3(matrixHandler.MatrixOfCubes[matrixHandler.StartPoint.i, matrixHandler.StartPoint.j].transform.position.x, 1f, matrixHandler.MatrixOfCubes[matrixHandler.StartPoint.i, matrixHandler.StartPoint.j].transform.position.z);
         pieceHandler.CurrentPiece.currentPoint = new Point(matrixHandler.StartPoint.i, matrixHandler.StartPoint.j);
+        pieceHandler.RestoreToCurrentPos();
         piecesHandler.ChangePiecessAvailability(true, matrixHandler.PiecesAvailable);
         arrowHandler.ChangeArrowsAvailability(true, pieceHandler.CurrentPiece.movementType);
 
@@ -446,6 +450,17 @@ public class GameManager : MonoBehaviour
                     //exit
                 });
             });
+        } else if (matrixHandler.CurrentLevel == 34)
+        {
+            moveEnabled = false;
+            tutorialHandler.ShowTutorial(22, cameraMain.WorldToScreenPoint(matrixHandler.MatrixOfCubes[matrixHandler.BreakableArray[0].point.i, matrixHandler.BreakableArray[0].point.j].transform.position), Vector3.left, c_s_y, "CRACKED boxes are BREAKING when pieces are MOVED over it", true, (objTutorial15) =>
+            {
+                tutorialHandler.ShowTutorial(23, cameraMain.WorldToScreenPoint(matrixHandler.BreakableArray[0].GameObj.transform.position), Vector3.left, c_s_y, "CRACKED boxes are BREAKING when pieces are CHANGED over it", false, (objTutorial16) =>
+                {
+                    moveEnabled = true;
+                    //exit
+                });
+            });
         }
 
 
@@ -459,13 +474,7 @@ public class GameManager : MonoBehaviour
         FirebaseSingleton.GetInstance().SendEvents(Constants.EVENT_LEVEL_UP, eventParams);
     }
 
-    private void RestorePosition()
-    {
-        Point point = pieceHandler.CurrentPiece.currentPoint;
-        pieceHandler.CurrentPieceGameObj.transform.position = new Vector3(matrixHandler.MatrixOfCubes[point.i, point.j].transform.position.x, 1f, matrixHandler.MatrixOfCubes[point.i, point.j].transform.position.z);
-        pieceHandler.CurrentPieceGameObj.transform.GetChild(0).localRotation = Quaternion.identity;
-        pieceHandler.CurrentPieceGameObj.transform.GetChild(0).localPosition = new Vector3(0f, pieceHandler.CurrentPieceGameObj.transform.GetChild(0).transform.localPosition.y, 0f);
-    }
+  
 
     private void ChangeStars(int level)
     {
@@ -590,11 +599,12 @@ public class GameManager : MonoBehaviour
         possibleNextBlocks.Clear();
     }
 
-    private void GameOver()
+    private void GameOver(string subtitle)
     {
         //clean cubes and blocks
         CleanNextMovesAndBlocks();
 
+        gameOverHandler.ChangeTitleSubtitle("Game Over!", subtitle);
         gameOverHandler.ShowPanel();
 
         canvas.enabled = false;
@@ -687,7 +697,9 @@ public class GameManager : MonoBehaviour
         {
             pieceHandler.MakeMovement((CustomPiece.MovementTypeEnum)sendPieceBackMovement, 0, (obj) =>
             {
-                pieceHandler.RestoreToPos(pieceHandler.currentPoint, matrixHandler.MatrixOfCubes[pieceHandler.currentPoint.i, pieceHandler.currentPoint.j].transform.position);
+                pieceHandler.RestoreToPos(pieceHandler.CurrentPiece.currentPoint, 
+                    matrixHandler.MatrixOfCubes[pieceHandler.CurrentPiece.currentPoint.i, pieceHandler.CurrentPiece.currentPoint.j].transform.position,
+                    true);
                 txtMoves.SetText(matrixHandler.MovesAvailable.ToString());
                 moveEnabled = true;
             });
@@ -704,7 +716,7 @@ public class GameManager : MonoBehaviour
             txtMoves.SetText(matrixHandler.MovesAvailable.ToString());
             if (matrixHandler.MovesAvailable <= 0 && !levelFinished)
             {
-                GameOver();
+                GameOver("");
             }
         }
         else
@@ -716,24 +728,24 @@ public class GameManager : MonoBehaviour
                 txtMoves.SetText(matrixHandler.MovesAvailable.ToString());
                 if (matrixHandler.MovesAvailable <= 0 && !levelFinished)
                 {
-                    GameOver();
+                    GameOver("");
                 }
 
             }
-            pieceHandler.RestoreToPos(pieceHandler.currentPoint, matrixHandler.MatrixOfCubes[pieceHandler.currentPoint.i, pieceHandler.currentPoint.j].transform.position);
+            pieceHandler.RestoreToPos(pieceHandler.CurrentPiece.currentPoint, 
+                matrixHandler.MatrixOfCubes[pieceHandler.CurrentPiece.currentPoint.i, pieceHandler.CurrentPiece.currentPoint.j].transform.position,
+                true);
         }
 
         GlobalSingleton.GetInstance().SetTimeAsync(50, (obj) =>
         {
             //restore movement if damaged (outside and inside)
-            RestorePosition();
+            pieceHandler.RestoreToCurrentPos();
             if (matrixHandler.MovesAvailable > 0)
             {
                 //check next moves
                 CheckNextMoves();
             }
-
-
         });
     }
 
@@ -1023,7 +1035,7 @@ public class GameManager : MonoBehaviour
                     //Debug.Log("Recalculate onClickArrow: " + txtMoves.text);
 
                     //restore position if damaged (outside and inside)
-                    RestorePosition();
+                    pieceHandler.RestoreToCurrentPos();
 
                     if (matrixHandler.CheckGoNextLevel(pieceHandler.CurrentPieceGameObj.transform.position))
                     {
@@ -1053,7 +1065,7 @@ public class GameManager : MonoBehaviour
                     }
                     else if (matrixHandler.MovesAvailable <= 0)
                     {
-                        GameOver();
+                        GameOver("");
                     }
                     else
                     {
@@ -1075,26 +1087,37 @@ public class GameManager : MonoBehaviour
         {
             return;
         }
-
-        if (matrixHandler.GetBreakableBreakableBox(pieceHandler.currentPoint) != null)
-        {
-            OnBreakable(matrixHandler.GetBreakableBreakableBox(pieceHandler.currentPoint));
-            pieceHandler.BlaBla();
-        }
             
-
         if (matrixHandler.ChangesAvailable > 0 && matrixHandler.IsPieceChangeAvailable(index) && (int)pieceHandler.CurrentPiece.pieceType != index)
         {
+            //disable movement while changing piece
+            moveEnabled = false;
+
+            //update changes left
             arrowHandler.ChangeArrowsAvailability(false, pieceHandler.CurrentPiece.movementType);
             pieceHandler.ChangeCustomPiece((CustomPiece.PiecesTypeEnum)index, true);
             arrowHandler.ChangeArrowsAvailability(true, pieceHandler.CurrentPiece.movementType);
             matrixHandler.RecalculateChanges(1);
             txtChanges.SetText(matrixHandler.ChangesAvailable.ToString());
 
+            //check if on breakable box
+            if (matrixHandler.GetBreakableBox(pieceHandler.CurrentPiece.currentPoint) != null)
+            {
+                OnBreakable(matrixHandler.GetBreakableBox(pieceHandler.CurrentPiece.currentPoint));
+                pieceHandler.MakePieceFallThrough();
+                GlobalSingleton.GetInstance().SetTimeAsync(150, (obj) =>
+                {
+                    GameOver("- Woops this should not happened! -");
+                });
+                return;
+            }
+
             //restore movement if damaged (outside and inside)
-            RestorePosition();
+            pieceHandler.RestoreToCurrentPos();
             //check next moves
             CheckNextMoves();
+            //enable movement
+            moveEnabled = true;
         }
         else if (matrixHandler.ChangesAvailable == 0)
         {
