@@ -6,11 +6,12 @@ using UnityEngine;
 public class PieceHandler : MonoBehaviour
 {
     public GameObject CurrentPieceGameObj { get { return currentPieceGameObj; } }
+    public GameObject CurrentPieceGameObjChild { get { return currentPieceGameObjChild; } }
     public CustomPiece CurrentPiece { get { return currentPiece; } }
     public Step LastStep { get { return lastStep; } }
     public GameManager gameManager;
-    [SerializeField]
-    public Point currentPoint;
+    //[SerializeField]
+    //public Point currentPoint;
 
     private GameObject currentPieceGameObj;
     private GameObject currentPieceGameObjChild;
@@ -23,9 +24,9 @@ public class PieceHandler : MonoBehaviour
     private Dictionary<CustomPiece.MovementTypeEnum, Step> movementVectorDictionary;
     private Dictionary<CustomPiece.PiecesTypeEnum, CustomPiece> customPiecesDictionary;
 
+    private int accuracy = Constants.ACCURECY_FRONT_CAMERA;
     private int stepsToMove;
     private Step lastStep = new Step();
-    private int accuracy = 10;
 
     private Delegates.ObjectDelegate movementFinishedDelegate;
 
@@ -103,7 +104,7 @@ public class PieceHandler : MonoBehaviour
         {
             return;
         }
-        currentPoint = currentPiece.currentPoint;
+        //currentPoint = currentPiece.currentPoint;
         if (stepsToMove > 0)
         {
             if (lastStep.Split)
@@ -195,13 +196,11 @@ public class PieceHandler : MonoBehaviour
         return false;
     }
 
-
-
-    public void BlaBla() {
+    public void MakePieceFallThrough()
+    {
         currentPieceGameObjChildRB.useGravity = true;
         currentPieceGameObjChildBCs[(int)currentPiece.pieceType].isTrigger = true;
     }
-
 
     public void MakeMovement(CustomPiece.MovementTypeEnum movement, int n, Delegates.ObjectDelegate objDelegate)
     {
@@ -214,6 +213,12 @@ public class PieceHandler : MonoBehaviour
 
         GlobalSingleton.GetInstance().SetTimeAsync(50, (o) =>
         {
+     
+            //check accuracy
+            accuracy = (gameManager.IsFrontCamera() ? Constants.ACCURECY_FRONT_CAMERA
+            : Constants.ACCURECY_TOP_CAMERA);
+           
+
             lastStep = movementVectorDictionary[movement];
             stepsToMove = (n * accuracy);
             movementFinishedDelegate = objDelegate;
@@ -302,20 +307,36 @@ public class PieceHandler : MonoBehaviour
             Point backwardPoint = movementVectorDictionary[CustomPiece.MovementTypeEnum.MOVEMENT_BACKWARD].Point;
             Point rightPoint = movementVectorDictionary[CustomPiece.MovementTypeEnum.MOVEMENT_RIGHT].Point;
             bishopBlockPoints[0] = new Point(blockPoint.i + backwardPoint.i, blockPoint.j + backwardPoint.j);
-            bishopBlockPoints[1] = new Point(blockPoint.i + rightPoint.i, currentPoint.j + rightPoint.j);
+            bishopBlockPoints[1] = new Point(blockPoint.i + rightPoint.i, CurrentPiece.currentPoint.j + rightPoint.j);
         }
 
         return bishopBlockPoints;
     }
 
+    public void RestoreToCurrentPos()
+    {
+        Vector3 pos = new Vector3(
+            gameManager.GetMatrixHandler().MatrixOfCubes[CurrentPiece.currentPoint.i, CurrentPiece.currentPoint.j].transform.position.x,
+            1f,
+             gameManager.GetMatrixHandler().MatrixOfCubes[CurrentPiece.currentPoint.i, CurrentPiece.currentPoint.j].transform.position.z);
 
-    public void RestoreToPos(Point p, Vector3 position)
+        RestoreToPos(CurrentPiece.currentPoint, pos, true);
+    }
+
+    public void RestoreToPos(Point p, Vector3 position, bool keepChildYPos)
     {
         currentPiece.currentPoint = p;
         currentPieceGameObj.transform.position = new Vector3(position.x, 1f, position.z);
         currentPieceGameObj.transform.localRotation = Quaternion.identity;
         currentPieceGameObjChild.transform.localRotation = Quaternion.identity;
-        currentPieceGameObjChild.transform.localPosition = new Vector3(0f, currentPieceGameObj.transform.GetChild(0).transform.localPosition.y, 0f);
+
+        Vector3 childPosInParent = Vector3.zero;
+        float currentChildYPos = currentPieceGameObj.transform.GetChild(0).transform.localPosition.y;
+        if (keepChildYPos && currentChildYPos<=1f && currentChildYPos>= 0)
+        {
+            childPosInParent = new Vector3(0f, currentChildYPos, 0f);
+        }
+        currentPieceGameObjChild.transform.localPosition = childPosInParent; 
     }
 
     public void DestroyPiece()

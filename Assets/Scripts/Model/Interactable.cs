@@ -17,8 +17,10 @@ public class Interactable : MonoBehaviour
 
     private int stepsToMove;
     public Vector3 lastDirection = new Vector3(0, 0, 0);
-    private int accuracy = 10;
+    private int accuracy = Constants.ACCURECY_FRONT_CAMERA;
     private bool goDown;
+
+    private Point destinationPoint;
 
     // Start is called before the first frame update
     void Start()
@@ -103,7 +105,12 @@ public class Interactable : MonoBehaviour
                     {
                         HandleEnabler();
                         break;
-                    } 
+                    }
+                case InteractableType.BREAKABLE:
+                    {
+                        HandleBreakable(true);
+                        break;
+                    }
             }
         }
     }
@@ -116,7 +123,7 @@ public class Interactable : MonoBehaviour
             {
                     case InteractableType.BREAKABLE:
                     {
-                        HandleBreakable();
+                        HandleBreakable(false);
                         break;
                     }
             }
@@ -174,8 +181,8 @@ public class Interactable : MonoBehaviour
 
 
             //check if the block with piece interact is the target one
-            if (block.oldPoint.i!=gameManager.GetPieceHandler().currentPoint.i
-                || block.oldPoint.j != gameManager.GetPieceHandler().currentPoint.j)
+            if (block.oldPoint.i!=gameManager.GetPieceHandler().CurrentPiece.currentPoint.i
+                || block.oldPoint.j != gameManager.GetPieceHandler().CurrentPiece.currentPoint.j)
             {
                 collideOrTrigger = false;
                 return;
@@ -189,6 +196,10 @@ public class Interactable : MonoBehaviour
                 goDown = !gameManager.GetMatrixHandler().CheckIfCanStep(false, gameManager.GetPieceHandler().GetPoint(gameManager.GetPieceHandler().LastStep.Movement, 1));
                 lastDirection = gameManager.GetPieceHandler().LastStep.Position;
                 block.oldPoint = newPoint;
+
+                //check accuracy
+                accuracy = (gameManager.IsFrontCamera() ? Constants.ACCURECY_FRONT_CAMERA
+                : Constants.ACCURECY_TOP_CAMERA);
                 stepsToMove += accuracy;
             }
             else //block stays same position
@@ -237,6 +248,17 @@ public class Interactable : MonoBehaviour
         {
             collideOrTrigger = true;
 
+            //Get object
+            Enabler enabler = (Enabler)receivedObject;
+
+            //check if the block with piece interact is the target one
+            if (enabler.enablerPoint.i != gameManager.GetPieceHandler().CurrentPiece.currentPoint.i
+                || enabler.enablerPoint.j != gameManager.GetPieceHandler().CurrentPiece.currentPoint.j)
+            {
+                collideOrTrigger = false;
+                return;
+            }
+
             //make sound
             if (PlayerPrefs.GetInt(Constants.KEY_SOUND) == 1)
             {
@@ -244,7 +266,7 @@ public class Interactable : MonoBehaviour
                 audio.Play();
             }
 
-            Enabler enabler = (Enabler)receivedObject;
+            
 
             //change enabler color
             Color enablerColor = ((enabler.enablerPoint.i + enabler.enablerPoint.j) % 2 == 0 ? Constants.MATRIX_BOX_BLACK_COLOR : Constants.MATRIX_BOX_WHITE_COLOR);
@@ -256,21 +278,26 @@ public class Interactable : MonoBehaviour
         }
     }
 
-    private void HandleBreakable()
+    private void HandleBreakable(bool isFromEnterTrigger)
     {
-        if (!collideOrTrigger)
+        if (isFromEnterTrigger)
+        {
+            destinationPoint = new Point(gameManager.GetPieceHandler().CurrentPiece.currentPoint.i,
+                 gameManager.GetPieceHandler().CurrentPiece.currentPoint.j);
+        }
+        else if (!collideOrTrigger)
         {
             collideOrTrigger = true;
 
             Breakable breakable = (Breakable)receivedObject;
 
             //check if the block with piece interact is the target one
-          /*  if (breakable.point.i != gameManager.GetPieceHandler().currentPoint.i
-                || breakable.point.j != gameManager.GetPieceHandler().currentPoint.j)
+            if (breakable.point.i != destinationPoint.i
+                || breakable.point.j != destinationPoint.j)
             {
                 collideOrTrigger = false;
                 return;
-            }*/
+            }
 
             //make sound
             if (PlayerPrefs.GetInt(Constants.KEY_SOUND) == 1)

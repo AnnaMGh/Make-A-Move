@@ -54,6 +54,10 @@ public class Constants
     public static int RAM_MEDIUM = 3000; // in megabytes
     public static int RAM_LOW_ACCEPTED = 2500; // in megabytes
 
+    //movement accuracy
+    public const int ACCURECY_FRONT_CAMERA = 9;
+    public const int ACCURECY_TOP_CAMERA = 10;
+
     //COLORS
     public static Color DEFAULT_ALERT_BG_COLOR = new Color(0.6f, 0.6f, 0.6f, 0.6f);
     public static Color DEFAULT_ALERT_TXT_COLOR = new Color(1f, 1f, 1f, 1f);

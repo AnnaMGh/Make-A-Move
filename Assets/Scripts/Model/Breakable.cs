@@ -29,7 +29,7 @@ public class Breakable
     public void ChangeDesign()
     {
         //change color
-        enablerRenderer.material.color = color;
+      //  enablerRenderer.material.color = color;
     }
 
     public bool IsBroken()

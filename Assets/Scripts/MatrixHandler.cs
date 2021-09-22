@@ -116,23 +116,29 @@ public class MatrixHandler : MonoBehaviour
 
     public bool IsOnBreakableBox(Point point) {
 
-        foreach (Breakable b in breakableArray)
+        if (breakableArray != null)
         {
-            if (b.point.i == point.i && b.point.j==point.j) {
-                return true;
+            foreach (Breakable b in breakableArray)
+            {
+                if (b.point.i == point.i && b.point.j == point.j)
+                {
+                    return true;
+                }
             }
         }
         return false;
     }
 
-    public Breakable GetBreakableBreakableBox(Point point)
+    public Breakable GetBreakableBox(Point point)
     {
-
-        foreach (Breakable b in breakableArray)
+        if (breakableArray != null)
         {
-            if (b.point.i == point.i && b.point.j == point.j)
+            foreach (Breakable b in breakableArray)
             {
-                return b;
+                if (b.point.i == point.i && b.point.j == point.j)
+                {
+                    return b;
+                }
             }
         }
         return null;
@@ -280,15 +286,15 @@ public class MatrixHandler : MonoBehaviour
 
     public void ChangeBreakableStatus(int index, Point point)
     {
-
-        matrixOfCubes[point.i,point.j].SetBreakableMaterial(crackMaterial[index]);
-        matrixOfCubes[point.i, point.j].SetCubeType(Cube.CubeType.TYPE_BREAKABLE);
-
         if (index == 0)
         {
             matrixOfCubes[point.i, point.j].isBreaked = true;
             matrixOfCubes[point.i, point.j].enabledStatus = false;
             matrixOfCubes[point.i, point.j].SetCubeType(Cube.CubeType.TYPE_UNAVAILABLE);
+        }
+        else {
+            matrixOfCubes[point.i, point.j].SetBreakableMaterial(crackMaterial[index-1]);
+            matrixOfCubes[point.i, point.j].SetCubeType(Cube.CubeType.TYPE_BREAKABLE);
         }
     }
 
@@ -366,9 +372,10 @@ public class MatrixHandler : MonoBehaviour
     {
         if (enablerArray != null)
         {
-            foreach (Enabler enabler in enablerArray)
+            foreach (Enabler obj in enablerArray)
             {
-                Destroy(enabler.GameObj);
+                RestoreEvenColorCubes(obj.cubePoint);
+                Destroy(obj.GameObj);
             }
         }
         enablerArray = null;
