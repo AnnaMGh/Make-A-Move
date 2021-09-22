@@ -374,7 +374,7 @@ public class MatrixHandler : MonoBehaviour
         {
             foreach (Enabler obj in enablerArray)
             {
-                RestoreEvenColorCubes(obj.enablerPoint);
+                RestoreEvenColorCubes(obj.cubePoint);
                 Destroy(obj.GameObj);
             }
         }

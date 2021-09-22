@@ -164,7 +164,7 @@ public class GameManager : MonoBehaviour
         InitiateUI();
 
         //todo test tutorial
-        //PlayerPrefs.SetInt(Constants.KEY_TUTORIAL_STATE, 21);
+        PlayerPrefs.SetInt(Constants.KEY_TUTORIAL_STATE, 21);
 
     }
 
@@ -291,6 +291,8 @@ public class GameManager : MonoBehaviour
             main.maxParticles = 0;
             particles.gameObject.SetActive(false);
         }
+
+        particles.gameObject.SetActive(false);
     }
 
     private void InitiateUI()
@@ -415,7 +417,8 @@ public class GameManager : MonoBehaviour
         else if (matrixHandler.CurrentLevel == 2)
         {
             moveEnabled = false;
-            tutorialHandler.ShowTutorial(8, cameraMain.WorldToScreenPoint(matrixHandler.NewPieceAvailable.GameObj.transform.position - new Vector3(0f, 0f, 0f)), Vector3.right, c_s_y, "Take the Rook, to enable a new chess piece", false, (objTutorial1) =>
+            tutorialHandler.ShowTutorial(8, cameraMain.WorldToScreenPoint(matrixHandler.NewPieceAvailable.GameObj.transform.position - new Vector3(0f, 0f, 0f)), 
+                Vector3.right, c_s_y, "Take the Rook, to enable a new chess piece", false, (objTutorial1) =>
             {
                 moveEnabled = true;
                 //exit
@@ -424,7 +427,8 @@ public class GameManager : MonoBehaviour
         else if (matrixHandler.CurrentLevel == 4)
         {
             moveEnabled = false;
-            tutorialHandler.ShowTutorial(11, cameraMain.WorldToScreenPoint(matrixHandler.BlockArray[0].GameObj.transform.position - new Vector3(0f, 0f, 0f)), Vector3.right, c_s_y, "Push the block to take the shortcut. Careful it will cost you extra moves", false, (objTutorial1) =>
+            tutorialHandler.ShowTutorial(11, cameraMain.WorldToScreenPoint(matrixHandler.BlockArray[0].GameObj.transform.position - new Vector3(0f, 0f, 0f)),
+                Vector3.right, c_s_y, "Push the block to take the shortcut. Careful it will cost you extra moves", false, (objTutorial1) =>
             {
                 moveEnabled = true;
                 //exit
@@ -433,7 +437,8 @@ public class GameManager : MonoBehaviour
         else if (matrixHandler.CurrentLevel == 6)
         {
             moveEnabled = false;
-            tutorialHandler.ShowTutorial(12, cameraMain.WorldToScreenPoint(matrixHandler.BlockArray[5].GameObj.transform.position - new Vector3(0f, 0f, -0.5f)), Vector3.right, c_s_y, "You can't push more than 1 block simultaneously", false, (objTutorial1) =>
+            tutorialHandler.ShowTutorial(12, cameraMain.WorldToScreenPoint(matrixHandler.BlockArray[5].GameObj.transform.position - new Vector3(0f, 0f, -0.5f)), 
+                Vector3.right, c_s_y, "You CAN'T push more than 1 block simultaneously", false, (objTutorial1) =>
             {
                 moveEnabled = true;
                 //exit
@@ -453,13 +458,11 @@ public class GameManager : MonoBehaviour
         } else if (matrixHandler.CurrentLevel == 34)
         {
             moveEnabled = false;
-            tutorialHandler.ShowTutorial(22, cameraMain.WorldToScreenPoint(matrixHandler.MatrixOfCubes[matrixHandler.BreakableArray[0].point.i, matrixHandler.BreakableArray[0].point.j].transform.position), Vector3.left, c_s_y, "CRACKED boxes are BREAKING when pieces are MOVED over it", true, (objTutorial15) =>
+            tutorialHandler.ShowTutorial(22, cameraMain.WorldToScreenPoint(matrixHandler.MatrixOfCubes[matrixHandler.BreakableArray[0].point.i, matrixHandler.BreakableArray[0].point.j].transform.position),
+                Vector3.left, c_s_y, "CRACKED boxes BREAK when pieces are MOVED or CHANGED over it", false, (objTutorial15) =>
             {
-                tutorialHandler.ShowTutorial(23, cameraMain.WorldToScreenPoint(matrixHandler.BreakableArray[0].GameObj.transform.position), Vector3.left, c_s_y, "CRACKED boxes are BREAKING when pieces are CHANGED over it", false, (objTutorial16) =>
-                {
                     moveEnabled = true;
                     //exit
-                });
             });
         }
 
@@ -615,6 +618,10 @@ public class GameManager : MonoBehaviour
             //make sound
             globalAudioHandler.PlaySound(GlobalAudioHandler.AudioType.GAME_OVER);
         });
+    }
+
+    public bool IsFrontCamera() {
+        return cameraMain == cameraFront;
     }
 
 

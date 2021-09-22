@@ -17,7 +17,7 @@ public class Interactable : MonoBehaviour
 
     private int stepsToMove;
     public Vector3 lastDirection = new Vector3(0, 0, 0);
-    private int accuracy = 10;
+    private int accuracy = Constants.ACCURECY_FRONT_CAMERA;
     private bool goDown;
 
     private Point destinationPoint;
@@ -196,6 +196,10 @@ public class Interactable : MonoBehaviour
                 goDown = !gameManager.GetMatrixHandler().CheckIfCanStep(false, gameManager.GetPieceHandler().GetPoint(gameManager.GetPieceHandler().LastStep.Movement, 1));
                 lastDirection = gameManager.GetPieceHandler().LastStep.Position;
                 block.oldPoint = newPoint;
+
+                //check accuracy
+                accuracy = (gameManager.IsFrontCamera() ? Constants.ACCURECY_FRONT_CAMERA
+                : Constants.ACCURECY_TOP_CAMERA);
                 stepsToMove += accuracy;
             }
             else //block stays same position
@@ -244,6 +248,17 @@ public class Interactable : MonoBehaviour
         {
             collideOrTrigger = true;
 
+            //Get object
+            Enabler enabler = (Enabler)receivedObject;
+
+            //check if the block with piece interact is the target one
+            if (enabler.enablerPoint.i != gameManager.GetPieceHandler().CurrentPiece.currentPoint.i
+                || enabler.enablerPoint.j != gameManager.GetPieceHandler().CurrentPiece.currentPoint.j)
+            {
+                collideOrTrigger = false;
+                return;
+            }
+
             //make sound
             if (PlayerPrefs.GetInt(Constants.KEY_SOUND) == 1)
             {
@@ -251,7 +266,7 @@ public class Interactable : MonoBehaviour
                 audio.Play();
             }
 
-            Enabler enabler = (Enabler)receivedObject;
+            
 
             //change enabler color
             Color enablerColor = ((enabler.enablerPoint.i + enabler.enablerPoint.j) % 2 == 0 ? Constants.MATRIX_BOX_BLACK_COLOR : Constants.MATRIX_BOX_WHITE_COLOR);

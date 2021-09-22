@@ -24,9 +24,9 @@ public class PieceHandler : MonoBehaviour
     private Dictionary<CustomPiece.MovementTypeEnum, Step> movementVectorDictionary;
     private Dictionary<CustomPiece.PiecesTypeEnum, CustomPiece> customPiecesDictionary;
 
+    private int accuracy = Constants.ACCURECY_FRONT_CAMERA;
     private int stepsToMove;
     private Step lastStep = new Step();
-    private int accuracy = 10;
 
     private Delegates.ObjectDelegate movementFinishedDelegate;
 
@@ -213,6 +213,12 @@ public class PieceHandler : MonoBehaviour
 
         GlobalSingleton.GetInstance().SetTimeAsync(50, (o) =>
         {
+     
+            //check accuracy
+            accuracy = (gameManager.IsFrontCamera() ? Constants.ACCURECY_FRONT_CAMERA
+            : Constants.ACCURECY_TOP_CAMERA);
+           
+
             lastStep = movementVectorDictionary[movement];
             stepsToMove = (n * accuracy);
             movementFinishedDelegate = objDelegate;
