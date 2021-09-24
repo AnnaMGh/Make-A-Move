@@ -11,13 +11,13 @@ GameObject:
   - component: {fileID: 2760168973071556301}
   - component: {fileID: 8604637291918144410}
   - component: {fileID: 4862937929623917724}
-  - component: {fileID: 1584879822833557657}
   - component: {fileID: 3834288998275043917}
   - component: {fileID: 4164280728297340662}
   - component: {fileID: 4699527894147068235}
   - component: {fileID: 4083681964163827594}
   - component: {fileID: 5780907640038364056}
   - component: {fileID: 8899978884245383528}
+  - component: {fileID: 1279732503665860855}
   - component: {fileID: 916982589445425685}
   - component: {fileID: 2201945357581309478}
   m_Layer: 2
@@ -90,20 +90,6 @@ MeshRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_AdditionalVertexStreams: {fileID: 0}
---- !u!64 &1584879822833557657
-MeshCollider:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1062226213143149274}
-  m_Material: {fileID: 0}
-  m_IsTrigger: 0
-  m_Enabled: 0
-  serializedVersion: 4
-  m_Convex: 1
-  m_CookingOptions: 30
-  m_Mesh: {fileID: -465546191678943184, guid: 85800ea7c2ad568408934f3def6bfa50, type: 3}
 --- !u!65 &3834288998275043917
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -182,6 +168,37 @@ BoxCollider:
   serializedVersion: 2
   m_Size: {x: 1.5327985, y: 3.3233485, z: 1.4042139}
   m_Center: {x: 0, y: 0.3818612, z: 0}
+--- !u!205 &1279732503665860855
+LODGroup:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1062226213143149274}
+  serializedVersion: 2
+  m_LocalReferencePoint: {x: 1.9115791, y: 7.4035416, z: 0.00541687}
+  m_Size: 215.38481
+  m_FadeMode: 0
+  m_AnimateCrossFading: 0
+  m_LastLODIsBillboard: 0
+  m_LODs:
+  - screenRelativeHeight: 0.25
+    fadeTransitionWidth: 0
+    renderers:
+    - renderer: {fileID: 0}
+  - screenRelativeHeight: 0.125
+    fadeTransitionWidth: 0
+    renderers:
+    - renderer: {fileID: 0}
+  - screenRelativeHeight: 0.0625
+    fadeTransitionWidth: 0
+    renderers:
+    - renderer: {fileID: 0}
+  - screenRelativeHeight: 0.01
+    fadeTransitionWidth: 0
+    renderers:
+    - renderer: {fileID: 0}
+  m_Enabled: 1
 --- !u!54 &916982589445425685
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -352,9 +369,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   gameManager: {fileID: 0}
-  currentPoint:
-    i: 0
-    j: 0
 --- !u!1 &8806293358287041742
 GameObject:
   m_ObjectHideFlags: 0

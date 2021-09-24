@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
+[System.Serializable]
 public class CustomPiece
 {
     //statics
@@ -24,6 +25,7 @@ public class CustomPiece
     public int limitedMoves; //limited
     public Point currentPoint;
     public Mesh mesh;
+    public LODGroup lodGroup;
     public Material materialWhite;
     public Material materialBlack;
     public AudioClip audio;
@@ -50,6 +52,7 @@ public class CustomPiece
         this.movementType = newPieceValues.movementType;
         this.limitedMoves = newPieceValues.limitedMoves;
         this.mesh = newPieceValues.mesh;
+        this.lodGroup = newPieceValues.lodGroup;
         this.materialWhite = newPieceValues.materialWhite;
         this.materialBlack = newPieceValues.materialBlack;
         this.audio = newPieceValues.audio;
@@ -63,6 +66,9 @@ public class CustomPiece
             movementType = new MovementTypeEnum[] { MovementTypeEnum.MOVEMENT_FORWARD };
             limitedMoves = 1; //limited
             mesh = Resources.Load<Mesh>("Meshes/" + pieceType.ToString());
+            lodGroup = Resources.Load<LODGroup>("Meshes/" + pieceType.ToString());
+            LOD[] lods = lodGroup.GetLODs();
+            Debug.Log("LODS: " + lods.ToString());
             materialWhite = Resources.Load<Material>("Materials/" + pieceType.ToString() + "_material_" + "white" ); 
             materialBlack = Resources.Load<Material>("Materials/" + pieceType.ToString() + "_material_" + "black");
             audio = Resources.Load<AudioClip>("Sounds/Pieces/" + pieceType.ToString());
