@@ -16,6 +16,7 @@ public class PieceHandler : MonoBehaviour
     private GameObject currentPieceGameObj;
     private GameObject currentPieceGameObjChild;
     private MeshFilter currentPieceGameObjChildMF;
+    private LODGroup currentPieceGameObjChildLOD;
     private MeshRenderer currentPieceGameObjChildMR;
     private Rigidbody currentPieceGameObjChildRB;
     private BoxCollider[] currentPieceGameObjChildBCs;
@@ -50,6 +51,7 @@ public class PieceHandler : MonoBehaviour
         currentPieceGameObjChild = currentPieceGameObj.transform.GetChild(0).gameObject;
         currentPieceGameObjChildMF = currentPieceGameObjChild.GetComponent<MeshFilter>();
         currentPieceGameObjChildMR = currentPieceGameObjChild.GetComponent<MeshRenderer>();
+        currentPieceGameObjChildLOD = currentPieceGameObjChild.GetComponent<LODGroup>();
         currentPieceGameObjChildRB = currentPieceGameObjChild.GetComponent<Rigidbody>();
         currentPieceGameObjChildBCs = currentPieceGameObjChild.GetComponents<BoxCollider>();
         currentPieceGameObjAudio = currentPieceGameObj.transform.GetChild(1).GetComponent<AudioSource>();
@@ -150,11 +152,41 @@ public class PieceHandler : MonoBehaviour
             currentPieceGameObjChildBCs[(int)currentPiece.pieceType].enabled = false;
         }
 
+        // Add 4 LOD levels
+        /* LOD[] lods = new LOD[4];
+         for (int i = 0; i < 4; i++)
+         {
+             PrimitiveType primType = PrimitiveType.Cube;
+             switch (i)
+             {
+                 case 1:
+                     primType = PrimitiveType.Capsule;
+                     break;
+                 case 2:
+                     primType = PrimitiveType.Sphere;
+                     break;
+                 case 3:
+                     primType = PrimitiveType.Cylinder;
+                     break;
+             }
+             GameObject go = GameObject.CreatePrimitive(primType);
+             go.transform.parent = gameObject.transform;
+             Renderer[] renderers = new Renderer[1];
+             renderers[0] = go.GetComponent<Renderer>();
+             lods[i] = new LOD(1.0F / (i + 1), renderers);
+         }
+         currentPieceGameObjChild.GetComponent<LODGroup>().SetLODs(lods);*/
+
+
         //change piece
         currentPiece.ChangePieceByType(type);
 
         //change mesh   
         currentPieceGameObjChildMF.sharedMesh = currentPiece.mesh;
+
+        //change lod (level of detail)
+       // currentPieceGameObjChildLOD.SetLODs(currentPiece.lodGroup.GetLODs());
+       // currentPieceGameObjChildLOD.RecalculateBounds();
 
         //change material
         currentPieceGameObjChildMR.material = (PlayerPrefs.GetInt(Constants.KEY_COLOR) == 0 ? currentPiece.materialWhite : currentPiece.materialBlack);
