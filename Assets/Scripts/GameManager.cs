@@ -70,8 +70,9 @@ public class GameManager : MonoBehaviour
     private Vector3 orbitDistance = Vector3.zero;
     private Vector3 orbitPosition = Vector3.zero;
 
-
+    //test GUI variables
     //string vvvalue = "not set";
+    //string crash = "Crash";
 
     Dictionary<Cube, CustomPiece.MovementTypeEnum> possibleNextMoves = new Dictionary<Cube, CustomPiece.MovementTypeEnum>();
     Dictionary<Block, CustomPiece.MovementTypeEnum> possibleNextBlocks = new Dictionary<Block, CustomPiece.MovementTypeEnum>();
@@ -83,6 +84,20 @@ public class GameManager : MonoBehaviour
     private void OnGUI()
     {
         //GUI.Label(new Rect(100f, 100f, 100f, 100f), vvvalue);
+
+        /*if (GUI.Button(new Rect(250, 250, 100, 100), crash))
+        {
+            if (FirebaseSingleton.GetInstance().areDependencesChecked)
+            {
+                crash = "CRASH";
+                FirebaseSingleton.GetInstance().CrashApp();
+            }
+            else
+            {
+                crash = "NO CRASH";
+                StartCoroutine(FirebaseSingleton.GetInstance().ICheckFirebaseDependences((obj1) => { }));
+            }
+        }*/
     }
 
 
@@ -164,7 +179,7 @@ public class GameManager : MonoBehaviour
         InitiateUI();
 
         //todo test tutorial
-        PlayerPrefs.SetInt(Constants.KEY_TUTORIAL_STATE, 21);
+        //PlayerPrefs.SetInt(Constants.KEY_TUTORIAL_STATE, 21);
 
     }
 
@@ -183,7 +198,8 @@ public class GameManager : MonoBehaviour
                 if ((Input.touchCount > 0 && Input.GetTouch(0).phase == TouchPhase.Ended))
                 {
                     //android
-                    MoveToTouchedCubePosition(Camera.main.ScreenPointToRay(Input.GetTouch(0).position));
+                    MoveToTouchedCubePosition(Camera.main.ScreenPointToRay(
+                        Input.GetTouch(0).position));
                 }
                 else if (Input.GetMouseButton(0))
                 {
@@ -417,7 +433,7 @@ public class GameManager : MonoBehaviour
         else if (matrixHandler.CurrentLevel == 2)
         {
             moveEnabled = false;
-            tutorialHandler.ShowTutorial(8, cameraMain.WorldToScreenPoint(matrixHandler.NewPieceAvailable.GameObj.transform.position - new Vector3(0f, 0f, 0f)), 
+            tutorialHandler.ShowTutorial(8, cameraMain.WorldToScreenPoint(matrixHandler.NewPieceAvailable.GameObj.transform.position - new Vector3(0f, 0f, 0f)),
                 Vector3.right, c_s_y, "Take the Rook, to enable a new chess piece", false, (objTutorial1) =>
             {
                 moveEnabled = true;
@@ -437,7 +453,7 @@ public class GameManager : MonoBehaviour
         else if (matrixHandler.CurrentLevel == 6)
         {
             moveEnabled = false;
-            tutorialHandler.ShowTutorial(12, cameraMain.WorldToScreenPoint(matrixHandler.BlockArray[5].GameObj.transform.position - new Vector3(0f, 0f, -0.5f)), 
+            tutorialHandler.ShowTutorial(12, cameraMain.WorldToScreenPoint(matrixHandler.BlockArray[5].GameObj.transform.position - new Vector3(0f, 0f, -0.5f)),
                 Vector3.right, c_s_y, "You CAN'T push more than 1 block simultaneously", false, (objTutorial1) =>
             {
                 moveEnabled = true;
@@ -455,14 +471,15 @@ public class GameManager : MonoBehaviour
                     //exit
                 });
             });
-        } else if (matrixHandler.CurrentLevel == 34)
+        }
+        else if (matrixHandler.CurrentLevel == 34)
         {
             moveEnabled = false;
             tutorialHandler.ShowTutorial(22, cameraMain.WorldToScreenPoint(matrixHandler.MatrixOfCubes[matrixHandler.BreakableArray[0].point.i, matrixHandler.BreakableArray[0].point.j].transform.position),
                 Vector3.left, c_s_y, "CRACKED boxes BREAK when pieces are MOVED or CHANGED over it", false, (objTutorial15) =>
             {
-                    moveEnabled = true;
-                    //exit
+                moveEnabled = true;
+                //exit
             });
         }
 
@@ -477,7 +494,7 @@ public class GameManager : MonoBehaviour
         FirebaseSingleton.GetInstance().SendEvents(Constants.EVENT_LEVEL_UP, eventParams);
     }
 
-  
+
 
     private void ChangeStars(int level)
     {
@@ -559,7 +576,7 @@ public class GameManager : MonoBehaviour
                     canMove &= !GetMatrixHandler().IsBlockOnPoint(pp[0]);
                     canMove &= !GetMatrixHandler().IsBlockOnPoint(pp[1]);
                 }
-                else 
+                else
                 {
                     canMove = GetMatrixHandler().CheckIfCanStep(true, GetPieceHandler()
                     .GetPointByPointDirection(direction, 2));
@@ -620,7 +637,8 @@ public class GameManager : MonoBehaviour
         });
     }
 
-    public bool IsFrontCamera() {
+    public bool IsFrontCamera()
+    {
         return cameraMain == cameraFront;
     }
 
@@ -704,7 +722,7 @@ public class GameManager : MonoBehaviour
         {
             pieceHandler.MakeMovement((CustomPiece.MovementTypeEnum)sendPieceBackMovement, 0, (obj) =>
             {
-                pieceHandler.RestoreToPos(pieceHandler.CurrentPiece.currentPoint, 
+                pieceHandler.RestoreToPos(pieceHandler.CurrentPiece.currentPoint,
                     matrixHandler.MatrixOfCubes[pieceHandler.CurrentPiece.currentPoint.i, pieceHandler.CurrentPiece.currentPoint.j].transform.position,
                     true);
                 txtMoves.SetText(matrixHandler.MovesAvailable.ToString());
@@ -739,7 +757,7 @@ public class GameManager : MonoBehaviour
                 }
 
             }
-            pieceHandler.RestoreToPos(pieceHandler.CurrentPiece.currentPoint, 
+            pieceHandler.RestoreToPos(pieceHandler.CurrentPiece.currentPoint,
                 matrixHandler.MatrixOfCubes[pieceHandler.CurrentPiece.currentPoint.i, pieceHandler.CurrentPiece.currentPoint.j].transform.position,
                 true);
         }
@@ -1094,7 +1112,7 @@ public class GameManager : MonoBehaviour
         {
             return;
         }
-            
+
         if (matrixHandler.ChangesAvailable > 0 && matrixHandler.IsPieceChangeAvailable(index) && (int)pieceHandler.CurrentPiece.pieceType != index)
         {
             //disable movement while changing piece
