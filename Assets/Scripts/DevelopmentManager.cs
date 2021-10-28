@@ -28,6 +28,7 @@ public class DevelopmentManager : MonoBehaviour
     public GameObject panelDev;
     public MatrixHandler matrixHandler;
     public Button save;
+
     [Header("1. Basic")]
     public GameObject btnBasic;
     public GameObject panelBasic;
@@ -41,6 +42,7 @@ public class DevelopmentManager : MonoBehaviour
     public TMP_InputField impFinishPointI;
     public TMP_InputField impFinishPointJ;
     public TMP_InputField impPieces;
+
     [Header("2. Extras")]
     public GameObject btnExtras;
     public GameObject panelExtras;
@@ -57,10 +59,12 @@ public class DevelopmentManager : MonoBehaviour
     public GameObject contentBreakable;
     public List<BreakableDev> breakableDevList;
 
-
     [Header("3. New")]
     public GameObject btnNew;
     public GameObject panelNew;
+    public TMP_InputField impPowerupNr;
+    public GameObject contentPowerup;
+    public List<PowerupDev> powerupDevList;
 
     [Header(" - OTHERS - ")]
     public AlertHandler alertHandler;
@@ -81,6 +85,7 @@ public class DevelopmentManager : MonoBehaviour
     private GameObject prefabBlock;
     private GameObject prefabEnabler;
     private GameObject prefabBreakable;
+    private GameObject prefabPowerup;
     private TextAsset[] textAssets;
     private int currentLevel;
     private Level level;
@@ -123,6 +128,7 @@ public class DevelopmentManager : MonoBehaviour
         prefabBlock = Resources.Load<GameObject>("Prefabs/BlockDev");
         prefabEnabler = Resources.Load<GameObject>("Prefabs/EnablerDev");
         prefabBreakable = Resources.Load<GameObject>("Prefabs/BreakableDev");
+        prefabPowerup = Resources.Load<GameObject>("Prefabs/PowerupDev");
 
         //set sprites
         spriteCameraFront = Resources.Load<Sprite>("Images/Icons/Camera_01");
@@ -272,6 +278,28 @@ public class DevelopmentManager : MonoBehaviour
                 breakableDev.SetData(i + 1, -1, matrixHandler.MatrixOfCubes.GetLength(0), matrixHandler.BreakableArray[i]);
                 breakableDevList.Add(breakableDev);
             }
+        } 
+        
+        //powerups
+        if (powerupDevList != null && powerupDevList.Count > 0)
+        {
+            int count = powerupDevList.Count;
+            for (int i = count - 1; i >= 0; i--)
+            {
+                Destroy(powerupDevList[i].gameObject);
+                powerupDevList.Remove(powerupDevList[i]);
+            }
+        }
+        impPowerupNr.text = (matrixHandler.PowerupArray == null ? "0" : matrixHandler.PowerupArray.Length.ToString());
+        powerupDevList = new List<PowerupDev>();
+        if (matrixHandler.PowerupArray != null && matrixHandler.PowerupArray.Length > 0)
+        {
+            for (int i = 0; i < matrixHandler.PowerupArray.Length; i++)
+            {
+                PowerupDev powerupDev = Instantiate(prefabPowerup, contentPowerup.transform).GetComponent<PowerupDev>();
+                powerupDev.SetData(i + 1, -1, matrixHandler.MatrixOfCubes.GetLength(0), matrixHandler.PowerupArray[i]);
+                powerupDevList.Add(powerupDev);
+            }
         }
         initialize = false;
     }
@@ -399,6 +427,19 @@ public class DevelopmentManager : MonoBehaviour
             for (int i = 0; i < breakableDevList.Count; i++)
             {
                 string check = breakableDevList[i].CheckData(i);
+                if (check != null)
+                {
+                    return check;
+                }
+            }
+        }
+        
+        //powerup
+        if (powerupDevList != null && powerupDevList.Count > 0)
+        {
+            for (int i = 0; i < powerupDevList.Count; i++)
+            {
+                string check = powerupDevList[i].CheckData(i);
                 if (check != null)
                 {
                     return check;
@@ -564,7 +605,7 @@ public class DevelopmentManager : MonoBehaviour
         }
 
     }
-
+    
     public void OnChangeStateOfBreakableNr()
     {
         if (!initialize)
@@ -595,7 +636,37 @@ public class DevelopmentManager : MonoBehaviour
         }
 
     }
-  
+
+    public void OnChangeStateOfPowerupNr()
+    {
+        if (!initialize)
+        {
+            int count = powerupDevList.Count;
+            int difference = count - Int32.Parse(impPowerupNr.text);
+
+            if (difference > 0)
+            {
+                //need to remove
+                for (int i = count - 1; i > count - 1 - difference; i--)
+                {
+                    Destroy(powerupDevList[i].gameObject);
+                    powerupDevList.Remove(powerupDevList[i]);
+                }
+            }
+            else
+            {
+                //need to add
+                for (int i = 0; i < Math.Abs(difference); i++)
+                {
+                    PowerupDev powerupDev = Instantiate(prefabPowerup, contentPowerup.transform).GetComponent<PowerupDev>();
+                    powerupDev.SetData(powerupDevList.Count + 1, -1, matrixHandler.MatrixOfCubes.GetLength(0), new Powerup());
+                    powerupDevList.Add(powerupDev);
+                }
+            }
+        }
+
+    }
+
 
     public void OnClickRefresh()
     {
@@ -693,6 +764,17 @@ public class DevelopmentManager : MonoBehaviour
             }
         }
         level.breakable = breakableCubes.ToArray();
+        
+        //powerup 
+        List<Powerup> powerups = new List<Powerup>();
+        if (powerupDevList != null && powerupDevList.Count > 0)
+        {
+            for (int i = 0; i < powerupDevList.Count; i++)
+            {
+                powerups.Add(powerupDevList[i].GetObject());
+            }
+        }
+        level.powerup = powerups.ToArray();
 
 
         matrixHandler.MatrixDesignLevel(level);

@@ -1,0 +1,1 @@
+{"level":43,"maximumPoints":{"moves":0,"changes":0,"totalPoints":0},"goalPoints":{"moves":0,"changes":0,"totalPoints":0},"piecesAvailable":[0],"newPieceAvailable":{"enabled":false,"typePiece":0,"point":{"i":0,"j":0}},"startPoint":{"i":0,"j":0},"finishPoint":{"i":0,"j":1},"block":[],"enabler":[],"breakable":[],"powerup":[{"point":{"i":1,"j":1},"type":1}],"disabledPoints":[]}

@@ -706,12 +706,22 @@ public class GameManager : MonoBehaviour
         {
             moveEnabled = false;
             tutorialHandler.ShowTutorial(21, piecesHandler.GetObjectWorldPotionCentered(CustomPiece.PiecesTypeEnum.TYPE_QUEEN, canvas),
-                Vector3.right, c_s_y, "QUEEN piece has been enabled", false, (objTutorial18) =>
+                Vector3.right, c_s_y, "QUEEN piece has been enabled", false, (objTutorial21) =>
                 {
 
                     moveEnabled = true;
                     //exit
 
+                });
+        } 
+        else if (type == CustomPiece.PiecesTypeEnum.TYPE_KING)
+        {
+            moveEnabled = false;
+            tutorialHandler.ShowTutorial(23, piecesHandler.GetObjectWorldPotionCentered(CustomPiece.PiecesTypeEnum.TYPE_QUEEN, canvas),
+                Vector3.right, c_s_y, "KING piece has been enabled", false, (objTutorial23) =>
+                {
+                    moveEnabled = true;
+                    //exit
                 });
         }
     }

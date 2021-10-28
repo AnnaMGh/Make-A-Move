@@ -6,7 +6,7 @@ using UnityEngine.SceneManagement;
 
 public class Interactable : MonoBehaviour
 {
-    public enum InteractableType { NEW_PIECE_AVAILABLE, BLOCK, ENABLER, BREAKABLE, ENEMY }
+    public enum InteractableType { NEW_PIECE_AVAILABLE, BLOCK, ENABLER, BREAKABLE, POWERUP, ENEMY }
 
     public InteractableType interactableType;
 
@@ -75,6 +75,10 @@ public class Interactable : MonoBehaviour
 
                 }
             }
+        }
+        else if (interactableType == InteractableType.POWERUP)
+        {
+            this.transform.Rotate(Vector3.up, 50f * Time.deltaTime, Space.World);
         }
 
     }

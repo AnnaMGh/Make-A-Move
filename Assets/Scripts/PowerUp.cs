@@ -2,19 +2,27 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class PowerUp: MonoBehaviour
+[System.Serializable]
+public class Powerup
 {
-    private const float rotationSpeed = 50f;
+   public enum PowerupType {DOUBLE_FULL, STRONG, DIZZY}
 
-    // Start is called before the first frame update
-    void Start()
+    public GameObject GameObj { get { return gameObj; } }
+
+    public Point point;
+    public int type;
+    private GameObject gameObj;
+
+
+    public void SetGameObject(GameObject gameObj)
     {
-        
+        this.gameObj = gameObj;
     }
 
-    // Update is called once per frame
-    void Update()
+    public void ChangeGameObjectName(int nr)
     {
-        this.transform.Rotate(Vector3.up, rotationSpeed * Time.deltaTime, Space.World);
+        this.gameObj.name = Interactable.InteractableType.POWERUP.ToString() + "_" + nr;
     }
+
+
 }
