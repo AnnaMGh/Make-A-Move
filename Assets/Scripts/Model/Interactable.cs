@@ -115,6 +115,11 @@ public class Interactable : MonoBehaviour
                         HandleBreakable(true);
                         break;
                     }
+                case InteractableType.POWERUP:
+                    {
+                        HandlePowerups();
+                        break;
+                    }
             }
         }
     }
@@ -312,6 +317,29 @@ public class Interactable : MonoBehaviour
 
 
             gameManager.OnBreakable(breakable);
+
+            collideOrTrigger = false;
+        }
+    }
+    
+    private void HandlePowerups()
+    {
+        if (!collideOrTrigger)
+        {
+            collideOrTrigger = true;
+
+            Powerup powerup = (Powerup)receivedObject;
+
+
+            //make sound
+            if (PlayerPrefs.GetInt(Constants.KEY_SOUND) == 1)
+            {
+                AudioSource audio = this.gameObject.GetComponent<AudioSource>();
+                audio.Play();
+            }
+
+            
+            gameManager.OnPowerup(powerup);
 
             collideOrTrigger = false;
         }

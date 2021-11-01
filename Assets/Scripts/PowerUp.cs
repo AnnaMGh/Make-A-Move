@@ -5,7 +5,7 @@ using UnityEngine;
 [System.Serializable]
 public class Powerup
 {
-   public enum PowerupType {DOUBLE_FULL, STRONG, DIZZY}
+    public enum PowerupType {NONE, DOUBLE_FULL, STRONG, DIZZY}
 
     public GameObject GameObj { get { return gameObj; } }
 

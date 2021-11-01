@@ -20,6 +20,7 @@ public class PieceHandler : MonoBehaviour
     private MeshRenderer currentPieceGameObjChildMR;
     private Rigidbody currentPieceGameObjChildRB;
     private BoxCollider[] currentPieceGameObjChildBCs;
+    private Interactable currentPieceGameOjChildI;
     private AudioSource currentPieceGameObjAudio;
     private CustomPiece currentPiece;
     private Dictionary<CustomPiece.MovementTypeEnum, Step> movementVectorDictionary;
@@ -33,7 +34,7 @@ public class PieceHandler : MonoBehaviour
 
     private AudioClip movementClip;
 
-
+    
     // Start is called before the first frame update
     void Awake()
     {
@@ -54,6 +55,7 @@ public class PieceHandler : MonoBehaviour
         currentPieceGameObjChildLOD = currentPieceGameObjChild.GetComponent<LODGroup>();
         currentPieceGameObjChildRB = currentPieceGameObjChild.GetComponent<Rigidbody>();
         currentPieceGameObjChildBCs = currentPieceGameObjChild.GetComponents<BoxCollider>();
+        currentPieceGameOjChildI = currentPieceGameObjChild.GetComponent<Interactable>();
         currentPieceGameObjAudio = currentPieceGameObj.transform.GetChild(1).GetComponent<AudioSource>();
         currentPiece = new CustomPiece();
 
@@ -146,6 +148,15 @@ public class PieceHandler : MonoBehaviour
         currentPieceGameObjChildBCs[(int)currentPiece.pieceType].isTrigger = false;
         currentPieceGameObjChildRB.useGravity = true;
 
+        //if is interactible disable gravity
+        /*if (currentPieceGameOjChildI.enabled) {
+            GlobalSingleton.GetInstance().SetTimeAsync(100, (obj) =>
+            {
+              //  currentPieceGameObjChildRB.useGravity = false;
+              //  currentPieceGameObjChildBCs[(int)currentPiece.pieceType].isTrigger = true;
+            });
+        }*/
+
         //deactivate old collider
         if ((int)currentPiece.pieceType != (int)type)
         {
@@ -205,7 +216,7 @@ public class PieceHandler : MonoBehaviour
     public void ChangeNewAvailableCustomPiece(CustomPiece.PiecesTypeEnum type)
     {
         currentPieceGameObj.transform.localScale = new Vector3(0.5f, 0.5f, 0.5f);
-        currentPieceGameObjChild.GetComponent<Interactable>().enabled = true;
+        currentPieceGameOjChildI.enabled = true;
         ChangeCustomPiece(type, false);
     }
 

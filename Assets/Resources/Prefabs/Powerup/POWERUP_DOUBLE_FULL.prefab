@@ -12,6 +12,7 @@ GameObject:
   - component: {fileID: 4901954438502552995}
   - component: {fileID: 7197819688561729897}
   - component: {fileID: 8368356057513296162}
+  - component: {fileID: 8368356057903125250}
   m_Layer: 0
   m_Name: POWERUP_DOUBLE_FULL
   m_TagString: Untagged
@@ -96,3 +97,16 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   interactableType: 4
   lastDirection: {x: 0, y: 0, z: 0}
+--- !u!65 &8368356057903125250
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8710866228583284924}
+  m_Material: {fileID: 0}
+  m_IsTrigger: 1
+  m_Enabled: 1
+  serializedVersion: 2
+  m_Size: {x: 0.3115219, y: 0.5750469, z: 0.12025672}
+  m_Center: {x: -0.019525066, y: 0.018793836, z: -0.0000000037252903}

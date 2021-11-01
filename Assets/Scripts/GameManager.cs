@@ -37,6 +37,7 @@ public class GameManager : MonoBehaviour
     public TMP_Text txtMoves;
     public Image imgChanges;
     public TMP_Text txtChanges;
+    public GameObject[] powerupsIcons;
 
 
     [Header(" - OTHERS - ")]
@@ -70,6 +71,8 @@ public class GameManager : MonoBehaviour
     private Vector3 orbitDistance = Vector3.zero;
     private Vector3 orbitPosition = Vector3.zero;
 
+    private Powerup currentPowerup;
+
     //test GUI variables
     //string vvvalue = "not set";
     //string crash = "Crash";
@@ -80,6 +83,8 @@ public class GameManager : MonoBehaviour
     //public float w;
     //public float h;
     public float c_s_y;
+
+
 
     private void OnGUI()
     {
@@ -797,6 +802,28 @@ public class GameManager : MonoBehaviour
             breakable.GameObj.transform.GetChild(0).gameObject.SetActive(true);
             Destroy(breakable.GameObj, 1f);
         }
+    } 
+    
+    public void OnPowerup(Powerup powerup)
+    {
+        currentPowerup = powerup;
+
+        powerupsIcons[powerup.type].SetActive(true);
+
+        Destroy(powerup.GameObj);
+        /* powerup.SteppedOver();
+
+         GetMatrixHandler().ChangeBreakableStatus(
+                powerup.GetBreakableIndex(),
+                 new Point(powerup.point.i, powerup.point.j));
+
+         if (powerup.IsBroken())
+         {
+             powerup.GameObj.transform.GetChild(0).gameObject.SetActive(true);
+             Destroy(powerup.GameObj, 1f);
+         }*/
+
+
     }
 
     public void OnOrbit(Vector3 direction)

@@ -12,6 +12,7 @@ GameObject:
   - component: {fileID: 6469038872156806389}
   - component: {fileID: 9088919208905500735}
   - component: {fileID: 7630160431011329213}
+  - component: {fileID: 7630160430534779779}
   m_Layer: 0
   m_Name: POWERUP_DIZZY
   m_TagString: Untagged
@@ -96,3 +97,16 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   interactableType: 4
   lastDirection: {x: 0, y: 0, z: 0}
+--- !u!65 &7630160430534779779
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7287580307583584746}
+  m_Material: {fileID: 0}
+  m_IsTrigger: 1
+  m_Enabled: 1
+  serializedVersion: 2
+  m_Size: {x: 0.121487685, y: 0.51549846, z: 0.12148769}
+  m_Center: {x: -0.0025807135, y: 0.0309731, z: 0.010756619}
