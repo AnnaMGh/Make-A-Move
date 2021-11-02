@@ -806,24 +806,15 @@ public class GameManager : MonoBehaviour
     
     public void OnPowerup(Powerup powerup)
     {
+        //disable last powerup 
+        if (currentPowerup != null)
+        {
+            powerupsIcons[currentPowerup.type].SetActive(false);
+        }
+
         currentPowerup = powerup;
-
         powerupsIcons[powerup.type].SetActive(true);
-
         Destroy(powerup.GameObj);
-        /* powerup.SteppedOver();
-
-         GetMatrixHandler().ChangeBreakableStatus(
-                powerup.GetBreakableIndex(),
-                 new Point(powerup.point.i, powerup.point.j));
-
-         if (powerup.IsBroken())
-         {
-             powerup.GameObj.transform.GetChild(0).gameObject.SetActive(true);
-             Destroy(powerup.GameObj, 1f);
-         }*/
-
-
     }
 
     public void OnOrbit(Vector3 direction)
@@ -1062,6 +1053,7 @@ public class GameManager : MonoBehaviour
             cameraFront.gameObject.SetActive(false);
             cameraTop.gameObject.SetActive(true);
             cameraMain = cameraTop;
+            matrixHandler.ChangePowerupCamera(false);
         }
         else
         {
@@ -1069,6 +1061,7 @@ public class GameManager : MonoBehaviour
             cameraFront.gameObject.SetActive(true);
             cameraTop.gameObject.SetActive(false);
             cameraMain = cameraFront;
+            matrixHandler.ChangePowerupCamera(true);
         }
     }
 
@@ -1154,6 +1147,15 @@ public class GameManager : MonoBehaviour
         {
             //disable movement while changing piece
             moveEnabled = false;
+
+            //check if had powerup
+            if (currentPowerup != null
+                && currentPowerup.type == (int)Powerup.PowerupType.DOUBLE_FULL
+                && !pieceHandler.CurrentPiece.pieceType.Equals(CustomPiece.PiecesTypeEnum.TYPE_KING))
+            {
+                powerupsIcons[currentPowerup.type].SetActive(false);
+                currentPowerup = null;
+            }
 
             //update changes left
             arrowHandler.ChangeArrowsAvailability(false, pieceHandler.CurrentPiece.movementType);

@@ -78,7 +78,14 @@ public class Interactable : MonoBehaviour
         }
         else if (interactableType == InteractableType.POWERUP)
         {
-            this.transform.Rotate(Vector3.up, 50f * Time.deltaTime, Space.World);
+            if (gameManager != null && gameManager.IsFrontCamera())
+            {
+                this.transform.Rotate(Vector3.up, 50f * Time.deltaTime, Space.World);
+            }
+            else
+            {
+                this.transform.Rotate(Vector3.forward, 50f * Time.deltaTime, Space.World);
+            }
         }
 
     }

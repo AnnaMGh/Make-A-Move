@@ -308,6 +308,13 @@ public class MatrixHandler : MonoBehaviour
         matrixOfCubes[point.i, point.j].ChangeCubeStatus(status, color);
     }
 
+    public void ChangePowerupCamera(bool isCamera3D) {
+        foreach (Powerup power in powerupArray)
+        {
+            power.ChangeCameraView(isCamera3D);
+        }
+    }
+
     private void AddNewPieceAvailable()
     {
         GameObject prefabPiece = (GameObject)Resources.Load("Prefabs/" + CustomPiece.prefabName, typeof(GameObject));
@@ -354,7 +361,7 @@ public class MatrixHandler : MonoBehaviour
     {
         powerup.SetGameObject(Instantiate(prefabPowerup[powerup.type],
             matrixOfCubes[powerup.point.i, powerup.point.j].transform.position
-            + new Vector3(0f, 0.5f, 0f), Quaternion.identity));
+            + new Vector3(0f, 1f, 0f), Quaternion.identity));
         powerup.ChangeGameObjectName(nr);
         powerup.GameObj.GetComponent<Interactable>().SetObject(powerup);
     }
