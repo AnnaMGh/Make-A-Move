@@ -534,21 +534,38 @@ public class GameManager : MonoBehaviour
             Point point = pieceHandler.GetPoint(type, 1);
             if (matrixHandler.CheckIfCanStep(false, point))
             {
-                //add cube
-                possibleNextMoves.Add(matrixHandler.MatrixOfCubes[point.i, point.j], type);
-
-                //add block and check if cube remains in list
-                CheckNextBlocks(point, type);
-
-                //add change cube type to next move if remain in list after the block check
-                if (possibleNextMoves.ContainsKey(matrixHandler.MatrixOfCubes[point.i, point.j]))
+                CheckNextMovesOnPoint(point, type);
+            }
+            if (currentPowerup != null)
+            {
+                if (currentPowerup.type== (int)(Powerup.PowerupType.DOUBLE_FULL))
                 {
-                    matrixHandler.MatrixOfCubes[point.i, point.j].SetCubeType(Cube.CubeType.TYPE_NEXT);
+                    if (pieceHandler.CurrentPiece.pieceType.Equals(CustomPiece.PiecesTypeEnum.TYPE_PAWN)) {
+                        point = pieceHandler.GetPoint(type,2);
+                        if (matrixHandler.CheckIfCanStep(false, point))
+                        {
+                            CheckNextMovesOnPoint(point, type);
+                        }
+                    }
                 }
             }
         }
     }
 
+    private void CheckNextMovesOnPoint(Point point, CustomPiece.MovementTypeEnum type) {
+
+        //add cube
+        possibleNextMoves.Add(matrixHandler.MatrixOfCubes[point.i, point.j], type);
+
+        //add block and check if cube remains in list
+        CheckNextBlocks(point, type);
+
+        //add change cube type to next move if remain in list after the block check
+        if (possibleNextMoves.ContainsKey(matrixHandler.MatrixOfCubes[point.i, point.j]))
+        {
+            matrixHandler.MatrixOfCubes[point.i, point.j].SetCubeType(Cube.CubeType.TYPE_NEXT);
+        }
+    }
     private void CheckNextBlocks(Point point, CustomPiece.MovementTypeEnum type)
     {
         foreach (Block block in matrixHandler.BlockArray)
@@ -814,7 +831,7 @@ public class GameManager : MonoBehaviour
 
         currentPowerup = powerup;
         powerupsIcons[powerup.type].SetActive(true);
-        Destroy(powerup.GameObj);
+        matrixHandler.RemovePowerup(powerup);
     }
 
     public void OnOrbit(Vector3 direction)
@@ -1071,6 +1088,9 @@ public class GameManager : MonoBehaviour
         if (!moveEnabled || GlobalSingleton.GetInstance().gamePaused) { return; }
 
         CustomPiece.MovementTypeEnum mov = (CustomPiece.MovementTypeEnum)index;
+
+
+        //regular movement
         Point p = pieceHandler.GetPoint(mov, 1);
 
         if (matrixHandler.CheckIfCanStep(false, pieceHandler.GetPoint(mov, 1)))

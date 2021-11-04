@@ -412,8 +412,27 @@ public class MatrixHandler : MonoBehaviour
             }
         }
         breakableArray = null;
-    } 
-    
+    }
+
+    public void RemovePowerup(Powerup powerup)
+    {
+        if (powerupArray != null)
+        {
+            Powerup[] newPowerups = new Powerup[powerupArray.Length-1];
+            int j= 0;
+            for (int i=0; i< powerupArray.Length; i++)
+            {
+                if (!powerupArray[i].Equals(powerup))
+                {
+                    newPowerups[j] = powerupArray[i];
+                    j++;
+                }
+            }
+            powerupArray = newPowerups;   
+            Destroy(powerup.GameObj);  
+        }
+    }
+
     private void RemovePowerups()
     {
         if (powerupArray != null)
