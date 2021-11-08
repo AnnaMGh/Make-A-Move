@@ -72,6 +72,7 @@ public class GameManager : MonoBehaviour
     private Vector3 orbitPosition = Vector3.zero;
 
     private Powerup currentPowerup;
+    private bool justTookedPowerup;
 
     //test GUI variables
     //string vvvalue = "not set";
@@ -229,7 +230,7 @@ public class GameManager : MonoBehaviour
                 Cube cube = GetCubeFromName(raycastHit.collider.name);
                 if (possibleNextMoves.ContainsKey(cube))
                 {
-                    OnClickArrow((int)possibleNextMoves[cube]);
+                    OnClickArrow(cube.StepsToPoint, (int)possibleNextMoves[cube]);
                 }
             }
             else if (raycastHit.collider.name.Contains(Interactable.InteractableType.BLOCK.ToString()))
@@ -241,7 +242,7 @@ public class GameManager : MonoBehaviour
                 Cube cube = matrixHandler.MatrixOfCubes[block.oldPoint.i, block.oldPoint.j];
                 if (possibleNextMoves.ContainsKey(cube))
                 {
-                    OnClickArrow((int)possibleNextMoves[cube]);
+                    OnClickArrow(cube.StepsToPoint, (int)possibleNextMoves[cube]);
                 }
             }
         }
@@ -531,20 +532,23 @@ public class GameManager : MonoBehaviour
         //check new ones
         foreach (CustomPiece.MovementTypeEnum type in pieceHandler.CurrentPiece.movementType)
         {
-            Point point = pieceHandler.GetPoint(type, 1);
+            int stepsToPoint = 1;
+            Point point = pieceHandler.GetPoint(type, stepsToPoint);
             if (matrixHandler.CheckIfCanStep(false, point))
             {
-                CheckNextMovesOnPoint(point, type);
+                CheckNextMovesOnPoint(point, type, stepsToPoint);
             }
             if (currentPowerup != null)
             {
-                if (currentPowerup.type== (int)(Powerup.PowerupType.DOUBLE_FULL))
+                if (currentPowerup.type == (int)(Powerup.PowerupType.DOUBLE_FULL))
                 {
-                    if (pieceHandler.CurrentPiece.pieceType.Equals(CustomPiece.PiecesTypeEnum.TYPE_PAWN)) {
-                        point = pieceHandler.GetPoint(type,2);
+                    if (pieceHandler.CurrentPiece.pieceType.Equals(CustomPiece.PiecesTypeEnum.TYPE_PAWN))
+                    {
+                        stepsToPoint = 2;
+                        point = pieceHandler.GetPoint(type, stepsToPoint);
                         if (matrixHandler.CheckIfCanStep(false, point))
                         {
-                            CheckNextMovesOnPoint(point, type);
+                            CheckNextMovesOnPoint(point, type, stepsToPoint);
                         }
                     }
                 }
@@ -552,9 +556,11 @@ public class GameManager : MonoBehaviour
         }
     }
 
-    private void CheckNextMovesOnPoint(Point point, CustomPiece.MovementTypeEnum type) {
+    private void CheckNextMovesOnPoint(Point point, CustomPiece.MovementTypeEnum type, int steptToPoint)
+    {
 
         //add cube
+        matrixHandler.MatrixOfCubes[point.i, point.j].StepsToPoint = steptToPoint;
         possibleNextMoves.Add(matrixHandler.MatrixOfCubes[point.i, point.j], type);
 
         //add block and check if cube remains in list
@@ -566,6 +572,7 @@ public class GameManager : MonoBehaviour
             matrixHandler.MatrixOfCubes[point.i, point.j].SetCubeType(Cube.CubeType.TYPE_NEXT);
         }
     }
+
     private void CheckNextBlocks(Point point, CustomPiece.MovementTypeEnum type)
     {
         foreach (Block block in matrixHandler.BlockArray)
@@ -616,6 +623,7 @@ public class GameManager : MonoBehaviour
                 else if (block.GameObj != null && block.GameObj.activeInHierarchy)
                 {
                     //remove the cube from the list of next moves if block is above
+                    matrixHandler.MatrixOfCubes[block.oldPoint.i, block.oldPoint.j].StepsToPoint = 1;
                     possibleNextMoves.Remove(matrixHandler.MatrixOfCubes[block.oldPoint.i, block.oldPoint.j]);
                 }
 
@@ -629,6 +637,7 @@ public class GameManager : MonoBehaviour
         //restore cubes from old points
         foreach (Cube cube in possibleNextMoves.Keys)
         {
+            cube.StepsToPoint = 1;
             cube.SetCubeType(cube.GetPreviousType());
         }
         possibleNextMoves.Clear();
@@ -662,6 +671,15 @@ public class GameManager : MonoBehaviour
     public bool IsFrontCamera()
     {
         return cameraMain == cameraFront;
+    }
+
+    private void CleanPowerup()
+    {
+        if (currentPowerup != null)
+        {
+            powerupsIcons[currentPowerup.type].SetActive(false);
+            currentPowerup = null;
+        }
     }
 
 
@@ -735,7 +753,7 @@ public class GameManager : MonoBehaviour
                     //exit
 
                 });
-        } 
+        }
         else if (type == CustomPiece.PiecesTypeEnum.TYPE_KING)
         {
             moveEnabled = false;
@@ -819,16 +837,14 @@ public class GameManager : MonoBehaviour
             breakable.GameObj.transform.GetChild(0).gameObject.SetActive(true);
             Destroy(breakable.GameObj, 1f);
         }
-    } 
-    
+    }
+
     public void OnPowerup(Powerup powerup)
     {
         //disable last powerup 
-        if (currentPowerup != null)
-        {
-            powerupsIcons[currentPowerup.type].SetActive(false);
-        }
+        CleanPowerup();
 
+        justTookedPowerup = true;
         currentPowerup = powerup;
         powerupsIcons[powerup.type].SetActive(true);
         matrixHandler.RemovePowerup(powerup);
@@ -1082,7 +1098,7 @@ public class GameManager : MonoBehaviour
         }
     }
 
-    public void OnClickArrow(int index)
+    public void OnClickArrow(int steps, int index)
     {
         //  Debug.Log("OnClickArrow | Move:" + (moveEnabled ? "enabled" : "disabled") + " | Paused:" + (GlobalSingleton.GetInstance().gamePaused ? "enabled" : "disabled"));
         if (!moveEnabled || GlobalSingleton.GetInstance().gamePaused) { return; }
@@ -1091,20 +1107,44 @@ public class GameManager : MonoBehaviour
 
 
         //regular movement
-        Point p = pieceHandler.GetPoint(mov, 1);
+        Point p = pieceHandler.GetPoint(mov, steps);
 
-        if (matrixHandler.CheckIfCanStep(false, pieceHandler.GetPoint(mov, 1)))
+        if (matrixHandler.CheckIfCanStep(false, pieceHandler.GetPoint(mov, steps)))
         {
             //block next movement
             moveEnabled = false;
             arrowHandler.ChangeArrowsColor(Constants.ARROW_DISABLED_COLOR, pieceHandler.CurrentPiece.movementType);
             //make movement
-            pieceHandler.MakeMovement(mov, 1, (obj) =>
+            pieceHandler.MakeMovement(mov, steps, (obj) =>
             {
                 //need async  to be sure that all the movements are finished (when moves a cube)
                 GlobalSingleton.GetInstance().SetTimeAsync(100, (async) =>
                 {
-                    matrixHandler.RecalculateMoves(1);
+                    int movesSpent = 1;
+                    bool b = true;
+                    //todo check if the onPowerup is called before this
+                    if (currentPowerup != null && !justTookedPowerup)
+                    {
+                        if (currentPowerup.type == (int)Powerup.PowerupType.DOUBLE_FULL)
+                        {
+                            if (pieceHandler.CurrentPiece.pieceType.Equals(CustomPiece.PiecesTypeEnum.TYPE_KNIGHT))
+                            {
+                                b = false;
+                                movesSpent = 0; 
+                            }
+                            if (!pieceHandler.CurrentPiece.pieceType.Equals(CustomPiece.PiecesTypeEnum.TYPE_KING))
+                            {
+                                CleanPowerup();
+                            }
+                        }
+                        justTookedPowerup = !b;
+                    }
+                    else {
+                        justTookedPowerup = false;
+                    }
+                   
+
+                    matrixHandler.RecalculateMoves(movesSpent);
                     txtMoves.SetText(matrixHandler.MovesAvailable.ToString());
                     txtCurrentLevel.SetText(matrixHandler.CurrentLevel.ToString());
                     //Debug.Log("Recalculate onClickArrow: " + txtMoves.text);

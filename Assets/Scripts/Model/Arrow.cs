@@ -26,7 +26,6 @@ public class Arrow : MonoBehaviour
 
     void OnMouseDown()
     {
-        gameManager.OnClickArrow((int)movement);
-        
+        gameManager.OnClickArrow(1, (int)movement);
     }
 }

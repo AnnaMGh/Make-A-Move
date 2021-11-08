@@ -13,8 +13,8 @@ GameObject:
   - component: {fileID: 9088919208905500735}
   - component: {fileID: 7630160431011329213}
   - component: {fileID: 7630160430534779779}
-  m_Layer: 0
-  m_Name: POWERUP_DIZZY
+  m_Layer: 2
+  m_Name: POWERUP_2DIZZY
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

@@ -13,8 +13,8 @@ GameObject:
   - component: {fileID: 4121858014871278231}
   - component: {fileID: 3382869243901857297}
   - component: {fileID: 3382869243677733525}
-  m_Layer: 0
-  m_Name: POWERUP_STRONG
+  m_Layer: 2
+  m_Name: POWERUP_1STRONG
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

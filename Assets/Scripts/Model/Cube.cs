@@ -9,6 +9,7 @@ public class Cube : MonoBehaviour
 
 
     public Point point;
+    public int StepsToPoint { get; set; }
     public bool enabledStatus;
     public bool needEnabler;
     public bool isBreaked;
