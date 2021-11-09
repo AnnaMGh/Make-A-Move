@@ -532,35 +532,50 @@ public class GameManager : MonoBehaviour
         //check new ones
         foreach (CustomPiece.MovementTypeEnum type in pieceHandler.CurrentPiece.movementType)
         {
-            int stepsToPoint = 1;
-            Point point = pieceHandler.GetPoint(type, stepsToPoint);
-            if (matrixHandler.CheckIfCanStep(false, point))
-            {
-                CheckNextMovesOnPoint(point, type, stepsToPoint);
-            }
+            // normal step
+            SetAndCheckNextMovesOnPoint(type, 1);
+
+            //powerup step
             if (currentPowerup != null)
             {
-                if (currentPowerup.type == (int)(Powerup.PowerupType.DOUBLE_FULL))
+                if (currentPowerup.type == (int)Powerup.PowerupType.DOUBLE_FULL)
                 {
-                    if (pieceHandler.CurrentPiece.pieceType.Equals(CustomPiece.PiecesTypeEnum.TYPE_PAWN))
-                    {
-                        stepsToPoint = 2;
-                        point = pieceHandler.GetPoint(type, stepsToPoint);
-                        if (matrixHandler.CheckIfCanStep(false, point))
-                        {
-                            CheckNextMovesOnPoint(point, type, stepsToPoint);
-                        }
-                    }
+                    CheckPowerupDoubleFullNextMoves(type);
                 }
             }
         }
     }
 
-    private void CheckNextMovesOnPoint(Point point, CustomPiece.MovementTypeEnum type, int steptToPoint)
+    private void CheckPowerupDoubleFullNextMoves(CustomPiece.MovementTypeEnum type) {
+        if (pieceHandler.CurrentPiece.pieceType.Equals(CustomPiece.PiecesTypeEnum.TYPE_PAWN))
+        {
+            SetAndCheckNextMovesOnPoint(type, 2);
+        }
+        else if (pieceHandler.CurrentPiece.pieceType.Equals(CustomPiece.PiecesTypeEnum.TYPE_ROOK)
+          || pieceHandler.CurrentPiece.pieceType.Equals(CustomPiece.PiecesTypeEnum.TYPE_BISHOP)
+          || pieceHandler.CurrentPiece.pieceType.Equals(CustomPiece.PiecesTypeEnum.TYPE_QUEEN))
+        {
+            for (int i = 2; i < 7; i++)
+            {
+                SetAndCheckNextMovesOnPoint(type, i);
+            }
+        }
+    }
+
+    private void SetAndCheckNextMovesOnPoint(CustomPiece.MovementTypeEnum type, int stepsToPoint)      
+    {
+        Point point = pieceHandler.GetPoint(type, stepsToPoint);
+        if (matrixHandler.CheckIfCanStep(false, point))
+        {
+            CheckNextMovesOnPoint(point, type, stepsToPoint);
+        }
+    }
+
+    private void CheckNextMovesOnPoint(Point point, CustomPiece.MovementTypeEnum type, int stepsToPoint)
     {
 
         //add cube
-        matrixHandler.MatrixOfCubes[point.i, point.j].StepsToPoint = steptToPoint;
+        matrixHandler.MatrixOfCubes[point.i, point.j].StepsToPoint = stepsToPoint;
         possibleNextMoves.Add(matrixHandler.MatrixOfCubes[point.i, point.j], type);
 
         //add block and check if cube remains in list
@@ -663,8 +678,8 @@ public class GameManager : MonoBehaviour
         {
             canvas.enabled = true;
 
-            //make sound
-            globalAudioHandler.PlaySound(GlobalAudioHandler.AudioType.GAME_OVER);
+                //make sound
+                globalAudioHandler.PlaySound(GlobalAudioHandler.AudioType.GAME_OVER);
         });
     }
 
@@ -700,8 +715,8 @@ public class GameManager : MonoBehaviour
                     tutorialHandler.ShowTutorial(10, imgChanges.transform.position + new Vector3(0f, 10f, 0f), Vector3.up, c_s_y, "Number of piece changes left", false, (objTutorial9) =>
                     {
                         moveEnabled = true;
-                        //exit
-                    });
+                            //exit
+                        });
                 });
         }
         else if (type == CustomPiece.PiecesTypeEnum.TYPE_KNIGHT)
@@ -715,8 +730,8 @@ public class GameManager : MonoBehaviour
                         tutorialHandler.ShowTutorial(15, cameraMain.WorldToScreenPoint(matrixHandler.MatrixOfCubes[3, 4].transform.position), Vector3.right, c_s_y, "KNIGHT is the only piece that can jump over obstacles (Cubes, Pieces, Holes)", false, (objTutorial14) =>
                         {
                             moveEnabled = true;
-                            //exit
-                        });
+                                //exit
+                            });
                     });
                 });
         }
@@ -735,9 +750,9 @@ public class GameManager : MonoBehaviour
                         tutorialHandler.ShowTutorial(20, cameraMain.WorldToScreenPoint(direction), Vector3.right, c_s_y, "If the blocks are surrounded by other blocks, BISHOP can't push them", false, (objTutorial20) =>
                         {
                             moveEnabled = true;
-                            //exit
+                                //exit
 
-                        });
+                            });
 
                     });
                 });
@@ -750,9 +765,9 @@ public class GameManager : MonoBehaviour
                 {
 
                     moveEnabled = true;
-                    //exit
+                        //exit
 
-                });
+                    });
         }
         else if (type == CustomPiece.PiecesTypeEnum.TYPE_KING)
         {
@@ -761,8 +776,8 @@ public class GameManager : MonoBehaviour
                 Vector3.right, c_s_y, "KING piece has been enabled", false, (objTutorial23) =>
                 {
                     moveEnabled = true;
-                    //exit
-                });
+                        //exit
+                    });
         }
     }
 
@@ -814,12 +829,12 @@ public class GameManager : MonoBehaviour
 
         GlobalSingleton.GetInstance().SetTimeAsync(50, (obj) =>
         {
-            //restore movement if damaged (outside and inside)
-            pieceHandler.RestoreToCurrentPos();
+                //restore movement if damaged (outside and inside)
+                pieceHandler.RestoreToCurrentPos();
             if (matrixHandler.MovesAvailable > 0)
             {
-                //check next moves
-                CheckNextMoves();
+                    //check next moves
+                    CheckNextMoves();
             }
         });
     }
@@ -968,8 +983,8 @@ public class GameManager : MonoBehaviour
         {
             InitializeLevel(Constants.TYPE_START);
 
-            //orbit camera
-            OnOrbit(Vector3.zero);
+                //orbit camera
+                OnOrbit(Vector3.zero);
 
             GlobalSingleton.GetInstance().SetTimeAsync(10, (objAsync) =>
             {
@@ -1117,20 +1132,20 @@ public class GameManager : MonoBehaviour
             //make movement
             pieceHandler.MakeMovement(mov, steps, (obj) =>
             {
-                //need async  to be sure that all the movements are finished (when moves a cube)
-                GlobalSingleton.GetInstance().SetTimeAsync(100, (async) =>
-                {
+                    //need async  to be sure that all the movements are finished (when moves a cube)
+                    GlobalSingleton.GetInstance().SetTimeAsync(100, (async) =>
+                        {
                     int movesSpent = 1;
                     bool b = true;
-                    //todo check if the onPowerup is called before this
-                    if (currentPowerup != null && !justTookedPowerup)
+                        //todo check if the onPowerup is called before this
+                        if (currentPowerup != null && !justTookedPowerup)
                     {
                         if (currentPowerup.type == (int)Powerup.PowerupType.DOUBLE_FULL)
                         {
                             if (pieceHandler.CurrentPiece.pieceType.Equals(CustomPiece.PiecesTypeEnum.TYPE_KNIGHT))
                             {
                                 b = false;
-                                movesSpent = 0; 
+                                movesSpent = 0;
                             }
                             if (!pieceHandler.CurrentPiece.pieceType.Equals(CustomPiece.PiecesTypeEnum.TYPE_KING))
                             {
@@ -1139,24 +1154,25 @@ public class GameManager : MonoBehaviour
                         }
                         justTookedPowerup = !b;
                     }
-                    else {
+                    else
+                    {
                         justTookedPowerup = false;
                     }
-                   
+
 
                     matrixHandler.RecalculateMoves(movesSpent);
                     txtMoves.SetText(matrixHandler.MovesAvailable.ToString());
                     txtCurrentLevel.SetText(matrixHandler.CurrentLevel.ToString());
-                    //Debug.Log("Recalculate onClickArrow: " + txtMoves.text);
+                        //Debug.Log("Recalculate onClickArrow: " + txtMoves.text);
 
-                    //restore position if damaged (outside and inside)
-                    pieceHandler.RestoreToCurrentPos();
+                        //restore position if damaged (outside and inside)
+                        pieceHandler.RestoreToCurrentPos();
 
                     if (matrixHandler.CheckGoNextLevel(pieceHandler.CurrentPieceGameObj.transform.position))
                     {
                         levelFinished = true;
-                        //clean cubes and blocks
-                        CleanNextMovesAndBlocks();
+                            //clean cubes and blocks
+                            CleanNextMovesAndBlocks();
 
                         gameAdHandler.HideBannerAd();
                         int bestScore = GlobalSingleton.GetInstance().GetLevelStarDictionaryValue(matrixHandler.CurrentLevel);
@@ -1184,12 +1200,12 @@ public class GameManager : MonoBehaviour
                     }
                     else
                     {
-                        //unblock next movement
-                        moveEnabled = true;
+                            //unblock next movement
+                            moveEnabled = true;
                         arrowHandler.ChangeArrowsColor(Constants.ARROW_ENABLED_COLOR, pieceHandler.CurrentPiece.movementType);
 
-                        //check next possible moves
-                        CheckNextMoves();
+                            //check next possible moves
+                            CheckNextMoves();
                     }
                 });
             });
