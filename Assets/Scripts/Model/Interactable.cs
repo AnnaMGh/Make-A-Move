@@ -197,8 +197,12 @@ public class Interactable : MonoBehaviour
 
 
             //check if the block with piece interact is the target one
-            if (block.oldPoint.i!=gameManager.GetPieceHandler().CurrentPiece.currentPoint.i
+            if ((block.oldPoint.i!=gameManager.GetPieceHandler().CurrentPiece.currentPoint.i
                 || block.oldPoint.j != gameManager.GetPieceHandler().CurrentPiece.currentPoint.j)
+                 && ((gameManager.CurrentPowerup == null
+                  || gameManager.CurrentPowerup.type != (int)Powerup.PowerupType.DOUBLE_FULL)
+                    && !gameManager.GetPieceHandler().CurrentPiece.pieceType.Equals(CustomPiece.PiecesTypeEnum.TYPE_KING))
+                )
             {
                 collideOrTrigger = false;
                 return;
@@ -268,8 +272,12 @@ public class Interactable : MonoBehaviour
             Enabler enabler = (Enabler)receivedObject;
 
             //check if the block with piece interact is the target one
-            if (enabler.enablerPoint.i != gameManager.GetPieceHandler().CurrentPiece.currentPoint.i
+            if ((enabler.enablerPoint.i != gameManager.GetPieceHandler().CurrentPiece.currentPoint.i
                 || enabler.enablerPoint.j != gameManager.GetPieceHandler().CurrentPiece.currentPoint.j)
+                && ((gameManager.CurrentPowerup == null
+                  || gameManager.CurrentPowerup.type != (int)Powerup.PowerupType.DOUBLE_FULL)
+                    && !gameManager.GetPieceHandler().CurrentPiece.pieceType.Equals(CustomPiece.PiecesTypeEnum.TYPE_KING))
+                )
             {
                 collideOrTrigger = false;
                 return;
@@ -308,8 +316,12 @@ public class Interactable : MonoBehaviour
             Breakable breakable = (Breakable)receivedObject;
 
             //check if the block with piece interact is the target one
-            if (breakable.point.i != destinationPoint.i
-                || breakable.point.j != destinationPoint.j)
+            if ((breakable.point.i != destinationPoint.i
+                  || breakable.point.j != destinationPoint.j) 
+                && ((gameManager.CurrentPowerup==null 
+                  || gameManager.CurrentPowerup.type != (int)Powerup.PowerupType.DOUBLE_FULL)
+                    && !gameManager.GetPieceHandler().CurrentPiece.pieceType.Equals(CustomPiece.PiecesTypeEnum.TYPE_KING))
+                )
             {
                 collideOrTrigger = false;
                 return;

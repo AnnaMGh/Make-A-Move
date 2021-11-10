@@ -71,7 +71,7 @@ public class GameManager : MonoBehaviour
     private Vector3 orbitDistance = Vector3.zero;
     private Vector3 orbitPosition = Vector3.zero;
 
-    private Powerup currentPowerup;
+    public Powerup CurrentPowerup { get; private set; }
     private bool justTookedPowerup;
 
     //test GUI variables
@@ -536,9 +536,9 @@ public class GameManager : MonoBehaviour
             SetAndCheckNextMovesOnPoint(type, 1);
 
             //powerup step
-            if (currentPowerup != null)
+            if (CurrentPowerup != null)
             {
-                if (currentPowerup.type == (int)Powerup.PowerupType.DOUBLE_FULL)
+                if (CurrentPowerup.type == (int)Powerup.PowerupType.DOUBLE_FULL)
                 {
                     CheckPowerupDoubleFullNextMoves(type);
                 }
@@ -557,18 +557,27 @@ public class GameManager : MonoBehaviour
         {
             for (int i = 2; i < 7; i++)
             {
-                SetAndCheckNextMovesOnPoint(type, i);
+                if (!SetAndCheckNextMovesOnPoint(type, i))
+                {
+                    break;
+                }
             }
         }
     }
 
-    private void SetAndCheckNextMovesOnPoint(CustomPiece.MovementTypeEnum type, int stepsToPoint)      
+    private bool SetAndCheckNextMovesOnPoint(CustomPiece.MovementTypeEnum type, int stepsToPoint)      
     {
         Point point = pieceHandler.GetPoint(type, stepsToPoint);
         if (matrixHandler.CheckIfCanStep(false, point))
         {
             CheckNextMovesOnPoint(point, type, stepsToPoint);
+
+
+            //check if it can really make 
+            return (possibleNextMoves.ContainsKey(matrixHandler.MatrixOfCubes[point.i, point.j]));
         }
+
+        return false;
     }
 
     private void CheckNextMovesOnPoint(Point point, CustomPiece.MovementTypeEnum type, int stepsToPoint)
@@ -642,7 +651,7 @@ public class GameManager : MonoBehaviour
                     possibleNextMoves.Remove(matrixHandler.MatrixOfCubes[block.oldPoint.i, block.oldPoint.j]);
                 }
 
-                return;
+                break;
             }
         }
     }
@@ -690,10 +699,10 @@ public class GameManager : MonoBehaviour
 
     private void CleanPowerup()
     {
-        if (currentPowerup != null)
+        if (CurrentPowerup != null)
         {
-            powerupsIcons[currentPowerup.type].SetActive(false);
-            currentPowerup = null;
+            powerupsIcons[CurrentPowerup.type].SetActive(false);
+            CurrentPowerup = null;
         }
     }
 
@@ -860,7 +869,7 @@ public class GameManager : MonoBehaviour
         CleanPowerup();
 
         justTookedPowerup = true;
-        currentPowerup = powerup;
+        CurrentPowerup = powerup;
         powerupsIcons[powerup.type].SetActive(true);
         matrixHandler.RemovePowerup(powerup);
     }
@@ -1138,9 +1147,9 @@ public class GameManager : MonoBehaviour
                     int movesSpent = 1;
                     bool b = true;
                         //todo check if the onPowerup is called before this
-                        if (currentPowerup != null && !justTookedPowerup)
+                        if (CurrentPowerup != null && !justTookedPowerup)
                     {
-                        if (currentPowerup.type == (int)Powerup.PowerupType.DOUBLE_FULL)
+                        if (CurrentPowerup.type == (int)Powerup.PowerupType.DOUBLE_FULL)
                         {
                             if (pieceHandler.CurrentPiece.pieceType.Equals(CustomPiece.PiecesTypeEnum.TYPE_KNIGHT))
                             {
@@ -1225,12 +1234,12 @@ public class GameManager : MonoBehaviour
             moveEnabled = false;
 
             //check if had powerup
-            if (currentPowerup != null
-                && currentPowerup.type == (int)Powerup.PowerupType.DOUBLE_FULL
+            if (CurrentPowerup != null
+                && CurrentPowerup.type == (int)Powerup.PowerupType.DOUBLE_FULL
                 && !pieceHandler.CurrentPiece.pieceType.Equals(CustomPiece.PiecesTypeEnum.TYPE_KING))
             {
-                powerupsIcons[currentPowerup.type].SetActive(false);
-                currentPowerup = null;
+                powerupsIcons[CurrentPowerup.type].SetActive(false);
+                CurrentPowerup = null;
             }
 
             //update changes left
