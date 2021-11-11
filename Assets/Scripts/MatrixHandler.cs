@@ -22,8 +22,9 @@ public class MatrixHandler : MonoBehaviour
     public Breakable[] BreakableArray { get { return breakableArray; } }
     public Powerup[] PowerupArray { get { return powerupArray; } }
 
+    public int MatrixIndexLength { get; private set; }
+
     private Cube[,] matrixOfCubes; // i = - ; j = |
-    private int matrixIndexLength;
     private int currentLevel;
     private LevelPoints maximumPoints;
     private LevelPoints goalPoints;
@@ -74,7 +75,7 @@ public class MatrixHandler : MonoBehaviour
 
     private void CreateMatrix(int n)
     {
-        matrixIndexLength = n;
+        MatrixIndexLength = n;
         matrixOfCubes = new Cube[n, n];
         GameObject cube = (GameObject)Resources.Load("Prefabs/MatrixCube", typeof(GameObject));
 
@@ -151,9 +152,9 @@ public class MatrixHandler : MonoBehaviour
     public void DestroyMatrix()
     {
         //destroy matrix cubes
-        for (int i = matrixIndexLength - 1; i >= 0; i--)
+        for (int i = MatrixIndexLength - 1; i >= 0; i--)
         {
-            for (int j = matrixIndexLength - 1; j >= 0; j--)
+            for (int j = MatrixIndexLength - 1; j >= 0; j--)
             {
                 Destroy(matrixOfCubes[i, j].gameObject);
             }
@@ -195,7 +196,7 @@ public class MatrixHandler : MonoBehaviour
 
     public bool CheckIfCanStep(bool justInMatrix, Point p)
     {
-        bool inMatrix = p.i < matrixIndexLength && p.j < matrixIndexLength
+        bool inMatrix = p.i < MatrixIndexLength && p.j < MatrixIndexLength
             && p.i > -1 && p.j > -1;
         //bool andActive = inMatrix && (justInMatrix? true : matrixOfCubes[p.i, p.j].activeInHierarchy);
         //bool andActive = inMatrix && (justInMatrix? true : matrixOfCubes[p.i, p.j].GetComponent<Renderer>().material.color.a >0);

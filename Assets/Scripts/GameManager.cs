@@ -555,7 +555,7 @@ public class GameManager : MonoBehaviour
           || pieceHandler.CurrentPiece.pieceType.Equals(CustomPiece.PiecesTypeEnum.TYPE_BISHOP)
           || pieceHandler.CurrentPiece.pieceType.Equals(CustomPiece.PiecesTypeEnum.TYPE_QUEEN))
         {
-            for (int i = 2; i < 7; i++)
+            for (int i = 2; i < matrixHandler.MatrixIndexLength; i++)
             {
                 if (!SetAndCheckNextMovesOnPoint(type, i))
                 {
@@ -570,11 +570,19 @@ public class GameManager : MonoBehaviour
         Point point = pieceHandler.GetPoint(type, stepsToPoint);
         if (matrixHandler.CheckIfCanStep(false, point))
         {
+            int possibleNextBlocksNr = possibleNextBlocks.Count;
+
             CheckNextMovesOnPoint(point, type, stepsToPoint);
 
+            return (possibleNextBlocksNr == possibleNextBlocks.Count
+                && possibleNextMoves.ContainsKey(matrixHandler.MatrixOfCubes[point.i, point.j]));
 
             //check if it can really make 
-            return (possibleNextMoves.ContainsKey(matrixHandler.MatrixOfCubes[point.i, point.j]));
+            // return   possibleNextMoves.ContainsKey(matrixHandler.MatrixOfCubes[point.i, point.j]);
+
+
+
+
         }
 
         return false;
@@ -588,7 +596,7 @@ public class GameManager : MonoBehaviour
         possibleNextMoves.Add(matrixHandler.MatrixOfCubes[point.i, point.j], type);
 
         //add block and check if cube remains in list
-        CheckNextBlocks(point, type);
+        CheckNextBlocks(point, type, stepsToPoint);
 
         //add change cube type to next move if remain in list after the block check
         if (possibleNextMoves.ContainsKey(matrixHandler.MatrixOfCubes[point.i, point.j]))
@@ -597,15 +605,19 @@ public class GameManager : MonoBehaviour
         }
     }
 
-    private void CheckNextBlocks(Point point, CustomPiece.MovementTypeEnum type)
+    private void CheckNextBlocks(Point point,CustomPiece.MovementTypeEnum type, int stepsToPoint)
     {
         foreach (Block block in matrixHandler.BlockArray)
         {
             //check if block is on same position as current point
             if (block.oldPoint.i == point.i && block.oldPoint.j == point.j)
             {
-                Point direction = new Point(block.oldPoint.i - pieceHandler.CurrentPiece.currentPoint.i,
-                    block.oldPoint.j - pieceHandler.CurrentPiece.currentPoint.j);
+                //Point direction = new Point(block.oldPoint.i - pieceHandler.CurrentPiece.currentPoint.i,
+                //    block.oldPoint.j - pieceHandler.CurrentPiece.currentPoint.j);
+                Point piecePoint = pieceHandler.GetPoint(type, stepsToPoint-1);
+
+                Point direction = new Point(block.oldPoint.i - piecePoint.i,
+                    block.oldPoint.j - piecePoint.j);
                 Point newPoint = new Point(block.oldPoint.i + direction.i,
                     block.oldPoint.j + direction.j);
 
