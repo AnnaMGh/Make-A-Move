@@ -114,7 +114,7 @@ public class Interactable : MonoBehaviour
                     }
                 case InteractableType.ENABLER:
                     {
-                        HandleEnabler();
+                        HandleEnabler(other, false);
                         break;
                     }
                 case InteractableType.BREAKABLE:
@@ -137,7 +137,7 @@ public class Interactable : MonoBehaviour
         {
             switch (interactableType)
             {
-                    case InteractableType.BREAKABLE:
+                case InteractableType.BREAKABLE:
                     {
                         HandleBreakable(false);
                         break;
@@ -164,7 +164,7 @@ public class Interactable : MonoBehaviour
                     }
                 case InteractableType.ENABLER:
                     {
-                        HandleEnabler();
+                        HandleEnabler(other.collider, true);
                         break;
                     }
             }
@@ -187,17 +187,14 @@ public class Interactable : MonoBehaviour
         if (!piece.CurrentPiece.pieceType.Equals(CustomPiece.PiecesTypeEnum.TYPE_KNIGHT) &&
             (
             (fromCollision && !piece.IsDiagonalMovement(piece.LastStep.Movement))
-            // (!fromCollision && piece.CurrentPiece.pieceType.Equals(CustomPiece.PiecesTypeEnum.TYPE_BISHOP))
             || (!fromCollision && piece.IsDiagonalMovement(piece.LastStep.Movement))
-          //  || (fromCollision && !piece.CurrentPiece.pieceType.Equals(CustomPiece.PiecesTypeEnum.TYPE_BISHOP))
-           
             ))
         {
             Block block = (Block)receivedObject;
 
 
             //check if the block with piece interact is the target one
-            if ((block.oldPoint.i!=gameManager.GetPieceHandler().CurrentPiece.currentPoint.i
+            if ((block.oldPoint.i != gameManager.GetPieceHandler().CurrentPiece.currentPoint.i
                 || block.oldPoint.j != gameManager.GetPieceHandler().CurrentPiece.currentPoint.j)
                  && ((gameManager.CurrentPowerup == null
                   || gameManager.CurrentPowerup.type != (int)Powerup.PowerupType.DOUBLE_FULL)
@@ -262,43 +259,48 @@ public class Interactable : MonoBehaviour
         }
     }
 
-    private void HandleEnabler()
+    private void HandleEnabler(Collider collider, bool fromCollision)
     {
         if (!collideOrTrigger)
         {
-            collideOrTrigger = true;
-
-            //Get object
-            Enabler enabler = (Enabler)receivedObject;
-
-            //check if the block with piece interact is the target one
-            if ((enabler.enablerPoint.i != gameManager.GetPieceHandler().CurrentPiece.currentPoint.i
-                || enabler.enablerPoint.j != gameManager.GetPieceHandler().CurrentPiece.currentPoint.j)
-                && ((gameManager.CurrentPowerup == null
-                  || gameManager.CurrentPowerup.type != (int)Powerup.PowerupType.DOUBLE_FULL)
-                    && !gameManager.GetPieceHandler().CurrentPiece.pieceType.Equals(CustomPiece.PiecesTypeEnum.TYPE_KING))
-                )
+            PieceHandler piece = collider.transform.parent.GetComponent<PieceHandler>();
+            if ((fromCollision && !piece.IsDiagonalMovement(piece.LastStep.Movement))
+            || (!fromCollision && piece.IsDiagonalMovement(piece.LastStep.Movement)))
             {
-                collideOrTrigger = false;
-                return;
+                collideOrTrigger = true;
+
+                //Get object
+                Enabler enabler = (Enabler)receivedObject;
+
+                //check if the block with piece interact is the target one
+                if ((enabler.enablerPoint.i != gameManager.GetPieceHandler().CurrentPiece.currentPoint.i
+                    || enabler.enablerPoint.j != gameManager.GetPieceHandler().CurrentPiece.currentPoint.j)
+                    && ((gameManager.CurrentPowerup == null
+                      || gameManager.CurrentPowerup.type != (int)Powerup.PowerupType.DOUBLE_FULL)
+                        && !gameManager.GetPieceHandler().CurrentPiece.pieceType.Equals(CustomPiece.PiecesTypeEnum.TYPE_KING))
+                    )
+                {
+                    collideOrTrigger = false;
+                    return;
+                }
+
+                //make sound
+                if (PlayerPrefs.GetInt(Constants.KEY_SOUND) == 1)
+                {
+                    AudioSource audio = this.gameObject.GetComponent<AudioSource>();
+                    audio.Play();
+                }
+
+
+
+                //change enabler color
+                Color enablerColor = ((enabler.enablerPoint.i + enabler.enablerPoint.j) % 2 == 0 ? Constants.MATRIX_BOX_BLACK_COLOR : Constants.MATRIX_BOX_WHITE_COLOR);
+                enabler.GameObj.GetComponent<Renderer>().material.color = enablerColor;
+                //change cube color
+                Color cubeColor = ((enabler.cubePoint.i + enabler.cubePoint.j) % 2 == 0 ? Constants.MATRIX_BOX_BLACK_COLOR : Constants.MATRIX_BOX_WHITE_COLOR);
+                gameManager.GetMatrixHandler().ChangeCubeStatus(enabler.cubePoint, true, cubeColor);
+
             }
-
-            //make sound
-            if (PlayerPrefs.GetInt(Constants.KEY_SOUND) == 1)
-            {
-                AudioSource audio = this.gameObject.GetComponent<AudioSource>();
-                audio.Play();
-            }
-
-            
-
-            //change enabler color
-            Color enablerColor = ((enabler.enablerPoint.i + enabler.enablerPoint.j) % 2 == 0 ? Constants.MATRIX_BOX_BLACK_COLOR : Constants.MATRIX_BOX_WHITE_COLOR);
-            enabler.GameObj.GetComponent<Renderer>().material.color = enablerColor;
-            //change cube color
-            Color cubeColor = ((enabler.cubePoint.i + enabler.cubePoint.j) % 2 == 0 ? Constants.MATRIX_BOX_BLACK_COLOR : Constants.MATRIX_BOX_WHITE_COLOR);
-            gameManager.GetMatrixHandler().ChangeCubeStatus(enabler.cubePoint, true, cubeColor);
-
         }
     }
 
@@ -317,8 +319,8 @@ public class Interactable : MonoBehaviour
 
             //check if the block with piece interact is the target one
             if ((breakable.point.i != destinationPoint.i
-                  || breakable.point.j != destinationPoint.j) 
-                && ((gameManager.CurrentPowerup==null 
+                  || breakable.point.j != destinationPoint.j)
+                && ((gameManager.CurrentPowerup == null
                   || gameManager.CurrentPowerup.type != (int)Powerup.PowerupType.DOUBLE_FULL)
                     && !gameManager.GetPieceHandler().CurrentPiece.pieceType.Equals(CustomPiece.PiecesTypeEnum.TYPE_KING))
                 )
@@ -340,7 +342,7 @@ public class Interactable : MonoBehaviour
             collideOrTrigger = false;
         }
     }
-    
+
     private void HandlePowerups()
     {
         if (!collideOrTrigger)
@@ -357,7 +359,7 @@ public class Interactable : MonoBehaviour
                 audio.Play();
             }
 
-            
+
             gameManager.OnPowerup(powerup);
 
             collideOrTrigger = false;

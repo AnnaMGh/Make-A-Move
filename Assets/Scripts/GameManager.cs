@@ -614,8 +614,7 @@ public class GameManager : MonoBehaviour
             {
                 //Point direction = new Point(block.oldPoint.i - pieceHandler.CurrentPiece.currentPoint.i,
                 //    block.oldPoint.j - pieceHandler.CurrentPiece.currentPoint.j);
-                Point piecePoint = pieceHandler.GetPoint(type, stepsToPoint-1);
-
+                Point piecePoint = pieceHandler.GetPoint(type, stepsToPoint - 1);
                 Point direction = new Point(block.oldPoint.i - piecePoint.i,
                     block.oldPoint.j - piecePoint.j);
                 Point newPoint = new Point(block.oldPoint.i + direction.i,

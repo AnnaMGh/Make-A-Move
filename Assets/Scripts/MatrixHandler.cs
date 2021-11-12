@@ -310,9 +310,12 @@ public class MatrixHandler : MonoBehaviour
     }
 
     public void ChangePowerupCamera(bool isCamera3D) {
-        foreach (Powerup power in powerupArray)
+        if (powerupArray != null)
         {
-            power.ChangeCameraView(isCamera3D);
+            foreach (Powerup power in powerupArray)
+            {
+                power.ChangeCameraView(isCamera3D);
+            }
         }
     }
 
