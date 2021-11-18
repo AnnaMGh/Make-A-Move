@@ -72,6 +72,7 @@ public class GameManager : MonoBehaviour
     private Vector3 orbitPosition = Vector3.zero;
 
     public Powerup CurrentPowerup { get; private set; }
+    public Powerup LastPowerupInUse { get; set; }
     private bool justTookedPowerup;
 
     //test GUI variables
@@ -320,11 +321,15 @@ public class GameManager : MonoBehaviour
     private void InitiateUI()
     {
 
-        //set camera
-        imgCamera.sprite = spriteCameraFront;
-        cameraFront.gameObject.SetActive(true);
-        cameraTop.gameObject.SetActive(false);
-        cameraMain = cameraFront;
+        //set camera if not leave it as it is
+        if (cameraMain == null)
+        {
+            imgCamera.sprite = spriteCameraFront;
+            cameraFront.gameObject.SetActive(true);
+            cameraTop.gameObject.SetActive(false);
+            cameraMain = cameraFront;
+        }
+   
 
         imgBg.gameObject.SetActive(false);
 
@@ -378,7 +383,6 @@ public class GameManager : MonoBehaviour
         txtMoves.SetText(matrixHandler.MovesAvailable.ToString());
         txtChanges.SetText(matrixHandler.ChangesAvailable.ToString());
 
-
         piecesHandler.ChangePiecessAvailability(false, null);
         arrowHandler.ChangeArrowsAvailability(false, null);
 
@@ -391,10 +395,16 @@ public class GameManager : MonoBehaviour
         //
         levelFinished = false;
 
+        //remove powerup if any activated
+        CleanPowerup(true);
+
         //unblock next movement
         moveEnabled = true;
         arrowHandler.ChangeArrowsColor(Constants.ARROW_ENABLED_COLOR, pieceHandler.CurrentPiece.movementType);
         CheckNextMoves();
+
+        //refresh camera
+        matrixHandler.ChangePowerupCamera(IsFrontCamera());
 
 
         //tutorial -> NO. 1
@@ -533,10 +543,13 @@ public class GameManager : MonoBehaviour
         foreach (CustomPiece.MovementTypeEnum type in pieceHandler.CurrentPiece.movementType)
         {
             // normal step
-            SetAndCheckNextMovesOnPoint(type, 1);
+            if (CurrentPowerup == null || CurrentPowerup.type != (int)Powerup.PowerupType.DOUBLE_FULL)
+            {
+                SetAndCheckNextMovesOnPoint(type, 1);
 
+            }
             //powerup step
-            if (CurrentPowerup != null)
+            else if (CurrentPowerup != null)
             {
                 if (CurrentPowerup.type == (int)Powerup.PowerupType.DOUBLE_FULL)
                 {
@@ -547,20 +560,25 @@ public class GameManager : MonoBehaviour
     }
 
     private void CheckPowerupDoubleFullNextMoves(CustomPiece.MovementTypeEnum type) {
+
+        //set stop steps
+        int stopSteps = 2;    
         if (pieceHandler.CurrentPiece.pieceType.Equals(CustomPiece.PiecesTypeEnum.TYPE_PAWN))
         {
-            SetAndCheckNextMovesOnPoint(type, 2);
+            stopSteps = 3;
         }
         else if (pieceHandler.CurrentPiece.pieceType.Equals(CustomPiece.PiecesTypeEnum.TYPE_ROOK)
-          || pieceHandler.CurrentPiece.pieceType.Equals(CustomPiece.PiecesTypeEnum.TYPE_BISHOP)
-          || pieceHandler.CurrentPiece.pieceType.Equals(CustomPiece.PiecesTypeEnum.TYPE_QUEEN))
+        || pieceHandler.CurrentPiece.pieceType.Equals(CustomPiece.PiecesTypeEnum.TYPE_BISHOP)
+        || pieceHandler.CurrentPiece.pieceType.Equals(CustomPiece.PiecesTypeEnum.TYPE_QUEEN))
         {
-            for (int i = 2; i < matrixHandler.MatrixIndexLength; i++)
+            stopSteps = matrixHandler.MatrixIndexLength;
+        }
+
+        for (int i = 1; i < stopSteps; i++)
+        {
+            if (!SetAndCheckNextMovesOnPoint(type, i))
             {
-                if (!SetAndCheckNextMovesOnPoint(type, i))
-                {
-                    break;
-                }
+                break;
             }
         }
     }
@@ -568,7 +586,7 @@ public class GameManager : MonoBehaviour
     private bool SetAndCheckNextMovesOnPoint(CustomPiece.MovementTypeEnum type, int stepsToPoint)      
     {
         Point point = pieceHandler.GetPoint(type, stepsToPoint);
-        if (matrixHandler.CheckIfCanStep(false, point))
+        if (matrixHandler.CheckIfCanStep(false,true, point))
         {
             int possibleNextBlocksNr = possibleNextBlocks.Count;
 
@@ -576,13 +594,6 @@ public class GameManager : MonoBehaviour
 
             return (possibleNextBlocksNr == possibleNextBlocks.Count
                 && possibleNextMoves.ContainsKey(matrixHandler.MatrixOfCubes[point.i, point.j]));
-
-            //check if it can really make 
-            // return   possibleNextMoves.ContainsKey(matrixHandler.MatrixOfCubes[point.i, point.j]);
-
-
-
-
         }
 
         return false;
@@ -623,29 +634,36 @@ public class GameManager : MonoBehaviour
                 bool canMove;
                 if (pieceHandler.CurrentPiece.pieceType == CustomPiece.PiecesTypeEnum.TYPE_KNIGHT)
                 {
-                    canMove = GetMatrixHandler().CheckIfCanStep(true, GetPieceHandler()
+                    canMove = GetMatrixHandler().CheckIfCanStep(true,true, GetPieceHandler()
                     .GetPointByPointDirection(direction, 1));
                 }
-                else if (pieceHandler.CurrentPiece.pieceType == CustomPiece.PiecesTypeEnum.TYPE_BISHOP
-                    || (pieceHandler.CurrentPiece.pieceType == CustomPiece.PiecesTypeEnum.TYPE_QUEEN)
-                    && pieceHandler.IsDiagonalMovement(type))
+                else if (pieceHandler.IsDiagonalMovement(type))
                 {
                     //check if has where to step and push the block
-                    canMove = GetMatrixHandler().CheckIfCanStep(true, GetPieceHandler()
+                    bool checkEnabler = (CurrentPowerup == null || CurrentPowerup.type != (int)Powerup.PowerupType.STRONG);
+                    canMove = GetMatrixHandler().CheckIfCanStep(true, checkEnabler, GetPieceHandler()
                     .GetPointByPointDirection(direction, 2));
 
                     //check if has blocks in its way
-                    Point[] pp = pieceHandler.GetPointsBishopBlock(type, block.oldPoint);
-                    canMove &= !GetMatrixHandler().IsBlockOnPoint(newPoint);
-                    canMove &= !GetMatrixHandler().IsBlockOnPoint(pp[0]);
-                    canMove &= !GetMatrixHandler().IsBlockOnPoint(pp[1]);
+                    if (checkEnabler)
+                    {
+                        Point[] pp = pieceHandler.GetPointsBishopBlock(type, block.oldPoint);
+                        canMove &= !GetMatrixHandler().IsBlockOnPoint(newPoint);
+                        canMove &= !GetMatrixHandler().IsBlockOnPoint(pp[0]);
+                        canMove &= !GetMatrixHandler().IsBlockOnPoint(pp[1]);
+                    }
                 }
                 else
                 {
-                    canMove = GetMatrixHandler().CheckIfCanStep(true, GetPieceHandler()
+                    bool checkEnabler = (CurrentPowerup == null || CurrentPowerup.type != (int)Powerup.PowerupType.STRONG);
+                    canMove = GetMatrixHandler().CheckIfCanStep(true, checkEnabler, GetPieceHandler()
                     .GetPointByPointDirection(direction, 2));
 
-                    canMove &= !GetMatrixHandler().IsBlockOnPoint(newPoint);
+                    //check if has blocks in its way
+                    if (checkEnabler)
+                    {
+                        canMove &= !GetMatrixHandler().IsBlockOnPoint(newPoint);
+                    }
                 }
 
 
@@ -708,12 +726,16 @@ public class GameManager : MonoBehaviour
         return cameraMain == cameraFront;
     }
 
-    private void CleanPowerup()
+    private void CleanPowerup(bool cleanAll)
     {
         if (CurrentPowerup != null)
         {
             powerupsIcons[CurrentPowerup.type].SetActive(false);
             CurrentPowerup = null;
+        }
+        if (cleanAll)
+        {
+            LastPowerupInUse = null;
         }
     }
 
@@ -829,6 +851,28 @@ public class GameManager : MonoBehaviour
                 GameOver("");
             }
         }
+        else if (sendPieceBackMovement == -3) //destroyed by powerup
+        {
+            if (LastPowerupInUse != null && LastPowerupInUse.type == (int)Powerup.PowerupType.STRONG
+            && CurrentPowerup != null && CurrentPowerup == LastPowerupInUse)
+            {
+                CleanPowerup(true);
+            }
+
+            if (block != null)
+            {
+                matrixHandler.RecalculateMoves(block.cost);
+                txtMoves.SetText(matrixHandler.MovesAvailable.ToString());
+                if (matrixHandler.MovesAvailable <= 0 && !levelFinished)
+                {
+                    GameOver("");
+                }
+
+            }
+            pieceHandler.RestoreToPos(pieceHandler.CurrentPiece.currentPoint,
+                matrixHandler.MatrixOfCubes[pieceHandler.CurrentPiece.currentPoint.i, pieceHandler.CurrentPiece.currentPoint.j].transform.position,
+                true);
+        }
         else
         {
             //just restore new position - when knight jumped
@@ -877,7 +921,7 @@ public class GameManager : MonoBehaviour
     public void OnPowerup(Powerup powerup)
     {
         //disable last powerup 
-        CleanPowerup();
+        CleanPowerup(false);
 
         justTookedPowerup = true;
         CurrentPowerup = powerup;
@@ -1143,12 +1187,25 @@ public class GameManager : MonoBehaviour
 
         //regular movement
         Point p = pieceHandler.GetPoint(mov, steps);
-
-        if (matrixHandler.CheckIfCanStep(false, pieceHandler.GetPoint(mov, steps)))
+        bool checkEnabler = (CurrentPowerup == null || CurrentPowerup.type != (int)Powerup.PowerupType.STRONG);
+        if (matrixHandler.CheckIfCanStep(false, checkEnabler, pieceHandler.GetPoint(mov, steps)))
         {
             //block next movement
             moveEnabled = false;
             arrowHandler.ChangeArrowsColor(Constants.ARROW_DISABLED_COLOR, pieceHandler.CurrentPiece.movementType);
+
+            //keep last powerup in use
+            if (CurrentPowerup != null)
+            {
+                if (CurrentPowerup.type == (int)Powerup.PowerupType.DOUBLE_FULL)
+                {
+                    if (!pieceHandler.CurrentPiece.pieceType.Equals(CustomPiece.PiecesTypeEnum.TYPE_KING))
+                    {
+                        LastPowerupInUse = CurrentPowerup;
+                    }
+                }
+            }
+
             //make movement
             pieceHandler.MakeMovement(mov, steps, (obj) =>
             {
@@ -1158,10 +1215,11 @@ public class GameManager : MonoBehaviour
                     int movesSpent = 1;
                     bool b = true;
                         //todo check if the onPowerup is called before this
-                        if (CurrentPowerup != null && !justTookedPowerup)
+                    if (CurrentPowerup != null && !justTookedPowerup)
                     {
                         if (CurrentPowerup.type == (int)Powerup.PowerupType.DOUBLE_FULL)
                         {
+                            
                             if (pieceHandler.CurrentPiece.pieceType.Equals(CustomPiece.PiecesTypeEnum.TYPE_KNIGHT))
                             {
                                 b = false;
@@ -1169,7 +1227,7 @@ public class GameManager : MonoBehaviour
                             }
                             if (!pieceHandler.CurrentPiece.pieceType.Equals(CustomPiece.PiecesTypeEnum.TYPE_KING))
                             {
-                                CleanPowerup();
+                                CleanPowerup(true);
                             }
                         }
                         justTookedPowerup = !b;

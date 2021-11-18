@@ -194,7 +194,7 @@ public class MatrixHandler : MonoBehaviour
         DesignMatrix(matrixOfCubes, level);
     }
 
-    public bool CheckIfCanStep(bool justInMatrix, Point p)
+    public bool CheckIfCanStep(bool justInMatrix, bool checkEnabler, Point p)
     {
         bool inMatrix = p.i < MatrixIndexLength && p.j < MatrixIndexLength
             && p.i > -1 && p.j > -1;
@@ -203,7 +203,7 @@ public class MatrixHandler : MonoBehaviour
         //bool andActive = inMatrix && (justInMatrix ? true : matrixOfCubes[p.i, p.j].GetComponent<Renderer>().material.color.a > 0);
         // bool andActive = inMatrix && (justInMatrix ? true : matrixOfCubes[p.i, p.j].GetComponent<Renderer>().enabled && !matrixOfCubes[p.i, p.j].needEnabler);
         bool andActive = inMatrix
-            && !matrixOfCubes[p.i, p.j].needEnabler
+            && (checkEnabler?!matrixOfCubes[p.i, p.j].needEnabler:true)
             && (justInMatrix ? true : matrixOfCubes[p.i, p.j].GetComponent<Renderer>().enabled);
         return inMatrix && andActive;
     }

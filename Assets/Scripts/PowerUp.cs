@@ -27,10 +27,24 @@ public class Powerup
     public void ChangeCameraView(bool isCamera3D) {
         if (isCamera3D)
         {
-            GameObj.transform.eulerAngles = new Vector3(0f, 0f, 0f);
+            if (type == (int)PowerupType.DIZZY)
+            {
+                GameObj.transform.eulerAngles = new Vector3(0f, 0f, 45f);
+            }
+            else {
+                GameObj.transform.eulerAngles = new Vector3(0f, 0f, 0f);
+            }
         }
         else {
-            GameObj.transform.eulerAngles = new Vector3(90f, 0f, 0f);
+           
+            if (type == (int)PowerupType.DIZZY)
+            {
+                GameObj.transform.eulerAngles = new Vector3(90f, 45f, 0f);
+            }
+            else
+            {
+                GameObj.transform.eulerAngles = new Vector3(90f, 0f, 0f);
+            }
         }
     }
 

@@ -9,6 +9,7 @@ public class PieceHandler : MonoBehaviour
     public GameObject CurrentPieceGameObjChild { get { return currentPieceGameObjChild; } }
     public CustomPiece CurrentPiece { get { return currentPiece; } }
     public Step LastStep { get { return lastStep; } }
+    public Point[] Path { get; private set; }
     public GameManager gameManager;
     //[SerializeField]
     //public Point currentPoint;
@@ -247,6 +248,13 @@ public class PieceHandler : MonoBehaviour
 
     public void MakeMovement(CustomPiece.MovementTypeEnum movement, int n, Delegates.ObjectDelegate objDelegate)
     {
+        //calculate the path through target point  
+        Path = new Point[n];
+        for (int i = 0; i < n; i++)
+        {
+            Path[i] = GetPoint(movement, i + 1);
+        }
+
         //handle sound
         if (PlayerPrefs.GetInt(Constants.KEY_SOUND) == 1)
         {
@@ -274,20 +282,7 @@ public class PieceHandler : MonoBehaviour
                 currentPieceGameObjChildRB.useGravity = false;
                 currentPieceGameObjChildBCs[(int)currentPiece.pieceType].isTrigger = true;
             }
-            /*  //if bishow => deactivate collider
-              else if (currentPiece.pieceType == CustomPiece.PiecesTypeEnum.TYPE_BISHOP)
-              {
-                  currentPieceGameObjChildRB.useGravity = false;
-                  currentPieceGameObjChildBCs[(int)currentPiece.pieceType].isTrigger = true;
-              }
-              //if queen => deactivate collider
-              else if (currentPiece.pieceType == CustomPiece.PiecesTypeEnum.TYPE_QUEEN
-              && IsDiagonalMovement(movement))
-              {
-                  currentPieceGameObjChildRB.useGravity = false;
-                  currentPieceGameObjChildBCs[(int)currentPiece.pieceType].isTrigger = true;
-              }*/
-
+            //if diagonal movement => through objects
             else if (IsDiagonalMovement(movement))
             {
                 currentPieceGameObjChildRB.useGravity = false;
@@ -315,6 +310,21 @@ public class PieceHandler : MonoBehaviour
         return new Point(currentPiece.currentPoint.i + n * movementVectorDictionary[movement].Point.i,
             currentPiece.currentPoint.j + n * movementVectorDictionary[movement].Point.j);
     }
+
+    public bool IsPointOnPath(Point point) {
+        if (Path != null)
+        {
+            for (int i = 0; i < Path.Length; i++)
+            {
+                if (Path[i].i == point.i && Path[i].j == point.j) {
+                    return true;
+                }
+            }
+        }
+
+        return false;
+    }
+
     public Point GetPointByPointDirection(Point direction, int n)
     {
         return new Point(currentPiece.currentPoint.i + n * direction.i,

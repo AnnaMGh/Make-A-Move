@@ -97,7 +97,9 @@ public class Interactable : MonoBehaviour
 
     private void OnTriggerEnter(Collider other)
     {
-        if (other != null && other.gameObject.tag != null && other.gameObject.tag.Equals("Player"))
+  
+        if (other != null && other.gameObject.tag != null
+            && other.gameObject.tag.Equals("Player"))
         {
             switch (interactableType)
             {
@@ -114,7 +116,7 @@ public class Interactable : MonoBehaviour
                     }
                 case InteractableType.ENABLER:
                     {
-                        HandleEnabler(other, false);
+                        HandleEnabler(other, true);
                         break;
                     }
                 case InteractableType.BREAKABLE:
@@ -125,6 +127,17 @@ public class Interactable : MonoBehaviour
                 case InteractableType.POWERUP:
                     {
                         HandlePowerups();
+                        break;
+                    }
+            }
+        }
+        else if (other != null && other.gameObject.name.Contains("BLOCK"))
+        {
+            switch (interactableType)
+            {
+                case InteractableType.ENABLER:
+                    {
+                        HandleEnabler(other, false);
                         break;
                     }
             }
@@ -162,11 +175,6 @@ public class Interactable : MonoBehaviour
                         HandleBlock(other.collider, true);
                         break;
                     }
-                case InteractableType.ENABLER:
-                    {
-                        HandleEnabler(other.collider, true);
-                        break;
-                    }
             }
         }
     }
@@ -180,127 +188,156 @@ public class Interactable : MonoBehaviour
 
     private void HandleBlock(Collider collider, bool fromCollision)
     {
-        collideOrTrigger = true;
-        PieceHandler piece = collider.transform.parent.GetComponent<PieceHandler>();
+        if (!collideOrTrigger) {
 
-        //if is from collision and its bishop or is from trigger and is something else than bishop => exit
-        if (!piece.CurrentPiece.pieceType.Equals(CustomPiece.PiecesTypeEnum.TYPE_KNIGHT) &&
-            (
-            (fromCollision && !piece.IsDiagonalMovement(piece.LastStep.Movement))
-            || (!fromCollision && piece.IsDiagonalMovement(piece.LastStep.Movement))
-            ))
-        {
-            Block block = (Block)receivedObject;
-
-
-            //check if the block with piece interact is the target one
-            if ((block.oldPoint.i != gameManager.GetPieceHandler().CurrentPiece.currentPoint.i
-                || block.oldPoint.j != gameManager.GetPieceHandler().CurrentPiece.currentPoint.j)
-                 && ((gameManager.CurrentPowerup == null
-                  || gameManager.CurrentPowerup.type != (int)Powerup.PowerupType.DOUBLE_FULL)
-                    && !gameManager.GetPieceHandler().CurrentPiece.pieceType.Equals(CustomPiece.PiecesTypeEnum.TYPE_KING))
-                )
-            {
-                collideOrTrigger = false;
-                return;
-            }
-
-            Point newPoint = new Point(block.oldPoint.i + gameManager.GetPieceHandler().LastStep.Point.i, block.oldPoint.j + gameManager.GetPieceHandler().LastStep.Point.j);
-            bool canMove = gameManager.GetMatrixHandler().CheckIfCanStep(true, gameManager.GetPieceHandler().GetPoint(gameManager.GetPieceHandler().LastStep.Movement, 1));
-            canMove &= !gameManager.GetMatrixHandler().IsBlockOnPoint(newPoint);
-            if (canMove) //block is moved
-            {
-                goDown = !gameManager.GetMatrixHandler().CheckIfCanStep(false, gameManager.GetPieceHandler().GetPoint(gameManager.GetPieceHandler().LastStep.Movement, 1));
-                lastDirection = gameManager.GetPieceHandler().LastStep.Position;
-                block.oldPoint = newPoint;
-
-                //check accuracy
-                accuracy = (gameManager.IsFrontCamera() ? Constants.ACCURECY_FRONT_CAMERA
-                : Constants.ACCURECY_TOP_CAMERA);
-                stepsToMove += accuracy;
-            }
-            else //block stays same position
-            {
-                goDown = false;
-                gameManager.OnBlock(false, null, (int)gameManager.GetPieceHandler().LastStep.OpositeMovement); //back to previous position
-                collideOrTrigger = false;
-            }
-
-        }
-        //block is destroyed by Knight
-        else if (fromCollision && piece.CurrentPiece.pieceType.Equals(CustomPiece.PiecesTypeEnum.TYPE_KNIGHT))
-        {
-            //make sound
-            if (PlayerPrefs.GetInt(Constants.KEY_SOUND) == 1)
-            {
-                this.gameObject.GetComponent<AudioSource>().Play();
-            }
-
-            particles.Play();
-            particles.gameObject.SetActive(true);
-            this.gameObject.transform.GetChild(0).gameObject.SetActive(false);
-            this.gameObject.transform.GetChild(1).gameObject.SetActive(false);
-            this.gameObject.GetComponent<Collider>().enabled = false;
-            this.gameObject.GetComponent<Renderer>().enabled = false;
-
-            goDown = false;
-            gameManager.OnBlock(false, null, -2); //refresh current position
-            collideOrTrigger = false;
-
-            Destroy(gameObject, 1f);
-            GlobalSingleton.GetInstance().SetTimeAsync(100, (async) =>
-            {
-                gameManager.OnBlock(false, (Block)receivedObject, -2); //refresh current position
-            });
-        }
-        else
-        {
-            collideOrTrigger = false;
-        }
-    }
-
-    private void HandleEnabler(Collider collider, bool fromCollision)
-    {
-        if (!collideOrTrigger)
-        {
+            collideOrTrigger = true;
             PieceHandler piece = collider.transform.parent.GetComponent<PieceHandler>();
-            if ((fromCollision && !piece.IsDiagonalMovement(piece.LastStep.Movement))
-            || (!fromCollision && piece.IsDiagonalMovement(piece.LastStep.Movement)))
-            {
-                collideOrTrigger = true;
 
-                //Get object
-                Enabler enabler = (Enabler)receivedObject;
+            //if is from collision and its bishop or is from trigger and is something else than bishop => exit
+            if (!piece.CurrentPiece.pieceType.Equals(CustomPiece.PiecesTypeEnum.TYPE_KNIGHT) &&
+                (
+                (fromCollision && !piece.IsDiagonalMovement(piece.LastStep.Movement))
+                || (!fromCollision && piece.IsDiagonalMovement(piece.LastStep.Movement))
+                ))
+            {
+                Block block = (Block)receivedObject;
+
 
                 //check if the block with piece interact is the target one
-                if ((enabler.enablerPoint.i != gameManager.GetPieceHandler().CurrentPiece.currentPoint.i
-                    || enabler.enablerPoint.j != gameManager.GetPieceHandler().CurrentPiece.currentPoint.j)
-                    && ((gameManager.CurrentPowerup == null
-                      || gameManager.CurrentPowerup.type != (int)Powerup.PowerupType.DOUBLE_FULL)
-                        && !gameManager.GetPieceHandler().CurrentPiece.pieceType.Equals(CustomPiece.PiecesTypeEnum.TYPE_KING))
-                    )
+                if ((block.oldPoint.i != gameManager.GetPieceHandler().CurrentPiece.currentPoint.i
+                     || block.oldPoint.j != gameManager.GetPieceHandler().CurrentPiece.currentPoint.j)
+                   )
                 {
                     collideOrTrigger = false;
                     return;
                 }
 
+
+                if (gameManager.CurrentPowerup != null && gameManager.CurrentPowerup.type == (int)Powerup.PowerupType.STRONG)
+                {
+                    gameManager.LastPowerupInUse = gameManager.CurrentPowerup;
+
+                    //make sound
+                    if (PlayerPrefs.GetInt(Constants.KEY_SOUND) == 1)
+                    {
+                        this.gameObject.GetComponent<AudioSource>().Play();
+                    }
+
+                    particles.Play();
+                    particles.gameObject.SetActive(true);
+                    this.gameObject.transform.GetChild(0).gameObject.SetActive(false);
+                    this.gameObject.transform.GetChild(1).gameObject.SetActive(false);
+                    this.gameObject.GetComponent<Collider>().enabled = false;
+                    this.gameObject.GetComponent<Renderer>().enabled = false;
+
+                    goDown = false;
+                    gameManager.OnBlock(false, null, -3); //refresh current position
+                    collideOrTrigger = false;
+
+                    Destroy(gameObject, 1f);
+                    GlobalSingleton.GetInstance().SetTimeAsync(100, (async) =>
+                    {
+                        gameManager.OnBlock(false, (Block)receivedObject, -3); //refresh current position
+                    });
+
+                }
+                else {
+                    //check if block might be moved
+                    Point newPoint = new Point(block.oldPoint.i + gameManager.GetPieceHandler().LastStep.Point.i, block.oldPoint.j + gameManager.GetPieceHandler().LastStep.Point.j);
+                    bool canMove = gameManager.GetMatrixHandler().CheckIfCanStep(true,true, gameManager.GetPieceHandler().GetPoint(gameManager.GetPieceHandler().LastStep.Movement, 1));
+                    canMove &= !gameManager.GetMatrixHandler().IsBlockOnPoint(newPoint);
+                    if (canMove) //block is moved
+                    {
+                        goDown = !gameManager.GetMatrixHandler().CheckIfCanStep(false,true, gameManager.GetPieceHandler().GetPoint(gameManager.GetPieceHandler().LastStep.Movement, 1));
+                        lastDirection = gameManager.GetPieceHandler().LastStep.Position;
+                        block.oldPoint = newPoint;
+
+                        //check accuracy
+                        accuracy = (gameManager.IsFrontCamera() ? Constants.ACCURECY_FRONT_CAMERA
+                        : Constants.ACCURECY_TOP_CAMERA);
+                        stepsToMove += accuracy;
+                    }
+                    else //block stays same position
+                    {
+                        goDown = false;
+                        gameManager.OnBlock(false, null, (int)gameManager.GetPieceHandler().LastStep.OpositeMovement); //back to previous position
+                        collideOrTrigger = false;
+                    }
+                }
+
+                
+            }
+            //block is destroyed by Knight
+            else if (fromCollision && piece.CurrentPiece.pieceType.Equals(CustomPiece.PiecesTypeEnum.TYPE_KNIGHT))
+            {
                 //make sound
                 if (PlayerPrefs.GetInt(Constants.KEY_SOUND) == 1)
                 {
-                    AudioSource audio = this.gameObject.GetComponent<AudioSource>();
-                    audio.Play();
+                    this.gameObject.GetComponent<AudioSource>().Play();
                 }
 
+                particles.Play();
+                particles.gameObject.SetActive(true);
+                this.gameObject.transform.GetChild(0).gameObject.SetActive(false);
+                this.gameObject.transform.GetChild(1).gameObject.SetActive(false);
+                this.gameObject.GetComponent<Collider>().enabled = false;
+                this.gameObject.GetComponent<Renderer>().enabled = false;
 
+                goDown = false;
+                gameManager.OnBlock(false, null, -2); //refresh current position
+                collideOrTrigger = false;
 
-                //change enabler color
-                Color enablerColor = ((enabler.enablerPoint.i + enabler.enablerPoint.j) % 2 == 0 ? Constants.MATRIX_BOX_BLACK_COLOR : Constants.MATRIX_BOX_WHITE_COLOR);
-                enabler.GameObj.GetComponent<Renderer>().material.color = enablerColor;
-                //change cube color
-                Color cubeColor = ((enabler.cubePoint.i + enabler.cubePoint.j) % 2 == 0 ? Constants.MATRIX_BOX_BLACK_COLOR : Constants.MATRIX_BOX_WHITE_COLOR);
-                gameManager.GetMatrixHandler().ChangeCubeStatus(enabler.cubePoint, true, cubeColor);
-
+                Destroy(gameObject, 1f);
+                GlobalSingleton.GetInstance().SetTimeAsync(100, (async) =>
+                {
+                    gameManager.OnBlock(false, (Block)receivedObject, -2); //refresh current position
+                });
             }
+            else
+            {
+                collideOrTrigger = false;
+            }
+        }
+       
+    }
+
+    private void HandleEnabler(Collider collider, bool isFromPlayer)
+    {
+        if (!collideOrTrigger)
+        {
+           collideOrTrigger = true;
+
+            //Get object
+            Enabler enabler = (Enabler)receivedObject;
+
+            //check if the enabler with piece interact is the target one
+            if (isFromPlayer)
+            {
+                if (enabler.enablerPoint.i != gameManager.GetPieceHandler().CurrentPiece.currentPoint.i
+                  || enabler.enablerPoint.j != gameManager.GetPieceHandler().CurrentPiece.currentPoint.j)
+                {
+                    //check if enabler is in the path
+                    if (!gameManager.GetPieceHandler().IsPointOnPath(enabler.enablerPoint))
+                    {
+                        collideOrTrigger = false;
+                        return;
+                    }
+                }
+            }
+
+            //make sound
+            if (PlayerPrefs.GetInt(Constants.KEY_SOUND) == 1)
+            {
+                AudioSource audio = this.gameObject.GetComponent<AudioSource>();
+                audio.Play();
+            }
+
+            //change enabler color
+            Color enablerColor = ((enabler.enablerPoint.i + enabler.enablerPoint.j) % 2 == 0 ? Constants.MATRIX_BOX_BLACK_COLOR : Constants.MATRIX_BOX_WHITE_COLOR);
+            enabler.GameObj.GetComponent<Renderer>().material.color = enablerColor;
+            //change cube color
+            Color cubeColor = ((enabler.cubePoint.i + enabler.cubePoint.j) % 2 == 0 ? Constants.MATRIX_BOX_BLACK_COLOR : Constants.MATRIX_BOX_WHITE_COLOR);
+            gameManager.GetMatrixHandler().ChangeCubeStatus(enabler.cubePoint, true, cubeColor);
         }
     }
 
@@ -317,16 +354,25 @@ public class Interactable : MonoBehaviour
 
             Breakable breakable = (Breakable)receivedObject;
 
-            //check if the block with piece interact is the target one
-            if ((breakable.point.i != destinationPoint.i
+            //check if the breakable with piece interact is the target one
+            if (breakable.point.i != destinationPoint.i
                   || breakable.point.j != destinationPoint.j)
-                && ((gameManager.CurrentPowerup == null
-                  || gameManager.CurrentPowerup.type != (int)Powerup.PowerupType.DOUBLE_FULL)
-                    && !gameManager.GetPieceHandler().CurrentPiece.pieceType.Equals(CustomPiece.PiecesTypeEnum.TYPE_KING))
-                )
             {
-                collideOrTrigger = false;
-                return;
+                //if the double full powerup is in use than continue
+                /*if (gameManager.CurrentPowerup == null
+                || (gameManager.CurrentPowerup.type != (int)Powerup.PowerupType.DOUBLE_FULL
+                    && gameManager.LastPowerupInUse.type != (int)Powerup.PowerupType.DOUBLE_FULL))
+                {
+                    collideOrTrigger = false;
+                    return;
+                }*/
+
+                //check if breakable is in the path
+                if (!gameManager.GetPieceHandler().IsPointOnPath(breakable.point))
+                {
+                    collideOrTrigger = false;
+                    return;
+                }
             }
 
             //make sound
@@ -351,6 +397,12 @@ public class Interactable : MonoBehaviour
 
             Powerup powerup = (Powerup)receivedObject;
 
+            //check if powerup is in the path
+            if (!gameManager.GetPieceHandler().IsPointOnPath(powerup.point))
+            {
+                collideOrTrigger = false;
+                return;
+            }
 
             //make sound
             if (PlayerPrefs.GetInt(Constants.KEY_SOUND) == 1)
