@@ -331,6 +331,12 @@ public class PieceHandler : MonoBehaviour
             currentPiece.currentPoint.j + n * direction.j);
     }
 
+    public Point GetSetPointByPointDirection(Point setPoint, Point direction, int n)
+    {
+        return new Point(setPoint.i + n * direction.i,
+            setPoint.j + n * direction.j);
+    }
+
     public Point[] GetPointsBishopBlock(CustomPiece.MovementTypeEnum movement, Point blockPoint)
     {
         Point[] bishopBlockPoints = new Point[2];

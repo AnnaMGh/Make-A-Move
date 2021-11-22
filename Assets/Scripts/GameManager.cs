@@ -635,14 +635,14 @@ public class GameManager : MonoBehaviour
                 if (pieceHandler.CurrentPiece.pieceType == CustomPiece.PiecesTypeEnum.TYPE_KNIGHT)
                 {
                     canMove = GetMatrixHandler().CheckIfCanStep(true,true, GetPieceHandler()
-                    .GetPointByPointDirection(direction, 1));
+                    .GetSetPointByPointDirection(piecePoint, direction, 1));
                 }
                 else if (pieceHandler.IsDiagonalMovement(type))
                 {
                     //check if has where to step and push the block
                     bool checkEnabler = (CurrentPowerup == null || CurrentPowerup.type != (int)Powerup.PowerupType.STRONG);
                     canMove = GetMatrixHandler().CheckIfCanStep(true, checkEnabler, GetPieceHandler()
-                    .GetPointByPointDirection(direction, 2));
+                   .GetSetPointByPointDirection(piecePoint, direction, 2));
 
                     //check if has blocks in its way
                     if (checkEnabler)
@@ -657,7 +657,7 @@ public class GameManager : MonoBehaviour
                 {
                     bool checkEnabler = (CurrentPowerup == null || CurrentPowerup.type != (int)Powerup.PowerupType.STRONG);
                     canMove = GetMatrixHandler().CheckIfCanStep(true, checkEnabler, GetPieceHandler()
-                    .GetPointByPointDirection(direction, 2));
+                    .GetSetPointByPointDirection(piecePoint, direction, 2));
 
                     //check if has blocks in its way
                     if (checkEnabler)
@@ -1183,6 +1183,61 @@ public class GameManager : MonoBehaviour
         if (!moveEnabled || GlobalSingleton.GetInstance().gamePaused) { return; }
 
         CustomPiece.MovementTypeEnum mov = (CustomPiece.MovementTypeEnum)index;
+
+
+        if (CurrentPowerup != null)
+        {
+            if (CurrentPowerup.type == (int)Powerup.PowerupType.DIZZY)
+            {
+                int i = UnityEngine.Random.Range(0,2);
+              
+                if (i % 2 == 0 && possibleNextMoves.Count>1)
+                {
+                    int randomIndex = UnityEngine.Random.Range(0, possibleNextMoves.Count);
+                    int j = 0;
+                   int putRandomBetweenValues = -1;
+                    foreach (CustomPiece.MovementTypeEnum movement in possibleNextMoves.Values)
+                    {
+                        if (j == randomIndex)
+                        {
+                            if (mov == movement)
+                            {
+                                if (j == possibleNextMoves.Count - 1)
+                                {
+                                    putRandomBetweenValues = UnityEngine.Random.Range(0, possibleNextMoves.Count - 1);
+                                }
+                                else if (j == 0)
+                                {
+                                    putRandomBetweenValues = UnityEngine.Random.Range(1, possibleNextMoves.Count);
+                                }
+                            }
+                            else {
+                                mov = movement;
+                            }
+                            break;
+                        }
+                        j++;
+                    }
+
+                    //put first
+                    if (putRandomBetweenValues>=0)
+                    {
+                        j = 0;
+                        foreach (CustomPiece.MovementTypeEnum movement in possibleNextMoves.Values)
+                        {
+                            if (j == putRandomBetweenValues)
+                            {
+                                mov = movement;
+                                break;
+                            }
+                            j++;
+                        }
+                    }
+                }
+
+                CleanPowerup(true);
+            }
+        }
 
 
         //regular movement
