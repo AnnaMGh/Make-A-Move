@@ -335,9 +335,8 @@ public class Interactable : MonoBehaviour
             //change enabler color
             Color enablerColor = ((enabler.enablerPoint.i + enabler.enablerPoint.j) % 2 == 0 ? Constants.MATRIX_BOX_BLACK_COLOR : Constants.MATRIX_BOX_WHITE_COLOR);
             enabler.GameObj.GetComponent<Renderer>().material.color = enablerColor;
-            //change cube color
-            Color cubeColor = ((enabler.cubePoint.i + enabler.cubePoint.j) % 2 == 0 ? Constants.MATRIX_BOX_BLACK_COLOR : Constants.MATRIX_BOX_WHITE_COLOR);
-            gameManager.GetMatrixHandler().ChangeCubeStatus(enabler.cubePoint, true, cubeColor);
+            gameManager.OnEnabler(enabler);
+           
         }
     }
 
