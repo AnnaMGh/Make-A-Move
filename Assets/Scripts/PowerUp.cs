@@ -12,6 +12,7 @@ public class Powerup
     public Point point;
     public int type;
     private GameObject gameObj;
+    public int nrOfFreeMovesAvailable;
 
 
     public void SetGameObject(GameObject gameObj)

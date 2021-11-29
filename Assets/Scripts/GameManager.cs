@@ -182,13 +182,16 @@ public class GameManager : MonoBehaviour
         //set firebase
         StartCoroutine(FirebaseSingleton.GetInstance().ICheckFirebaseDependences((obj1) => { }));
 
-        CheckFirstLaunch();
-        HandlePatricle();
-        InitiateUI();
 
         //todo test tutorial
         PlayerPrefs.SetInt(Constants.KEY_TUTORIAL_STATE, 0);
+        HardcodeToLevel(50);
+        //end todo
 
+
+        CheckFirstLaunch();
+        HandlePatricle();
+        InitiateUI();
     }
 
     // Update is called once per frame
@@ -218,6 +221,19 @@ public class GameManager : MonoBehaviour
 
         }
     }
+
+    private void HardcodeToLevel(int level)
+    {
+        if (PlayerPrefs.GetInt(Constants.KEY_LAST_LEVEL) < level)
+        {
+            PlayerPrefs.SetInt(Constants.KEY_LAST_LEVEL, level);
+            for (int i = 1; i < level; i++)
+            {
+                GlobalSingleton.GetInstance().ChangeLevelStar(i, 3);
+            }
+        }
+    }
+
 
     private void MoveToTouchedCubePosition(Ray raycast)
     {
@@ -755,6 +771,58 @@ public class GameManager : MonoBehaviour
         }
     }
 
+    private CustomPiece.MovementTypeEnum GetDizzyMovement(CustomPiece.MovementTypeEnum mov) {
+
+        int i = UnityEngine.Random.Range(0, 2);
+
+        if (i % 2 == 0 && possibleNextMoves.Count > 1)
+        {
+            int randomIndex = UnityEngine.Random.Range(0, possibleNextMoves.Count);
+            int j = 0;
+            int putRandomBetweenValues = -1;
+            foreach (CustomPiece.MovementTypeEnum movement in possibleNextMoves.Values)
+            {
+                if (j == randomIndex)
+                {
+                    if (mov == movement)
+                    {
+                        if (j == possibleNextMoves.Count - 1)
+                        {
+                            putRandomBetweenValues = UnityEngine.Random.Range(0, possibleNextMoves.Count - 1);
+                        }
+                        else if (j == 0)
+                        {
+                            putRandomBetweenValues = UnityEngine.Random.Range(1, possibleNextMoves.Count);
+                        }
+                    }
+                    else
+                    {
+                        mov = movement;
+                    }
+                    break;
+                }
+                j++;
+            }
+
+            //put first
+            if (putRandomBetweenValues >= 0)
+            {
+                j = 0;
+                foreach (CustomPiece.MovementTypeEnum movement in possibleNextMoves.Values)
+                {
+                    if (j == putRandomBetweenValues)
+                    {
+                        mov = movement;
+                        break;
+                    }
+                    j++;
+                }
+            } 
+        }
+
+        return mov;
+    }
+
 
     #region From other classes
 
@@ -1258,54 +1326,7 @@ public class GameManager : MonoBehaviour
         {
             if (CurrentPowerup.type == (int)Powerup.PowerupType.DIZZY)
             {
-                int i = UnityEngine.Random.Range(0, 2);
-
-                if (i % 2 == 0 && possibleNextMoves.Count > 1)
-                {
-                    int randomIndex = UnityEngine.Random.Range(0, possibleNextMoves.Count);
-                    int j = 0;
-                    int putRandomBetweenValues = -1;
-                    foreach (CustomPiece.MovementTypeEnum movement in possibleNextMoves.Values)
-                    {
-                        if (j == randomIndex)
-                        {
-                            if (mov == movement)
-                            {
-                                if (j == possibleNextMoves.Count - 1)
-                                {
-                                    putRandomBetweenValues = UnityEngine.Random.Range(0, possibleNextMoves.Count - 1);
-                                }
-                                else if (j == 0)
-                                {
-                                    putRandomBetweenValues = UnityEngine.Random.Range(1, possibleNextMoves.Count);
-                                }
-                            }
-                            else
-                            {
-                                mov = movement;
-                            }
-                            break;
-                        }
-                        j++;
-                    }
-
-                    //put first
-                    if (putRandomBetweenValues >= 0)
-                    {
-                        j = 0;
-                        foreach (CustomPiece.MovementTypeEnum movement in possibleNextMoves.Values)
-                        {
-                            if (j == putRandomBetweenValues)
-                            {
-                                mov = movement;
-                                break;
-                            }
-                            j++;
-                        }
-                    }
-                }
-
-                CleanPowerup(true);
+                mov = GetDizzyMovement(mov);
             }
         }
 
@@ -1354,6 +1375,16 @@ public class GameManager : MonoBehaviour
                                 {
                                     CleanPowerup(true);
                                 }
+                            }else if(CurrentPowerup.type == (int) Powerup.PowerupType.DIZZY)
+                            {
+                                
+                                b = false;
+                                movesSpent = (CurrentPowerup.nrOfFreeMovesAvailable>1?0:1);
+                                CurrentPowerup.nrOfFreeMovesAvailable--;
+                                if (movesSpent == 1)
+                                {
+                                    CleanPowerup(true);
+                                }
                             }
                             justTookedPowerup = !b;
                         }
@@ -1383,7 +1414,7 @@ public class GameManager : MonoBehaviour
                             if (bestScore < currentStars)
                             {
                                 bestScore = currentStars;
-                                GlobalSingleton.GetInstance().ChangeLevelStar(matrixHandler.CurrentLevel, matrixHandler.CalculateStars());
+                                GlobalSingleton.GetInstance().ChangeLevelStar(matrixHandler.CurrentLevel, bestScore);
                             }
 
                             levelFinishedHandler.ShowPanel(matrixHandler.CurrentLevel, (objLevelFinishedShowed) =>

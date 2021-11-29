@@ -93,6 +93,15 @@ public class PowerupDev : InteractableDev
 
         Powerup powerup = new Powerup();
         powerup.type = Int32.Parse(impPowerupType.text);
+        powerup.nrOfFreeMovesAvailable = 0;
+        if (powerup.type == (int)Powerup.PowerupType.DOUBLE_FULL)
+        {
+            powerup.nrOfFreeMovesAvailable = 1;
+        }
+        else if (powerup.type == (int)Powerup.PowerupType.DIZZY)
+        {
+            powerup.nrOfFreeMovesAvailable = 3;
+        }
         powerup.point = new Point(Int32.Parse(impPowerupPointI.text), Int32.Parse(impPowerupPointJ.text));
         return powerup;
     }
