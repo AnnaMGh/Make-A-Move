@@ -11,6 +11,7 @@ public class Constants
     public static string KEY_SOUND = "key_sound"; //(0 = off, 1 = on)
     public static string KEY_COLOR = "key_color"; //(0 = white, 1 = black)
     public static string KEY_TUTORIAL_STATE = "key_tutorial_state"; //(0 = none, 1 = level, 2 = level 1 pawn, 3 = target ...)
+    public static string KEY_TUTORIAL_STATE_CSV = "key_tutorials_state"; //(0 = none, 1 = level, 2 = level 1 pawn, 3 = target ...)
     public static string KEY_LEVEL_STARS_CSV = "key_stars_csv";
 
     //GAME TARGETS

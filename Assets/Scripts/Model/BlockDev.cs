@@ -14,7 +14,7 @@ public class BlockDev : InteractableDev
     private int minLimit = -1;
     private int maxLimit = 8;
     private int minCost = 0;
-    private int maxCost = 21;
+    private int maxCost = 100;
 
 
     private void Initialize()

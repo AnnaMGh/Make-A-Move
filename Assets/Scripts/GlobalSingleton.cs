@@ -9,6 +9,7 @@ public class GlobalSingleton
     private static GlobalSingleton instance;
     private TextAsset[] textAssets;
     private Dictionary<int, int> levelStarDictionary;
+    private Dictionary<string, int> tutorialDictionary;
     private StandardShaderUtils.BlendMode mainCubesBlendMode;
     public static GlobalSingleton GetInstance()
     {
@@ -51,6 +52,7 @@ public class GlobalSingleton
         textAssets = Resources.LoadAll<TextAsset>("LevelsJson");
     }
 
+    #region level stars
     public Dictionary<int, int> GetLevelStarDictionary() {
         if (levelStarDictionary == null)
         {
@@ -109,6 +111,65 @@ public class GlobalSingleton
             }
         }
     }
+    #endregion
+
+
+    #region tutorial
+    public int GetTutorialDictionaryState(string tutorial)
+    {
+        if (tutorialDictionary == null)
+        {
+            RefreshTutorialDictionary();
+        }
+        if (tutorialDictionary.ContainsKey(tutorial))
+        {
+            return tutorialDictionary[tutorial];
+        }
+        return 0;
+    }
+
+    public void ChangeTutorialState(string tutorial, int state)
+    {
+        if (tutorialDictionary == null)
+        {
+            RefreshTutorialDictionary();
+        }
+        if (tutorialDictionary.ContainsKey(tutorial))
+        {
+            tutorialDictionary[tutorial] = state;
+        }
+        else
+        {
+            tutorialDictionary.Add(tutorial, state);
+        }
+
+        string cvs = "";
+        foreach (KeyValuePair<string, int> t in tutorialDictionary)
+        {
+            cvs += "," + t.Key + "-" + t.Value;
+        }
+
+        if (cvs.Length > 0)
+        {
+            PlayerPrefs.SetString(Constants.KEY_TUTORIAL_STATE_CSV, cvs.Substring(1));
+        }
+    }
+
+    public void RefreshTutorialDictionary()
+    {
+        tutorialDictionary = new Dictionary<string, int>();
+        string csvStr = PlayerPrefs.GetString(Constants.KEY_TUTORIAL_STATE_CSV);
+        if (csvStr != null && csvStr.Length > 0)
+        {
+            string[] csv = csvStr.Split(',');
+            for (int i = 0; i < csv.Length; i++)
+            {
+                string[] tutorialCSV = csv[i].Split('-');
+                tutorialDictionary.Add(tutorialCSV[0], Int32.Parse(tutorialCSV[1]));
+            }
+        }
+    }
+    #endregion
 
     public StandardShaderUtils.BlendMode GetMainCubesBlendMode() {
         if (mainCubesBlendMode == 0)

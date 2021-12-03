@@ -185,6 +185,7 @@ public class GameManager : MonoBehaviour
 
         //todo test tutorial
         PlayerPrefs.SetInt(Constants.KEY_TUTORIAL_STATE, 0);
+        PlayerPrefs.SetString(Constants.KEY_TUTORIAL_STATE_CSV, "");
         HardcodeToLevel(50);
         //end todo
 
@@ -428,11 +429,17 @@ public class GameManager : MonoBehaviour
         if (matrixHandler.CurrentLevel == 1)
         {
             moveEnabled = false;
-            tutorialHandler.ShowTutorial(1, imgCurrentLevel.transform.position + new Vector3(0f, 10f, 0f), Vector3.up, c_s_y, "Current level", true, (objTutorial1) =>
+            tutorialHandler.ShowTutorial(TutorialHandler.TutorialTitle.INTRODUCE_LEVEL, 
+                imgCurrentLevel.transform.position + new Vector3(0f, 10f, 0f),
+                c_s_y, (objTutorial1) =>
             {
-                tutorialHandler.ShowTutorial(2, cameraMain.WorldToScreenPoint(pieceHandler.CurrentPieceGameObj.transform.position), Vector3.right, c_s_y, "Current chess piece", true, (objTutorial2) =>
+                tutorialHandler.ShowTutorial(TutorialHandler.TutorialTitle.INTRODUCE_PIECE, 
+                    cameraMain.WorldToScreenPoint(pieceHandler.CurrentPieceGameObj.transform.position),  
+                    c_s_y, (objTutorial2) =>
                 {
-                    tutorialHandler.ShowTutorial(3, cameraMain.WorldToScreenPoint(matrixHandler.MatrixOfCubes[matrixHandler.FinishPoint.i, matrixHandler.FinishPoint.j].transform.position + Vector3.forward), Vector3.right, c_s_y, "Target", true, (objTutorial3) =>
+                    tutorialHandler.ShowTutorial(TutorialHandler.TutorialTitle.INTRODUCE_TARGET, 
+                        cameraMain.WorldToScreenPoint(matrixHandler.MatrixOfCubes[matrixHandler.FinishPoint.i, matrixHandler.FinishPoint.j].transform.position + Vector3.forward), 
+                        c_s_y, (objTutorial3) =>
                     {
                         Cube nextPossibleMoveCube = new Cube();
                         foreach (KeyValuePair<Cube, CustomPiece.MovementTypeEnum> c in possibleNextMoves)
@@ -441,16 +448,23 @@ public class GameManager : MonoBehaviour
                             break;
                         }
 
-                        //tutorialHandler.ShowTutorial(4, cameraMain.WorldToScreenPoint(arrowHandler.GetPositions()[CustomPiece.MovementTypeEnum.MOVEMENT_FORWARD]), Vector3.left, c_s_y, "Movement arrows according to piece type", true, (objTutorial4) =>
-                        tutorialHandler.ShowTutorial(4, cameraMain.WorldToScreenPoint(nextPossibleMoveCube.transform.position + Vector3.forward), Vector3.left, c_s_y, "Tap on the marked cubes to move the player", true, (objTutorial4) =>
-                       {
-                           tutorialHandler.ShowTutorial(5, imgMoves.transform.position + new Vector3(0f, 10f, 0f), Vector3.up, c_s_y, "Number of moves left", true, (objTutorial5) =>
+                        tutorialHandler.ShowTutorial(TutorialHandler.TutorialTitle.INTRODUCE_MOVEMENT,
+                            cameraMain.WorldToScreenPoint(nextPossibleMoveCube.transform.position + Vector3.forward),
+                            c_s_y,  (objTutorial4) =>
+                        {
+                           tutorialHandler.ShowTutorial(TutorialHandler.TutorialTitle.INTRODUCE_MOVEMENT_NUMBER, 
+                               imgMoves.transform.position + new Vector3(0f, 10f, 0f), 
+                               c_s_y, (objTutorial5) =>
                            {
                                float cameraSize = imgCamera.GetComponent<RectTransform>().rect.width / 2f * c_s_y;
 
-                               tutorialHandler.ShowTutorial(6, imgCamera.transform.position + new Vector3(-cameraSize, -cameraSize, 0f), Vector3.left, c_s_y, "Change camera perspective - Toggle between 2D and 3D", true, (objTutorial6) =>
+                               tutorialHandler.ShowTutorial(TutorialHandler.TutorialTitle.INTRODUCE_CAMERA, 
+                                   imgCamera.transform.position + new Vector3(-cameraSize, -cameraSize, 0f), 
+                                   c_s_y, (objTutorial6) =>
                                {
-                                   tutorialHandler.ShowTutorial(7, imgCamera.transform.position + new Vector3(-cameraSize, -cameraSize, 0f), Vector3.left, c_s_y, "While camera 3D is on you can rotate the view by SWIPING", false, (objTutorial7) =>
+                                   tutorialHandler.ShowTutorial(TutorialHandler.TutorialTitle.UPDATE_CAMERA, 
+                                       imgCamera.transform.position + new Vector3(-cameraSize, -cameraSize, 0f),
+                                       c_s_y,  (objTutorial7) =>
                                    {
                                        moveEnabled = true;
                                        //exit
@@ -518,15 +532,46 @@ public class GameManager : MonoBehaviour
         else if (matrixHandler.CurrentLevel == 49)
         {
             moveEnabled = false;
-            tutorialHandler.ShowTutorial(24, cameraMain.WorldToScreenPoint(matrixHandler.MatrixOfCubes[matrixHandler.PowerupArray[0].point.i, matrixHandler.PowerupArray[0].point.j].transform.position),
-                Vector3.right, c_s_y, "DOUBLE_FULL POWERUP gives different powers for every piece", true, (objTutorial) =>
+            tutorialHandler.ShowTutorial(TutorialHandler.TutorialTitle.POWERUP_DOUBLE_FULL_INTRODUCE,
+                cameraMain.WorldToScreenPoint(matrixHandler.MatrixOfCubes[matrixHandler.PowerupArray[0].point.i, matrixHandler.PowerupArray[0].point.j].transform.position),
+                c_s_y, (objTutorial) =>
+                {
+
+                    tutorialHandler.ShowTutorial(TutorialHandler.TutorialTitle.POWERUP_DOUBLE_FULL_LOST,
+                        cameraMain.WorldToScreenPoint(matrixHandler.MatrixOfCubes[matrixHandler.PowerupArray[0].point.i, matrixHandler.PowerupArray[0].point.j].transform.position),
+                         c_s_y, (objTutoria2) =>
+                        {
+                             moveEnabled = true;
+                         //exit
+                     });
+                });
+        }
+        else if (matrixHandler.CurrentLevel == 52)
+        {
+            moveEnabled = false;
+            tutorialHandler.ShowTutorial(30, cameraMain.WorldToScreenPoint(matrixHandler.MatrixOfCubes[matrixHandler.PowerupArray[0].point.i, matrixHandler.PowerupArray[0].point.j].transform.position),
+                Vector3.right, c_s_y, "STRONG POWERUP makes the pieces destroy blocks instead of pushing them", true, (objTutorial) =>
             {
-                tutorialHandler.ShowTutorial(25, cameraMain.WorldToScreenPoint(matrixHandler.MatrixOfCubes[matrixHandler.PowerupArray[0].point.i, matrixHandler.PowerupArray[0].point.j].transform.position),
-                 Vector3.right, c_s_y, "DOUBLE_FULL POWERUP will be lost after the first move or the first piece change", false, (objTutoria2) =>
+                tutorialHandler.ShowTutorial(31, cameraMain.WorldToScreenPoint(matrixHandler.MatrixOfCubes[matrixHandler.PowerupArray[0].point.i, matrixHandler.PowerupArray[0].point.j].transform.position),
+                 Vector3.right, c_s_y, "STRONG POWERUP doesn't apply to KNIGHT", false, (objTutoria2) =>
                  {
                      moveEnabled = true;
-                    //exit
-                });
+                     //exit
+                 });
+            });
+        }
+        else if (matrixHandler.CurrentLevel == 57)
+        {
+            moveEnabled = false;
+            tutorialHandler.ShowTutorial(32, cameraMain.WorldToScreenPoint(matrixHandler.MatrixOfCubes[matrixHandler.PowerupArray[0].point.i, matrixHandler.PowerupArray[0].point.j].transform.position),
+                Vector3.right, c_s_y, "DIZZY POWERUP gives 3 free moves", true, (objTutorial) =>
+            {
+                tutorialHandler.ShowTutorial(33, cameraMain.WorldToScreenPoint(matrixHandler.MatrixOfCubes[matrixHandler.PowerupArray[0].point.i, matrixHandler.PowerupArray[0].point.j].transform.position),
+                 Vector3.right, c_s_y, "DIZZY POWERUP have 50% of moving the piece in another direction", false, (objTutoria2) =>
+                 {
+                     moveEnabled = true;
+                     //exit
+                 });
             });
         }
 
@@ -771,7 +816,8 @@ public class GameManager : MonoBehaviour
         }
     }
 
-    private CustomPiece.MovementTypeEnum GetDizzyMovement(CustomPiece.MovementTypeEnum mov) {
+    private CustomPiece.MovementTypeEnum GetDizzyMovement(CustomPiece.MovementTypeEnum mov)
+    {
 
         int i = UnityEngine.Random.Range(0, 2);
 
@@ -817,7 +863,7 @@ public class GameManager : MonoBehaviour
                     }
                     j++;
                 }
-            } 
+            }
         }
 
         return mov;
@@ -1027,7 +1073,7 @@ public class GameManager : MonoBehaviour
             {
                 moveEnabled = false;
 
-                Point p = pieceHandler.GetSetPointByPointDirection(powerup.point, new Point(0,1), 2);
+                Point p = pieceHandler.GetSetPointByPointDirection(powerup.point, new Point(0, 1), 2);
 
                 tutorialHandler.ShowTutorial(26, cameraMain.WorldToScreenPoint(matrixHandler.MatrixOfCubes[p.i, p.j].transform.position),
                     Vector3.right, c_s_y, "PAWN with DOUBLE_FULL POWERUP can move up to 2 steps", false, (objTutorial1) =>
@@ -1375,13 +1421,14 @@ public class GameManager : MonoBehaviour
                                 {
                                     CleanPowerup(true);
                                 }
-                            }else if(CurrentPowerup.type == (int) Powerup.PowerupType.DIZZY)
+                            }
+                            else if (CurrentPowerup.type == (int)Powerup.PowerupType.DIZZY)
                             {
-                                
-                                b = false;
-                                movesSpent = (CurrentPowerup.nrOfFreeMovesAvailable>1?0:1);
+
+                                b = true;
+                                movesSpent = (CurrentPowerup.nrOfFreeMovesAvailable > 0 ? 0 : 1);
                                 CurrentPowerup.nrOfFreeMovesAvailable--;
-                                if (movesSpent == 1)
+                                if (CurrentPowerup.nrOfFreeMovesAvailable <= 0)
                                 {
                                     CleanPowerup(true);
                                 }
@@ -1464,8 +1511,12 @@ public class GameManager : MonoBehaviour
 
             //check if had powerup
             if (CurrentPowerup != null
-                && CurrentPowerup.type == (int)Powerup.PowerupType.DOUBLE_FULL
-                && !pieceHandler.CurrentPiece.pieceType.Equals(CustomPiece.PiecesTypeEnum.TYPE_KING))
+                &&
+                (CurrentPowerup.type == (int)Powerup.PowerupType.DOUBLE_FULL
+                     && !pieceHandler.CurrentPiece.pieceType.Equals(CustomPiece.PiecesTypeEnum.TYPE_KING)
+                   ||
+                   CurrentPowerup.type == (int)Powerup.PowerupType.DIZZY
+                ))
             {
                 powerupsIcons[CurrentPowerup.type].SetActive(false);
                 CurrentPowerup = null;
