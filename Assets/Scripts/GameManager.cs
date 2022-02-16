@@ -76,7 +76,7 @@ public class GameManager : MonoBehaviour
     private bool justTookedPowerup;
 
     //test GUI variables
-    //string vvvalue = "not set";
+    string vvvalue = "not set";
     //string crash = "Crash";
 
     Dictionary<Cube, CustomPiece.MovementTypeEnum> possibleNextMoves = new Dictionary<Cube, CustomPiece.MovementTypeEnum>();
@@ -429,16 +429,16 @@ public class GameManager : MonoBehaviour
         if (matrixHandler.CurrentLevel == 1)
         {
             moveEnabled = false;
-            tutorialHandler.ShowTutorial(TutorialHandler.TutorialTitle.INTRODUCE_LEVEL, 
+            tutorialHandler.ShowTutorial(TutorialHandler.TutorialTitle.INTRODUCE_LEVEL,
                 imgCurrentLevel.transform.position + new Vector3(0f, 10f, 0f),
                 c_s_y, (objTutorial1) =>
             {
-                tutorialHandler.ShowTutorial(TutorialHandler.TutorialTitle.INTRODUCE_PIECE, 
-                    cameraMain.WorldToScreenPoint(pieceHandler.CurrentPieceGameObj.transform.position),  
+                tutorialHandler.ShowTutorial(TutorialHandler.TutorialTitle.INTRODUCE_PIECE,
+                    cameraMain.WorldToScreenPoint(pieceHandler.CurrentPieceGameObj.transform.position),
                     c_s_y, (objTutorial2) =>
                 {
-                    tutorialHandler.ShowTutorial(TutorialHandler.TutorialTitle.INTRODUCE_TARGET, 
-                        cameraMain.WorldToScreenPoint(matrixHandler.MatrixOfCubes[matrixHandler.FinishPoint.i, matrixHandler.FinishPoint.j].transform.position + Vector3.forward), 
+                    tutorialHandler.ShowTutorial(TutorialHandler.TutorialTitle.INTRODUCE_TARGET,
+                        cameraMain.WorldToScreenPoint(matrixHandler.MatrixOfCubes[matrixHandler.FinishPoint.i, matrixHandler.FinishPoint.j].transform.position + Vector3.forward),
                         c_s_y, (objTutorial3) =>
                     {
                         Cube nextPossibleMoveCube = new Cube();
@@ -450,27 +450,27 @@ public class GameManager : MonoBehaviour
 
                         tutorialHandler.ShowTutorial(TutorialHandler.TutorialTitle.INTRODUCE_MOVEMENT,
                             cameraMain.WorldToScreenPoint(nextPossibleMoveCube.transform.position + Vector3.forward),
-                            c_s_y,  (objTutorial4) =>
-                        {
-                           tutorialHandler.ShowTutorial(TutorialHandler.TutorialTitle.INTRODUCE_MOVEMENT_NUMBER, 
-                               imgMoves.transform.position + new Vector3(0f, 10f, 0f), 
-                               c_s_y, (objTutorial5) =>
-                           {
-                               float cameraSize = imgCamera.GetComponent<RectTransform>().rect.width / 2f * c_s_y;
+                            c_s_y, (objTutorial4) =>
+                       {
+                           tutorialHandler.ShowTutorial(TutorialHandler.TutorialTitle.INTRODUCE_MOVEMENT_NUMBER,
+                                imgMoves.transform.position + new Vector3(0f, 10f, 0f),
+                                c_s_y, (objTutorial5) =>
+                            {
+                                float cameraSize = imgCamera.GetComponent<RectTransform>().rect.width / 2f * c_s_y;
 
-                               tutorialHandler.ShowTutorial(TutorialHandler.TutorialTitle.INTRODUCE_CAMERA, 
-                                   imgCamera.transform.position + new Vector3(-cameraSize, -cameraSize, 0f), 
-                                   c_s_y, (objTutorial6) =>
-                               {
-                                   tutorialHandler.ShowTutorial(TutorialHandler.TutorialTitle.UPDATE_CAMERA, 
-                                       imgCamera.transform.position + new Vector3(-cameraSize, -cameraSize, 0f),
-                                       c_s_y,  (objTutorial7) =>
-                                   {
-                                       moveEnabled = true;
-                                       //exit
-                                   });
-                               });
-                           });
+                                tutorialHandler.ShowTutorial(TutorialHandler.TutorialTitle.INTRODUCE_CAMERA,
+                                    imgCamera.transform.position + new Vector3(-cameraSize, -cameraSize, 0f),
+                                    c_s_y, (objTutorial6) =>
+                                {
+                                    tutorialHandler.ShowTutorial(TutorialHandler.TutorialTitle.UPDATE_CAMERA,
+                                        imgCamera.transform.position + new Vector3(-cameraSize, -cameraSize, 0f),
+                                        c_s_y, (objTutorial7) =>
+                                    {
+                                        moveEnabled = true;
+                                      //exit
+                                  });
+                                });
+                            });
                        });
                     });
                 });
@@ -541,9 +541,9 @@ public class GameManager : MonoBehaviour
                         cameraMain.WorldToScreenPoint(matrixHandler.MatrixOfCubes[matrixHandler.PowerupArray[0].point.i, matrixHandler.PowerupArray[0].point.j].transform.position),
                          c_s_y, (objTutoria2) =>
                         {
-                             moveEnabled = true;
-                         //exit
-                     });
+                            moveEnabled = true;
+                            //exit
+                        });
                 });
         }
         else if (matrixHandler.CurrentLevel == 52)
@@ -872,6 +872,11 @@ public class GameManager : MonoBehaviour
 
     #region From other classes
 
+    public void OnTestGUI(string text)
+    {
+        vvvalue = text;
+    }
+
     public void OnNewPieceAvailable(CustomPiece.PiecesTypeEnum type)
     {
         matrixHandler.AddNewTypeOfPiece(type);
@@ -1065,7 +1070,12 @@ public class GameManager : MonoBehaviour
         justTookedPowerup = true;
         CurrentPowerup = powerup;
         powerupsIcons[powerup.type].SetActive(true);
-        matrixHandler.RemovePowerup(powerup);
+
+        GlobalSingleton.GetInstance().SetTimeAsync(1000, obj =>
+        {
+            matrixHandler.RemovePowerup(powerup);
+        });
+
 
         if (matrixHandler.CurrentLevel == 49)
         {
@@ -1147,6 +1157,8 @@ public class GameManager : MonoBehaviour
             }
         }
     }
+
+
     #endregion
 
 

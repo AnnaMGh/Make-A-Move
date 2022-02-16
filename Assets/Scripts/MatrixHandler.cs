@@ -367,7 +367,8 @@ public class MatrixHandler : MonoBehaviour
             matrixOfCubes[powerup.point.i, powerup.point.j].transform.position
             + new Vector3(0f, 1f, 0f), Quaternion.identity));
         powerup.ChangeGameObjectName(nr);
-        powerup.GameObj.GetComponent<Interactable>().SetObject(powerup);
+        powerup.SetObjectScript(powerup);
+        //powerup.GameObj.GetComponent<Interactable>().SetObject(powerup);
     }
 
     private void RemoveNewPieceAvailable()

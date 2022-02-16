@@ -80,11 +80,11 @@ public class Interactable : MonoBehaviour
         {
             if (gameManager != null && gameManager.IsFrontCamera())
             {
-                this.transform.Rotate(Vector3.up, 50f * Time.deltaTime, Space.World);
+                this.transform.GetChild(0).Rotate(Vector3.up, 50f * Time.deltaTime, Space.World);
             }
             else
             {
-                this.transform.Rotate(Vector3.forward, 50f * Time.deltaTime, Space.World);
+                this.transform.GetChild(0).Rotate(Vector3.forward, 50f * Time.deltaTime, Space.World);
             }
         }
 
@@ -97,9 +97,16 @@ public class Interactable : MonoBehaviour
 
     private void OnTriggerEnter(Collider other)
     {
-  
-        if (other != null && other.gameObject.tag != null
-            && other.gameObject.tag.Equals("Player"))
+
+        if (other!=null && this.name.Contains("POWERUP"))
+        {
+            print("TRIGGER: " + other.name);
+            gameManager.OnTestGUI(other.name);
+        }
+      
+
+        if (other != null 
+            && other.gameObject.CompareTag("Player"))
         {
             switch (interactableType)
             {
@@ -146,7 +153,7 @@ public class Interactable : MonoBehaviour
 
     private void OnTriggerExit(Collider other)
     {
-        if (other != null && other.gameObject.tag != null && other.gameObject.tag.Equals("Player"))
+        if (other != null  && other.gameObject.CompareTag("Player"))
         {
             switch (interactableType)
             {
@@ -161,7 +168,7 @@ public class Interactable : MonoBehaviour
 
     private void OnCollisionEnter(Collision other)
     {
-        if (other != null && other.gameObject.tag != null && other.gameObject.tag.Equals("Player") && !collideOrTrigger)
+        if (other != null  && other.gameObject.CompareTag("Player") && !collideOrTrigger)
         {
             switch (interactableType)
             {
@@ -406,10 +413,9 @@ public class Interactable : MonoBehaviour
             //make sound
             if (PlayerPrefs.GetInt(Constants.KEY_SOUND) == 1)
             {
-                AudioSource audio = this.gameObject.GetComponent<AudioSource>();
+                AudioSource audio = this.gameObject.transform.GetChild(1).GetComponent<AudioSource>();
                 audio.Play();
             }
-
 
             gameManager.OnPowerup(powerup);
 
