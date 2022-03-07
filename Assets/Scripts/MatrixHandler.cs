@@ -259,6 +259,23 @@ public class MatrixHandler : MonoBehaviour
         return false;
     }
 
+    public bool IsPowerupOnPoint(Point point)
+    {
+        if (powerupArray != null && powerupArray.Length > 0)
+        {
+            foreach (Powerup p in powerupArray)
+            {
+                if (p.point.i == point.i && p.point.j == point.j
+                    && p.GameObj != null && p.GameObj.activeInHierarchy)
+                {
+                    return true;
+                }
+            }
+        }
+
+        return false;
+    }
+
     public bool IsCubeEnabled(Point point)
     {
         if (enablerArray != null && enablerArray.Length > 0)

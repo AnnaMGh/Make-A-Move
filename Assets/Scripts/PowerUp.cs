@@ -14,12 +14,15 @@ public class Powerup
     private GameObject gameObj;
     public int nrOfFreeMovesAvailable;
 
+    private BoxCollider gameObjCollider;
     private GameObject gameObjMesh;
+   
 
 
     public void SetGameObject(GameObject gameObj)
     {
         this.gameObj = gameObj;
+        this.gameObjCollider = gameObj.GetComponent<BoxCollider>();
         this.gameObjMesh = gameObj.transform.GetChild(0).gameObject;
     }
 
@@ -31,6 +34,10 @@ public class Powerup
     public void SetObjectScript(Powerup obj)
     {
         gameObj.GetComponent<Interactable>().SetObject(obj);
+    }
+
+    public void SetTrigger(bool value) {
+        this.gameObjCollider.isTrigger = value;
     }
 
     public void ChangeCameraView(bool isCamera3D)

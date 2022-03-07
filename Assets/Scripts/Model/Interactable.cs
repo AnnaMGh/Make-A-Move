@@ -97,14 +97,7 @@ public class Interactable : MonoBehaviour
 
     private void OnTriggerEnter(Collider other)
     {
-
-        if (other!=null && this.name.Contains("POWERUP"))
-        {
-            print("TRIGGER: " + other.name);
-            gameManager.OnTestGUI(other.name);
-        }
-      
-
+     
         if (other != null 
             && other.gameObject.CompareTag("Player"))
         {

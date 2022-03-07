@@ -11,6 +11,11 @@ public class GlobalSingleton
     private Dictionary<int, int> levelStarDictionary;
     private Dictionary<string, int> tutorialDictionary;
     private StandardShaderUtils.BlendMode mainCubesBlendMode;
+
+    public float CanvasScale { get;  private set; }
+    public bool gamePaused;
+    public bool gameInTutorialOrAlert;
+
     public static GlobalSingleton GetInstance()
     {
         if (instance == null)
@@ -20,8 +25,9 @@ public class GlobalSingleton
         return instance;
     }
 
-    public bool gamePaused;
-    public bool gameInTutorialOrAlert;
+    public void SetCanvasScale(float scale) {
+        CanvasScale = scale;
+    }
 
     public async void SetTimeAsync(int time, Delegates.ObjectDelegate objectDelegate)
     {
