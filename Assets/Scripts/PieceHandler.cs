@@ -220,6 +220,13 @@ public class PieceHandler : MonoBehaviour
         currentPieceGameOjChildI.enabled = true;
         ChangeCustomPiece(type, false);
     }
+    
+    public void ChangeEnemyCustomPiece(CustomPiece.PiecesTypeEnum type)
+    {
+        //currentPieceGameObj.transform.localScale = new Vector3(0.5f, 0.5f, 0.5f);
+        currentPieceGameOjChildI.enabled = true;
+        ChangeCustomPiece(type, false);
+    }
 
     public void ChangeColor()
     {

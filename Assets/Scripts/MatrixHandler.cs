@@ -21,6 +21,7 @@ public class MatrixHandler : MonoBehaviour
     public Enabler[] EnablerArray { get { return enablerArray; } }
     public Breakable[] BreakableArray { get { return breakableArray; } }
     public Powerup[] PowerupArray { get { return powerupArray; } }
+    public Enemy[] EnemyArray { get { return enemyArray; } }
 
     public int MatrixIndexLength { get; private set; }
 
@@ -39,11 +40,13 @@ public class MatrixHandler : MonoBehaviour
     private Enabler[] enablerArray;
     private Breakable[] breakableArray;
     private Powerup[] powerupArray;
+    private Enemy[] enemyArray;
     private bool fromGame;
     private GameObject prefabBlock;
     private GameObject prefabEnabler;
     private GameObject prefabBreakable;
     private GameObject[] prefabPowerup;
+  
 
     private Material[] crackMaterial;
 
@@ -382,10 +385,21 @@ public class MatrixHandler : MonoBehaviour
     {
         powerup.SetGameObject(Instantiate(prefabPowerup[powerup.type],
             matrixOfCubes[powerup.point.i, powerup.point.j].transform.position
-            + new Vector3(0f, 1f, 0f), Quaternion.identity));
+            + new Vector3(0f, 1f, 0f), 
+            Quaternion.identity));
         powerup.ChangeGameObjectName(nr);
         powerup.SetObjectScript(powerup);
         //powerup.GameObj.GetComponent<Interactable>().SetObject(powerup);
+    }
+
+    private void AddEnemy(int nr, Enemy enemy)
+    {
+        GameObject prefabPiece = (GameObject)Resources.Load("Prefabs/" + CustomPiece.prefabName, typeof(GameObject));
+        enemy.SetGameObject(Instantiate(prefabPiece,
+            matrixOfCubes[enemy.point.i, enemy.point.j].transform.position
+            + new Vector3(0f, 1f, 0f), 
+            Quaternion.identity));
+        enemy.GameObj.GetComponent<PieceHandler>().ChangeNewAvailableCustomPiece(enemy.TypePiece);
     }
 
     private void RemoveNewPieceAvailable()
@@ -466,6 +480,17 @@ public class MatrixHandler : MonoBehaviour
         }
         powerupArray = null;
     }
+    private void RemoveEnemies()
+    {
+        if (enemyArray != null)
+        {
+            foreach (Enemy obj in enemyArray)
+            {
+                 Destroy(obj.GameObj);
+            }
+        }
+        enemyArray = null;
+    }
 
     private void CleanMatrix()
     {
@@ -475,6 +500,7 @@ public class MatrixHandler : MonoBehaviour
         RemoveEnablers();
         RemoveBreakables();
         RemovePowerups();
+        RemoveEnemies();
     }
 
     #region design
@@ -528,6 +554,7 @@ public class MatrixHandler : MonoBehaviour
         enablerArray = level.enabler;
         breakableArray = level.breakable;
         powerupArray = level.powerup;
+        enemyArray = level.enemy;
 
         //make base
         matrixOfCubes[startPoint.i, startPoint.j].SetCubeType(Cube.CubeType.TYPE_START);
@@ -582,6 +609,15 @@ public class MatrixHandler : MonoBehaviour
             for (int i = 0; i < powerupArray.Length; i++)
             {
                 AddPowerup(i, powerupArray[i]);
+            }
+        } 
+        
+        //enemy
+        if (enemyArray != null && enemyArray.Length > 0)
+        {
+            for (int i = 0; i < enemyArray.Length; i++)
+            {
+                AddEnemy(i, enemyArray[i]);
             }
         }
 

@@ -4,7 +4,7 @@ using UnityEngine;
 using TMPro;
 using System;
 
-public class EnablerDev : InteractableDev
+public class EnablerDev : InteractableDev<Enabler>
 {
     private TMP_Text impEnablerLbl;
     private TMP_InputField impEnablerPointI;
@@ -32,7 +32,7 @@ public class EnablerDev : InteractableDev
         impColorA = transform.GetChild(8).GetComponent<TMP_InputField>();
     }
 
-    public void SetData(int nr, int min, int max, Enabler enabler)
+    public override void SetData(int nr, int min, int max, Enabler enabler)
     {
         if (impEnablerLbl == null) { Initialize(); }
 
@@ -53,17 +53,17 @@ public class EnablerDev : InteractableDev
         }
     }
 
-    public string CheckData(int nr)
+    public override string CheckData(int nr)
     {
         if (impEnablerLbl == null) { Initialize(); }
-       
+
         if (impEnablerPointI.text.Equals(""))
         {
             return "Enabler " + nr + " point i not added";
         }
         if (!CheckNrInRange(Int32.Parse(impEnablerPointI.text)))
         {
-            return "Enabler " + nr + "point i not in matrix range";
+            return "Enabler " + nr + "point i not in matrix range [" + (minLimit + 1) + "," + (maxLimit - 1) + "]";
         }
         if (impEnablerPointJ.text.Equals(""))
         {
@@ -71,7 +71,7 @@ public class EnablerDev : InteractableDev
         }
         if (!CheckNrInRange(Int32.Parse(impEnablerPointJ.text)))
         {
-            return "Enabler " + nr + "point j not in matrix range";
+            return "Enabler " + nr + "point j not in matrix range [" + (minLimit + 1) + "," + (maxLimit - 1) + "]";
         }
         if (impCubePointI.text.Equals(""))
         {
@@ -79,7 +79,7 @@ public class EnablerDev : InteractableDev
         }
         if (!CheckNrInRange(Int32.Parse(impCubePointI.text)))
         {
-            return "Enabler Cube " + nr + "point i not in matrix range";
+            return "Enabler Cube " + nr + "point i not in matrix range [" + (minLimit + 1) + "," + (maxLimit - 1) + "]";
         }
         if (impCubePointJ.text.Equals(""))
         {
@@ -87,7 +87,7 @@ public class EnablerDev : InteractableDev
         }
         if (!CheckNrInRange(Int32.Parse(impCubePointJ.text)))
         {
-            return "Enabler Cube " + nr + "point j not in matrix range";
+            return "Enabler Cube " + nr + "point j not in matrix range [" + (minLimit + 1) + "," + (maxLimit - 1) + "]";
         }
         if (impColorR.text.Equals(""))
         {
@@ -113,7 +113,7 @@ public class EnablerDev : InteractableDev
         return (nr > minLimit && nr < maxLimit);
     }
 
-    public Enabler GetObject()
+    public override Enabler GetObject()
     {
         string check = CheckData(0);
         if (check != null)
@@ -121,10 +121,12 @@ public class EnablerDev : InteractableDev
             return null;
         }
 
-        Enabler enabler = new Enabler();
-        enabler.enablerPoint = new Point(Int32.Parse(impEnablerPointI.text), Int32.Parse(impEnablerPointJ.text));
-        enabler.cubePoint = new Point(Int32.Parse(impCubePointI.text), Int32.Parse(impCubePointJ.text));
-        enabler.color = new Color((float)Decimal.Parse(impColorR.text), (float)Decimal.Parse(impColorG.text), (float)Decimal.Parse(impColorB.text), (float)Decimal.Parse(impColorA.text));
+        Enabler enabler = new Enabler
+        {
+            enablerPoint = new Point(Int32.Parse(impEnablerPointI.text), Int32.Parse(impEnablerPointJ.text)),
+            cubePoint = new Point(Int32.Parse(impCubePointI.text), Int32.Parse(impCubePointJ.text)),
+            color = new Color((float)Decimal.Parse(impColorR.text), (float)Decimal.Parse(impColorG.text), (float)Decimal.Parse(impColorB.text), (float)Decimal.Parse(impColorA.text))
+        };
         return enabler;
     }
 }

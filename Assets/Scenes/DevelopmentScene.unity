@@ -23483,6 +23483,9 @@ MonoBehaviour:
   impPowerupNr: {fileID: 2000542005}
   contentPowerup: {fileID: 1399366335}
   powerupDevList: []
+  impEnemyNr: {fileID: 2136498151}
+  contentEnemy: {fileID: 577153667}
+  enemyDevList: []
   alertHandler: {fileID: 16235672}
   CurrentDevelopmentType: 0
   CurrentLevels: []
@@ -25373,8 +25376,8 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls:
       - m_Target: {fileID: 1850730935}
-        m_TargetAssemblyTypeName: 
-        m_MethodName: OnChangeStateOfBlocksNr
+        m_TargetAssemblyTypeName: DevelopmentManager, Assembly-CSharp
+        m_MethodName: OnChangeStateOfEnemyNr
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}

@@ -4,7 +4,7 @@ using System;
 using UnityEngine;
 using TMPro;
 
-public class BlockDev : InteractableDev
+public class BlockDev : InteractableDev<Block>
 {
     private TMP_Text impBlockLbl;
     private TMP_InputField impBlockCost;
@@ -25,7 +25,7 @@ public class BlockDev : InteractableDev
         impBlockOldPointJ = transform.GetChild(3).GetComponent<TMP_InputField>();
     }
 
-    public void SetData(int nr, int min, int max, Block block)
+    public override void SetData(int nr, int min, int max, Block block)
     {
         if (impBlockLbl == null) { Initialize(); }
 
@@ -41,7 +41,7 @@ public class BlockDev : InteractableDev
         }
     }
 
-    public string CheckData(int blockNr)
+    public override string CheckData(int blockNr)
     {
         if (impBlockCost == null) { Initialize(); }
 
@@ -52,7 +52,7 @@ public class BlockDev : InteractableDev
         }
         if (!CheckCostInRange(Int32.Parse(impBlockCost.text)))
         {
-            return "Block " + blockNr + " cost not in matrix range";
+            return "Block " + blockNr + " cost not in matrix range [" + (minCost + 1) + "," + (maxCost - 1) + "]";
         }
         if (impBlockOldPointI.text.Equals(""))
         {
@@ -60,7 +60,7 @@ public class BlockDev : InteractableDev
         }
         if (!CheckNrInRange(Int32.Parse(impBlockOldPointI.text)))
         {
-            return "Block " + blockNr + "old i not in matrix range";
+            return "Block " + blockNr + "old i not in matrix range [" + (minLimit + 1) + "," + (maxLimit - 1) + "]";
         }
         if (impBlockOldPointJ.text.Equals(""))
         {
@@ -68,7 +68,7 @@ public class BlockDev : InteractableDev
         }
         if (!CheckNrInRange(Int32.Parse(impBlockOldPointJ.text)))
         {
-            return "Block " + blockNr + "old j not in matrix range";
+            return "Block " + blockNr + "old j not in matrix range [" + (minLimit + 1) + "," + (maxLimit - 1) + "]";
         }
         return null;
     }
@@ -82,7 +82,7 @@ public class BlockDev : InteractableDev
         return (nr > minCost && nr < maxCost);
     }
 
-    public Block GetObject() {
+    public override Block GetObject() {
 
         string check = CheckData(0);
         if (check != null)
@@ -90,9 +90,11 @@ public class BlockDev : InteractableDev
             return null;
         }
 
-        Block block = new Block();
-        block.cost = Int32.Parse(impBlockCost.text);
-        block.oldPoint = new Point(Int32.Parse(impBlockOldPointI.text), Int32.Parse(impBlockOldPointJ.text));
+        Block block = new Block
+        {
+            cost = Int32.Parse(impBlockCost.text),
+            oldPoint = new Point(Int32.Parse(impBlockOldPointI.text), Int32.Parse(impBlockOldPointJ.text))
+        };
         return block;
     }
 }

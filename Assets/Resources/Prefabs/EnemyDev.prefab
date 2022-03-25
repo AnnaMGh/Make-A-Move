@@ -640,9 +640,9 @@ GameObject:
   - component: {fileID: 1991360966018607045}
   - component: {fileID: 295486792905792316}
   - component: {fileID: 2320789324252258900}
-  - component: {fileID: 5126788473318893172}
+  - component: {fileID: 3008634458271486450}
   m_Layer: 5
-  m_Name: PowerupDev
+  m_Name: EnemyDev
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -709,7 +709,7 @@ MonoBehaviour:
   m_FillOrigin: 0
   m_UseSpriteMesh: 0
   m_PixelsPerUnitMultiplier: 1
---- !u!114 &5126788473318893172
+--- !u!114 &3008634458271486450
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -718,7 +718,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 6026970860361037572}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 0dfa13d03dc01194a97f34ae0cd51991, type: 3}
+  m_Script: {fileID: 11500000, guid: bfbb717b27d2aa142bb0f08183c046ee, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
 --- !u!1 &6040511199074202437
@@ -1415,7 +1415,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: 'Powerup:'
+  m_text: 'Enemy:'
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
   m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}

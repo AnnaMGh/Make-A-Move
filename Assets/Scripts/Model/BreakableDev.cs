@@ -4,7 +4,7 @@ using UnityEngine;
 using TMPro;
 using System;
 
-public class BreakableDev : InteractableDev
+public class BreakableDev : InteractableDev<Breakable>
 {
     private TMP_Text impBreakableLbl;
     private TMP_InputField impBreakableResistance;
@@ -15,7 +15,7 @@ public class BreakableDev : InteractableDev
     private int minLimit = -1;
     private int maxLimit = 8;
 
-    private readonly int minResistance = 1;
+    private readonly int minResistance = 0;
     private readonly int maxResistance = 4;
 
     private void Initialize()
@@ -26,7 +26,7 @@ public class BreakableDev : InteractableDev
         impBreakablePointJ = transform.GetChild(3).GetComponent<TMP_InputField>();
     }
 
-    public void SetData(int nr, int min, int max, Breakable breakable)
+    public override void SetData(int nr, int min, int max, Breakable breakable)
     {
         if (impBreakableLbl == null) { Initialize(); }
 
@@ -42,7 +42,7 @@ public class BreakableDev : InteractableDev
         }
     }
 
-    public string CheckData(int nr)
+    public override string CheckData(int nr)
     {
         if (impBreakableLbl == null) { Initialize(); }
 
@@ -50,9 +50,10 @@ public class BreakableDev : InteractableDev
         {
             return "Breakable resistance " + nr + " not added";
         }
-        if (!CheckNrInRange(Int32.Parse(impBreakableResistance.text)))
+        if (!CheckResistanceInRange(Int32.Parse(impBreakableResistance.text)))
         {
-            return "Breakable resistance " + nr + "point i not in matrix range";
+            return "Breakable resistance " + nr 
+                + " not in matrix range [" + (minResistance + 1) + "," + (maxResistance - 1) + "]";
         }
         if (impBreakablePointI.text.Equals(""))
         {
@@ -60,7 +61,7 @@ public class BreakableDev : InteractableDev
         }
         if (!CheckNrInRange(Int32.Parse(impBreakablePointI.text)))
         {
-            return "Breakable " + nr + "point i not in matrix range";
+            return "Breakable " + nr + "point i not in matrix range [" + (minLimit + 1) + "," + (maxLimit - 1) + "]";
         }
         if (impBreakablePointJ.text.Equals(""))
         {
@@ -68,7 +69,7 @@ public class BreakableDev : InteractableDev
         }
         if (!CheckNrInRange(Int32.Parse(impBreakablePointJ.text)))
         {
-            return "Breakable " + nr + "point j not in matrix range";
+            return "Breakable " + nr + "point j not in matrix range [" + (minLimit + 1) + "," + (maxLimit - 1) + "]";
         }
         return null;
     }
@@ -83,7 +84,7 @@ public class BreakableDev : InteractableDev
         return (nr > minResistance && nr < maxResistance);
     }
 
-    public Breakable GetObject()
+    public override Breakable GetObject()
     {
         string check = CheckData(0);
         if (check != null)
@@ -91,9 +92,11 @@ public class BreakableDev : InteractableDev
             return null;
         }
 
-        Breakable breakable = new Breakable();
-        breakable.maxResistance = Int32.Parse(impBreakableResistance.text);
-        breakable.point = new Point(Int32.Parse(impBreakablePointI.text), Int32.Parse(impBreakablePointJ.text));
+        Breakable breakable = new Breakable
+        {
+            maxResistance = Int32.Parse(impBreakableResistance.text),
+            point = new Point(Int32.Parse(impBreakablePointI.text), Int32.Parse(impBreakablePointJ.text))
+        };
         return breakable;
     }
 }

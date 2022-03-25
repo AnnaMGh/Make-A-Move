@@ -65,6 +65,9 @@ public class DevelopmentManager : MonoBehaviour
     public TMP_InputField impPowerupNr;
     public GameObject contentPowerup;
     public List<PowerupDev> powerupDevList;
+    public TMP_InputField impEnemyNr;
+    public GameObject contentEnemy;
+    public List<EnemyDev> enemyDevList;
 
     [Header(" - OTHERS - ")]
     public AlertHandler alertHandler;
@@ -86,6 +89,7 @@ public class DevelopmentManager : MonoBehaviour
     private GameObject prefabEnabler;
     private GameObject prefabBreakable;
     private GameObject prefabPowerup;
+    private GameObject prefabEnemy;
     private TextAsset[] textAssets;
     private int currentLevel;
     private Level level;
@@ -129,6 +133,7 @@ public class DevelopmentManager : MonoBehaviour
         prefabEnabler = Resources.Load<GameObject>("Prefabs/EnablerDev");
         prefabBreakable = Resources.Load<GameObject>("Prefabs/BreakableDev");
         prefabPowerup = Resources.Load<GameObject>("Prefabs/PowerupDev");
+        prefabEnemy = Resources.Load<GameObject>("Prefabs/EnemyDev");
 
         //set sprites
         spriteCameraFront = Resources.Load<Sprite>("Images/Icons/Camera_01");
@@ -146,7 +151,8 @@ public class DevelopmentManager : MonoBehaviour
         PrepareMenuLevels();
     }
 
-    private void PrepareMenuLevels() {
+    private void PrepareMenuLevels()
+    {
         textAssets = GlobalSingleton.GetInstance().GetLevelAssetsTexts(true);
         int maxLevel = textAssets.Length;
         txtMenuLevel.text = maxLevel.ToString();
@@ -214,7 +220,11 @@ public class DevelopmentManager : MonoBehaviour
         }
 
         //block
-        if (blockDevList != null && blockDevList.Count > 0)
+        ClearList<BlockDev, Block>(blockDevList);
+        SetObjectNumber(impBlockNr, matrixHandler.BlockArray);
+        InitList(ref blockDevList, matrixHandler.BlockArray, prefabBlock, contentBlocks);
+
+        /*if (blockDevList != null && blockDevList.Count > 0)
         {
             int count = blockDevList.Count;
             for (int i = count - 1; i >= 0; i--)
@@ -223,21 +233,24 @@ public class DevelopmentManager : MonoBehaviour
                 blockDevList.Remove(blockDevList[i]);
             }
         }
-        impBlockNr.text = (matrixHandler.BlockArray==null?"0" :matrixHandler.BlockArray.Length.ToString());
+        impBlockNr.text = (matrixHandler.BlockArray == null ? "0" : matrixHandler.BlockArray.Length.ToString());
         blockDevList = new List<BlockDev>();
         if (matrixHandler.BlockArray != null && matrixHandler.BlockArray.Length > 0)
         {
             for (int i = 0; i < matrixHandler.BlockArray.Length; i++)
             {
-               // BlockDev blockDev = Instantiate(prefabBlock, new Vector3(0,0,0),  Quaternion.identity, contentBlocks.transform).GetComponent<BlockDev>();
+                // BlockDev blockDev = Instantiate(prefabBlock, new Vector3(0,0,0),  Quaternion.identity, contentBlocks.transform).GetComponent<BlockDev>();
                 BlockDev blockDev = Instantiate(prefabBlock, contentBlocks.transform).GetComponent<BlockDev>();
-                blockDev.SetData(i+1, -1, matrixHandler.MatrixOfCubes.GetLength(0), matrixHandler.BlockArray[i]);
+                blockDev.SetData(i + 1, -1, matrixHandler.MatrixOfCubes.GetLength(0), matrixHandler.BlockArray[i]);
                 blockDevList.Add(blockDev);
             }
-        }
+        }*/
 
         //enabler
-        if (enablerDevList != null && enablerDevList.Count > 0)
+        ClearList<EnablerDev, Enabler>(enablerDevList);
+        SetObjectNumber(impEnablerNr, matrixHandler.EnablerArray);
+        InitList(ref enablerDevList, matrixHandler.EnablerArray, prefabEnabler, contentEnablers);
+        /*if (enablerDevList != null && enablerDevList.Count > 0)
         {
             int count = enablerDevList.Count;
             for (int i = count - 1; i >= 0; i--)
@@ -256,10 +269,13 @@ public class DevelopmentManager : MonoBehaviour
                 enablerkDev.SetData(i + 1, -1, matrixHandler.MatrixOfCubes.GetLength(0), matrixHandler.EnablerArray[i]);
                 enablerDevList.Add(enablerkDev);
             }
-        }
-        
+        }*/
+
         //breakable
-        if (breakableDevList != null && breakableDevList.Count > 0)
+        ClearList<BreakableDev, Breakable>(breakableDevList);
+        SetObjectNumber(impBreakableNr, matrixHandler.BreakableArray);
+        InitList(ref breakableDevList, matrixHandler.BreakableArray, prefabBreakable, contentBreakable);
+        /*if (breakableDevList != null && breakableDevList.Count > 0)
         {
             int count = breakableDevList.Count;
             for (int i = count - 1; i >= 0; i--)
@@ -278,30 +294,52 @@ public class DevelopmentManager : MonoBehaviour
                 breakableDev.SetData(i + 1, -1, matrixHandler.MatrixOfCubes.GetLength(0), matrixHandler.BreakableArray[i]);
                 breakableDevList.Add(breakableDev);
             }
-        } 
-        
+        }*/
+
         //powerups
-        if (powerupDevList != null && powerupDevList.Count > 0)
+        ClearList<PowerupDev, Powerup>(powerupDevList);
+        SetObjectNumber(impPowerupNr, matrixHandler.PowerupArray);
+        InitList(ref powerupDevList, matrixHandler.PowerupArray, prefabPowerup, contentPowerup);
+
+        //enemies
+        ClearList<EnemyDev, Enemy>(enemyDevList);
+        SetObjectNumber(impEnemyNr, matrixHandler.EnemyArray);
+        InitList(ref enemyDevList, matrixHandler.EnemyArray, prefabEnemy, contentEnemy);
+
+        initialize = false;
+    }
+
+    private void SetObjectNumber<T>(TMP_InputField inputField, T[] arr)
+    {
+        inputField.text = (arr == null ? "0" : arr.Length.ToString());
+    }
+
+    private void InitList<T, U>(ref List<T> devList, U[] arr, GameObject prefab, GameObject content)
+        where T : InteractableDev<U>
+    {
+        devList = new List<T>();
+        if (arr != null && arr.Length > 0)
         {
-            int count = powerupDevList.Count;
+            for (int i = 0; i < arr.Length; i++)
+            {
+                T devObj = Instantiate(prefab, content.transform).GetComponent<T>();
+                devObj.SetData(i + 1, -1, matrixHandler.MatrixOfCubes.GetLength(0), arr[i]);
+                devList.Add(devObj);
+            }
+        }
+    }
+
+    private void ClearList<T, U>(List<T> list) where T : InteractableDev<U>
+    {
+        if (list != null && list.Count > 0)
+        {
+            int count = list.Count;
             for (int i = count - 1; i >= 0; i--)
             {
-                Destroy(powerupDevList[i].gameObject);
-                powerupDevList.Remove(powerupDevList[i]);
+                Destroy(list[i].gameObject);
+                list.Remove(list[i]);
             }
         }
-        impPowerupNr.text = (matrixHandler.PowerupArray == null ? "0" : matrixHandler.PowerupArray.Length.ToString());
-        powerupDevList = new List<PowerupDev>();
-        if (matrixHandler.PowerupArray != null && matrixHandler.PowerupArray.Length > 0)
-        {
-            for (int i = 0; i < matrixHandler.PowerupArray.Length; i++)
-            {
-                PowerupDev powerupDev = Instantiate(prefabPowerup, contentPowerup.transform).GetComponent<PowerupDev>();
-                powerupDev.SetData(i + 1, -1, matrixHandler.MatrixOfCubes.GetLength(0), matrixHandler.PowerupArray[i]);
-                powerupDevList.Add(powerupDev);
-            }
-        }
-        initialize = false;
     }
 
     private string CheckData()
@@ -394,59 +432,59 @@ public class DevelopmentManager : MonoBehaviour
         //2. EXTRAS
         //new piece
 
+        string checkArrs;
 
         //blocks
-        if (blockDevList != null && blockDevList.Count > 0)
+        checkArrs = CheckArrayData<BlockDev, Block>(blockDevList);
+        if (checkArrs != null)
         {
-            for (int i = 0; i < blockDevList.Count; i++)
-            {
-                string check = blockDevList[i].CheckData(i);
-                if (check != null)
-                {
-                    return check;
-                }
-            }
-        }  
-        
-        //enabler
-        if (enablerDevList != null && enablerDevList.Count > 0)
-        {
-            for (int i = 0; i < enablerDevList.Count; i++)
-            {
-                string check = enablerDevList[i].CheckData(i);
-                if (check != null)
-                {
-                    return check;
-                }
-            }
-        } 
-        
-        //breakable
-        if (breakableDevList != null && breakableDevList.Count > 0)
-        {
-            for (int i = 0; i < breakableDevList.Count; i++)
-            {
-                string check = breakableDevList[i].CheckData(i);
-                if (check != null)
-                {
-                    return check;
-                }
-            }
-        }
-        
-        //powerup
-        if (powerupDevList != null && powerupDevList.Count > 0)
-        {
-            for (int i = 0; i < powerupDevList.Count; i++)
-            {
-                string check = powerupDevList[i].CheckData(i);
-                if (check != null)
-                {
-                    return check;
-                }
-            }
+            return checkArrs;
         }
 
+        //enabler
+        checkArrs = CheckArrayData<EnablerDev, Enabler>(enablerDevList);
+        if (checkArrs != null)
+        {
+            return checkArrs;
+        }
+
+        //breakable
+        checkArrs = CheckArrayData<BreakableDev, Breakable>(breakableDevList);
+        if (checkArrs != null)
+        {
+            return checkArrs;
+        }
+
+        //powerup
+        checkArrs = CheckArrayData<PowerupDev, Powerup>(powerupDevList);
+        if (checkArrs != null)
+        {
+            return checkArrs;
+        }
+
+        //enemy
+        checkArrs = CheckArrayData<EnemyDev, Enemy>(enemyDevList);
+        if (checkArrs != null)
+        {
+            return checkArrs;
+        }
+
+        return null;
+    }
+
+    private string CheckArrayData<T, U>(List<T> list) where T : InteractableDev<U>
+    {
+        if (list != null && list.Count > 0)
+        {
+            for (int i = 0; i < list.Count; i++)
+            {
+                string check = list[i].CheckData(i);
+                if (check != null)
+                {
+                    return check;
+                }
+            }
+        }
         return null;
     }
 
@@ -544,14 +582,57 @@ public class DevelopmentManager : MonoBehaviour
         }
     }
 
+
+    private void OnChangeStateOfObjects<T, U>(ref List<T> listDev, TMP_InputField inpNr,
+        GameObject prefab, GameObject content) 
+        where T : InteractableDev<U>
+    {
+
+        // InteractableDev<T> listDev = null;
+
+        if (!initialize)
+        {
+
+            int count = listDev.Count;
+            int difference = count - Int32.Parse(inpNr.text);
+
+            if (difference > 0)
+            {
+                //need to remove
+                for (int i = count - 1; i > count - 1 - difference; i--)
+                {
+                    Destroy(listDev[i].gameObject);
+                    listDev.Remove(listDev[i]);
+                }
+            }
+            else
+            {
+                //need to add
+                for (int i = 0; i < Math.Abs(difference); i++)
+                {
+                    T objDev = Instantiate(prefab, content.transform).GetComponent<T>();
+                    objDev.SetData(listDev.Count + 1, -1, matrixHandler.MatrixOfCubes.GetLength(0), 
+                        (U)Activator.CreateInstance(typeof(U), new object[] {  }));
+                    listDev.Add(objDev);
+                }
+
+            }
+        }
+
+    }
+
     public void OnChangeStateOfBlocksNr()
     {
-        if (!initialize) {
+
+        OnChangeStateOfObjects<BlockDev, Block>(ref blockDevList, impBlockNr, prefabBlock, contentBlocks);
+       
+        /*if (!initialize)
+        {
 
             int count = blockDevList.Count;
             int difference = count - Int32.Parse(impBlockNr.text);
-          
-            if (difference>0)
+
+            if (difference > 0)
             {
                 //need to remove
                 for (int i = count - 1; i > count - 1 - difference; i--)
@@ -566,18 +647,19 @@ public class DevelopmentManager : MonoBehaviour
                 for (int i = 0; i < Math.Abs(difference); i++)
                 {
                     BlockDev blockDev = Instantiate(prefabBlock, contentBlocks.transform).GetComponent<BlockDev>();
-                    blockDev.SetData(blockDevList.Count + 1,-1, matrixHandler.MatrixOfCubes.GetLength(0), new Block());
+                    blockDev.SetData(blockDevList.Count + 1, -1, matrixHandler.MatrixOfCubes.GetLength(0), new Block());
                     blockDevList.Add(blockDev);
                 }
-                
+
             }
-        }
-        
+        }*/
+
     }
 
     public void OnChangeStateOfEnablersNr()
     {
-        if (!initialize)
+        OnChangeStateOfObjects<EnablerDev, Enabler>(ref enablerDevList, impEnablerNr, prefabEnabler, contentEnablers);
+        /*if (!initialize)
         {
             int count = enablerDevList.Count;
             int difference = count - Int32.Parse(impEnablerNr.text);
@@ -602,13 +684,15 @@ public class DevelopmentManager : MonoBehaviour
                 }
 
             }
-        }
+        }*/
 
     }
-    
+
     public void OnChangeStateOfBreakableNr()
     {
-        if (!initialize)
+        OnChangeStateOfObjects<BreakableDev, Breakable>
+            (ref breakableDevList, impBreakableNr, prefabBreakable, contentBreakable);
+        /*if (!initialize)
         {
             int count = breakableDevList.Count;
             int difference = count - Int32.Parse(impBreakableNr.text);
@@ -633,13 +717,14 @@ public class DevelopmentManager : MonoBehaviour
                 }
 
             }
-        }
+        }*/
 
     }
 
     public void OnChangeStateOfPowerupNr()
     {
-        if (!initialize)
+        OnChangeStateOfObjects<PowerupDev, Powerup>(ref powerupDevList, impPowerupNr, prefabPowerup, contentPowerup);
+       /* if (!initialize)
         {
             int count = powerupDevList.Count;
             int difference = count - Int32.Parse(impPowerupNr.text);
@@ -663,10 +748,14 @@ public class DevelopmentManager : MonoBehaviour
                     powerupDevList.Add(powerupDev);
                 }
             }
-        }
+        }*/
 
     }
 
+    public void OnChangeStateOfEnemyNr()
+    {
+        OnChangeStateOfObjects<EnemyDev, Enemy>(ref enemyDevList, impEnemyNr, prefabEnemy, contentEnemy);
+    }
 
     public void OnClickRefresh()
     {
@@ -733,7 +822,8 @@ public class DevelopmentManager : MonoBehaviour
         level.newPieceAvailable = pieceAvailable;
 
         //block 
-        List<Block> blockCubes = new List<Block>();
+        level.block = GetArrayFromList<BlockDev, Block>(blockDevList);
+        /*List<Block> blockCubes = new List<Block>();
         if (blockDevList != null && blockDevList.Count > 0)
         {
             for (int i = 0; i < blockDevList.Count; i++)
@@ -741,10 +831,11 @@ public class DevelopmentManager : MonoBehaviour
                 blockCubes.Add(blockDevList[i].GetObject());
             }
         }
-        level.block = blockCubes.ToArray();
+        level.block = blockCubes.ToArray();*/
 
         //enabler 
-        List<Enabler> enablerCubes = new List<Enabler>();
+        level.enabler = GetArrayFromList<EnablerDev, Enabler>(enablerDevList);
+        /*List<Enabler> enablerCubes = new List<Enabler>();
         if (enablerDevList != null && enablerDevList.Count > 0)
         {
             for (int i = 0; i < enablerDevList.Count; i++)
@@ -752,10 +843,11 @@ public class DevelopmentManager : MonoBehaviour
                 enablerCubes.Add(enablerDevList[i].GetObject());
             }
         }
-        level.enabler = enablerCubes.ToArray(); 
-        
+        level.enabler = enablerCubes.ToArray();*/
+
         //breakable 
-        List<Breakable> breakableCubes = new List<Breakable>();
+        level.breakable = GetArrayFromList<BreakableDev, Breakable>(breakableDevList);
+        /*List<Breakable> breakableCubes = new List<Breakable>();
         if (breakableDevList != null && breakableDevList.Count > 0)
         {
             for (int i = 0; i < breakableDevList.Count; i++)
@@ -763,10 +855,11 @@ public class DevelopmentManager : MonoBehaviour
                 breakableCubes.Add(breakableDevList[i].GetObject());
             }
         }
-        level.breakable = breakableCubes.ToArray();
-        
+        level.breakable = breakableCubes.ToArray();*/
+
         //powerup 
-        List<Powerup> powerups = new List<Powerup>();
+        level.powerup = GetArrayFromList<PowerupDev, Powerup>(powerupDevList);
+        /*List<Powerup> powerups = new List<Powerup>();
         if (powerupDevList != null && powerupDevList.Count > 0)
         {
             for (int i = 0; i < powerupDevList.Count; i++)
@@ -774,10 +867,25 @@ public class DevelopmentManager : MonoBehaviour
                 powerups.Add(powerupDevList[i].GetObject());
             }
         }
-        level.powerup = powerups.ToArray();
+        level.powerup = powerups.ToArray();*/
+
+        //enemy
+        level.enemy = GetArrayFromList<EnemyDev, Enemy>(enemyDevList);
 
 
         matrixHandler.MatrixDesignLevel(level);
+    }
+
+    private U[] GetArrayFromList<T,U>(List<T> listDev) where T:InteractableDev<U>{
+        List<U> list = new List<U>();
+        if (listDev != null && listDev.Count > 0)
+        {
+            for (int i = 0; i < listDev.Count; i++)
+            {
+                list.Add(listDev[i].GetObject());
+            }
+        }
+        return list.ToArray();
     }
 
     public void OnClickSave()

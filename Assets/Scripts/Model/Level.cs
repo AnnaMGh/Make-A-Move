@@ -15,7 +15,7 @@ public class Level
     public Enabler[] enabler;
     public Breakable[] breakable;
     public Powerup[] powerup;
-    //public Enemy[] enemy;
+    public Enemy[] enemy;
     public Point[] disabledPoints;
    
 

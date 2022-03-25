@@ -4,7 +4,7 @@ using UnityEngine;
 using TMPro;
 using System;
 
-public class PowerupDev : InteractableDev
+public class PowerupDev : InteractableDev<Powerup>
 {
     private TMP_Text impPowerupLbl;
     private TMP_InputField impPowerupType;
@@ -15,8 +15,8 @@ public class PowerupDev : InteractableDev
     private int minLimit = -1;
     private int maxLimit = 8;
 
-    private readonly int minType = 0;
-    private readonly int maxType = 2;
+    private readonly int minType = -1;
+    private readonly int maxType = 3;
 
     private void Initialize()
     {
@@ -26,7 +26,7 @@ public class PowerupDev : InteractableDev
         impPowerupPointJ = transform.GetChild(3).GetComponent<TMP_InputField>();
     }
 
-    public void SetData(int nr, int min, int max, Powerup powerup)
+    public override void SetData(int nr, int min, int max, Powerup powerup)
     {
         if (impPowerupLbl == null) { Initialize(); }
 
@@ -42,7 +42,7 @@ public class PowerupDev : InteractableDev
         }
     }
 
-    public string CheckData(int nr)
+    public override string CheckData(int nr)
     {
         if (impPowerupLbl == null) { Initialize(); }
 
@@ -50,9 +50,9 @@ public class PowerupDev : InteractableDev
         {
             return "Powerup type " + nr + " not added";
         }
-        if (!CheckNrInRange(Int32.Parse(impPowerupType.text)))
+        if (!CheckTypeInRange(Int32.Parse(impPowerupType.text)))
         {
-            return "Powerup type " + nr + "point i not in matrix range";
+            return "Powerup type " + nr + "point i not in matrix range [" + (minType + 1) + "," + (maxType - 1) + "]";
         }
         if (impPowerupPointI.text.Equals(""))
         {
@@ -60,7 +60,7 @@ public class PowerupDev : InteractableDev
         }
         if (!CheckNrInRange(Int32.Parse(impPowerupPointI.text)))
         {
-            return "Powerup " + nr + "point i not in matrix range";
+            return "Powerup " + nr + "point i not in matrix range [" + (minLimit + 1) + "," + (maxLimit - 1) + "]";
         }
         if (impPowerupPointJ.text.Equals(""))
         {
@@ -68,7 +68,7 @@ public class PowerupDev : InteractableDev
         }
         if (!CheckNrInRange(Int32.Parse(impPowerupPointJ.text)))
         {
-            return "Powerup " + nr + "point j not in matrix range";
+            return "Powerup " + nr + "point j not in matrix range [" + (minLimit + 1) + "," + (maxLimit - 1) + "]";
         }
         return null;
     }
@@ -83,7 +83,7 @@ public class PowerupDev : InteractableDev
         return (nr > minType && nr < maxType);
     }
 
-    public Powerup GetObject()
+    public override Powerup GetObject()
     {
         string check = CheckData(0);
         if (check != null)
@@ -91,9 +91,11 @@ public class PowerupDev : InteractableDev
             return null;
         }
 
-        Powerup powerup = new Powerup();
-        powerup.type = Int32.Parse(impPowerupType.text);
-        powerup.nrOfFreeMovesAvailable = 0;
+        Powerup powerup = new Powerup
+        {
+            type = Int32.Parse(impPowerupType.text),
+            nrOfFreeMovesAvailable = 0
+        };
         if (powerup.type == (int)Powerup.PowerupType.DOUBLE_FULL)
         {
             powerup.nrOfFreeMovesAvailable = 1;
