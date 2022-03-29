@@ -399,7 +399,7 @@ public class MatrixHandler : MonoBehaviour
             matrixOfCubes[enemy.point.i, enemy.point.j].transform.position
             + new Vector3(0f, 1f, 0f), 
             Quaternion.identity));
-        enemy.GameObj.GetComponent<PieceHandler>().ChangeNewAvailableCustomPiece(enemy.TypePiece);
+        enemy.GameObj.GetComponent<PieceHandler>().ChangeEnemyCustomPiece(enemy.TypePiece);
     }
 
     private void RemoveNewPieceAvailable()

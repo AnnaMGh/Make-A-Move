@@ -87,6 +87,7 @@ public class GameManager : MonoBehaviour
     public float c_s_y;
 
     private int level49Powerup = 2; //2 - pawn pawerup, 1 - horse powerup, 0 - oher piece powerup
+    private bool lastMoveWasPowerupStrongOnABox = false;
 
 
     private void OnGUI()
@@ -404,7 +405,7 @@ public class GameManager : MonoBehaviour
         piecesHandler.ChangePiecessAvailability(false, null);
         arrowHandler.ChangeArrowsAvailability(false, null);
 
-        pieceHandler.ChangeCustomPiece(CustomPiece.PiecesTypeEnum.TYPE_PAWN, false);
+        pieceHandler.ChangeCustomPiece(CustomPiece.PiecesTypeEnum.TYPE_PAWN, false, false);
         pieceHandler.CurrentPiece.currentPoint = new Point(matrixHandler.StartPoint.i, matrixHandler.StartPoint.j);
         pieceHandler.RestoreToCurrentPos();
         piecesHandler.ChangePiecessAvailability(true, matrixHandler.PiecesAvailable);
@@ -622,6 +623,11 @@ public class GameManager : MonoBehaviour
         return pieceHandler;
     }
 
+
+    private void CheckNextEnemyMoves()
+    {
+
+    }
     private void CheckNextMoves()
     {
         //clean cubes and blocks
@@ -1014,21 +1020,33 @@ public class GameManager : MonoBehaviour
         }
         else if (sendPieceBackMovement == -3) //destroyed by powerup
         {
-            if (LastPowerupInUse != null && LastPowerupInUse.type == (int)Powerup.PowerupType.STRONG
-            && CurrentPowerup != null && CurrentPowerup == LastPowerupInUse)
-            {
-                CleanPowerup(true);
-            }
-
             if (block != null)
             {
+                if (LastPowerupInUse != null && LastPowerupInUse.type == (int)Powerup.PowerupType.STRONG
+                && CurrentPowerup != null && CurrentPowerup == LastPowerupInUse)
+                {
+                    if (!lastMoveWasPowerupStrongOnABox 
+                        && pieceHandler.CurrentPiece.pieceType.Equals(CustomPiece.PiecesTypeEnum.TYPE_KING))
+                    {
+                        lastMoveWasPowerupStrongOnABox = true;
+                    }
+                    else if(lastMoveWasPowerupStrongOnABox)
+                    {
+                        CleanPowerup(true);
+                    }
+                }
+                else
+                {
+                    lastMoveWasPowerupStrongOnABox = true;
+                }
+
                 txtMoves.SetText(matrixHandler.MovesAvailable.ToString());
                 if (matrixHandler.MovesAvailable <= 0 && !levelFinished)
                 {
                     GameOver("");
                 }
-
             }
+         
             pieceHandler.RestoreToPos(pieceHandler.CurrentPiece.currentPoint,
                 matrixHandler.MatrixOfCubes[pieceHandler.CurrentPiece.currentPoint.i, pieceHandler.CurrentPiece.currentPoint.j].transform.position,
                 true);
@@ -1261,7 +1279,7 @@ public class GameManager : MonoBehaviour
         piecesHandler.ChangePiecessAvailability(false, null);
 
         //change values
-        pieceHandler.ChangeCustomPiece(CustomPiece.PiecesTypeEnum.TYPE_PAWN, false);
+        pieceHandler.ChangeCustomPiece(CustomPiece.PiecesTypeEnum.TYPE_PAWN, false, false);
         arrowHandler.ChangeArrowsAvailability(true, pieceHandler.CurrentPiece.movementType);
 
         //make matrix
@@ -1525,6 +1543,9 @@ public class GameManager : MonoBehaviour
                             moveEnabled = true;
                             arrowHandler.ChangeArrowsColor(Constants.ARROW_ENABLED_COLOR, pieceHandler.CurrentPiece.movementType);
 
+                            //move the enemy
+
+
                             //check next possible moves
                             CheckNextMoves();
                         }
@@ -1564,7 +1585,7 @@ public class GameManager : MonoBehaviour
 
             //update changes left
             arrowHandler.ChangeArrowsAvailability(false, pieceHandler.CurrentPiece.movementType);
-            pieceHandler.ChangeCustomPiece((CustomPiece.PiecesTypeEnum)index, true);
+            pieceHandler.ChangeCustomPiece((CustomPiece.PiecesTypeEnum)index, false, true);
             arrowHandler.ChangeArrowsAvailability(true, pieceHandler.CurrentPiece.movementType);
             matrixHandler.RecalculateChanges(1);
             txtChanges.SetText(matrixHandler.ChangesAvailable.ToString());

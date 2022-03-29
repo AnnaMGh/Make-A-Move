@@ -142,7 +142,7 @@ public class PieceHandler : MonoBehaviour
         }
     }
 
-    public void ChangeCustomPiece(CustomPiece.PiecesTypeEnum type, bool withSound)
+    public void ChangeCustomPiece(CustomPiece.PiecesTypeEnum type, bool isEnemy, bool withSound)
     {
         //activate new collider
         currentPieceGameObjChildBCs[(int)type].enabled = true;
@@ -201,7 +201,8 @@ public class PieceHandler : MonoBehaviour
        // currentPieceGameObjChildLOD.RecalculateBounds();
 
         //change material
-        currentPieceGameObjChildMR.material = (PlayerPrefs.GetInt(Constants.KEY_COLOR) == 0 ? currentPiece.materialWhite : currentPiece.materialBlack);
+        int colorId = (isEnemy? 1 - PlayerPrefs.GetInt(Constants.KEY_COLOR) : PlayerPrefs.GetInt(Constants.KEY_COLOR));
+        currentPieceGameObjChildMR.material = (colorId == 0 ? currentPiece.materialWhite : currentPiece.materialBlack);
 
         //positon a bit higer to have the fall effect
         gameObject.transform.Translate(0f, 0.25f, 0f, Space.World);
@@ -218,14 +219,14 @@ public class PieceHandler : MonoBehaviour
     {
         currentPieceGameObj.transform.localScale = new Vector3(0.5f, 0.5f, 0.5f);
         currentPieceGameOjChildI.enabled = true;
-        ChangeCustomPiece(type, false);
+        ChangeCustomPiece(type,false, false);
     }
     
     public void ChangeEnemyCustomPiece(CustomPiece.PiecesTypeEnum type)
     {
         //currentPieceGameObj.transform.localScale = new Vector3(0.5f, 0.5f, 0.5f);
         currentPieceGameOjChildI.enabled = true;
-        ChangeCustomPiece(type, false);
+        ChangeCustomPiece(type, true,false);
     }
 
     public void ChangeColor()
