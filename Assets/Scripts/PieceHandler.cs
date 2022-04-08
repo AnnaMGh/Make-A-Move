@@ -23,6 +23,8 @@ public class PieceHandler : MonoBehaviour
     private BoxCollider[] currentPieceGameObjChildBCs;
     private Interactable currentPieceGameOjChildI;
     private AudioSource currentPieceGameObjAudio;
+    private GameObject currentPieceGameObjTrotus;
+    private MeshRenderer currentPieceGameObjTrotusMeshRenderer;
     private CustomPiece currentPiece;
     private Dictionary<CustomPiece.MovementTypeEnum, Step> movementVectorDictionary;
     private Dictionary<CustomPiece.PiecesTypeEnum, CustomPiece> customPiecesDictionary;
@@ -35,7 +37,7 @@ public class PieceHandler : MonoBehaviour
 
     private AudioClip movementClip;
 
-    
+
     // Start is called before the first frame update
     void Awake()
     {
@@ -58,7 +60,11 @@ public class PieceHandler : MonoBehaviour
         currentPieceGameObjChildBCs = currentPieceGameObjChild.GetComponents<BoxCollider>();
         currentPieceGameOjChildI = currentPieceGameObjChild.GetComponent<Interactable>();
         currentPieceGameObjAudio = currentPieceGameObj.transform.GetChild(1).GetComponent<AudioSource>();
+        currentPieceGameObjTrotus = currentPieceGameObj.transform.GetChild(3).gameObject;
+        currentPieceGameObjTrotusMeshRenderer = currentPieceGameObjTrotus.GetComponent<MeshRenderer>();
         currentPiece = new CustomPiece();
+
+        currentPieceGameObjTrotus.SetActive(false);
 
         //create movement dictionary
         movementVectorDictionary = new Dictionary<CustomPiece.MovementTypeEnum, Step>
@@ -109,6 +115,13 @@ public class PieceHandler : MonoBehaviour
         {
             return;
         }
+
+        //make trotus rotate if powerup is on
+        if (currentPieceGameObjTrotus != null && currentPieceGameObjTrotus.activeInHierarchy)
+        {
+            currentPieceGameObjTrotus.transform.Rotate(Vector3.up, 50f * Time.deltaTime, Space.World);
+        }
+
         //currentPoint = currentPiece.currentPoint;
         if (stepsToMove > 0)
         {
@@ -124,7 +137,7 @@ public class PieceHandler : MonoBehaviour
             stepsToMove--;
             if (stepsToMove == 0)
             {
-                if (lastStep.Split && !lastStep.SplitPos)
+                /*if (lastStep.Split && !lastStep.SplitPos)
                 {
                     stepsToMove = accuracy;
                     lastStep.SplitPos = true;
@@ -136,9 +149,28 @@ public class PieceHandler : MonoBehaviour
                     currentPieceGameObjChildBCs[(int)currentPiece.pieceType].isTrigger = false;
                     currentPieceGameObjChildRB.useGravity = true;
                     movementFinishedDelegate?.Invoke(true);
-                }
+                }*/
+
+                CheckNextSteps();
 
             }
+        }
+    }
+
+    private void CheckNextSteps()
+    {
+        if (lastStep.Split && !lastStep.SplitPos)
+        {
+            stepsToMove = accuracy;
+            lastStep.SplitPos = true;
+        }
+        else
+        {
+            lastStep.SplitPos = false;
+            gameObject.transform.position = new Vector3((float)Math.Round(gameObject.transform.position.x, 0), gameObject.transform.position.y, (float)Math.Round(gameObject.transform.position.z));
+            currentPieceGameObjChildBCs[(int)currentPiece.pieceType].isTrigger = false;
+            currentPieceGameObjChildRB.useGravity = true;
+            movementFinishedDelegate?.Invoke(true);
         }
     }
 
@@ -197,11 +229,11 @@ public class PieceHandler : MonoBehaviour
         currentPieceGameObjChildMF.sharedMesh = currentPiece.mesh;
 
         //change lod (level of detail)
-       // currentPieceGameObjChildLOD.SetLODs(currentPiece.lodGroup.GetLODs());
-       // currentPieceGameObjChildLOD.RecalculateBounds();
+        // currentPieceGameObjChildLOD.SetLODs(currentPiece.lodGroup.GetLODs());
+        // currentPieceGameObjChildLOD.RecalculateBounds();
 
         //change material
-        int colorId = (isEnemy? 1 - PlayerPrefs.GetInt(Constants.KEY_COLOR) : PlayerPrefs.GetInt(Constants.KEY_COLOR));
+        int colorId = (isEnemy ? 1 - PlayerPrefs.GetInt(Constants.KEY_COLOR) : PlayerPrefs.GetInt(Constants.KEY_COLOR));
         currentPieceGameObjChildMR.material = (colorId == 0 ? currentPiece.materialWhite : currentPiece.materialBlack);
 
         //positon a bit higer to have the fall effect
@@ -219,20 +251,42 @@ public class PieceHandler : MonoBehaviour
     {
         currentPieceGameObj.transform.localScale = new Vector3(0.5f, 0.5f, 0.5f);
         currentPieceGameOjChildI.enabled = true;
-        ChangeCustomPiece(type,false, false);
+        ChangeCustomPiece(type, false, false);
     }
-    
+
     public void ChangeEnemyCustomPiece(CustomPiece.PiecesTypeEnum type)
     {
         //currentPieceGameObj.transform.localScale = new Vector3(0.5f, 0.5f, 0.5f);
         currentPieceGameOjChildI.enabled = true;
-        ChangeCustomPiece(type, true,false);
+        ChangeCustomPiece(type, true, false);
     }
 
     public void ChangeColor()
     {
         //change color material
         currentPieceGameObjChildMR.material = (PlayerPrefs.GetInt(Constants.KEY_COLOR) == 0 ? currentPiece.materialWhite : currentPiece.materialBlack);
+    }
+
+    public void ShowPowerupTrotus(int powerupType)
+    {
+        switch (powerupType)
+        {
+            case (int)Powerup.PowerupType.DOUBLE_FULL:
+                currentPieceGameObjTrotusMeshRenderer.material.color = Constants.POWERUP_DOUBLE_FULL_COLOR;
+                break;
+            case (int)Powerup.PowerupType.STRONG:
+                currentPieceGameObjTrotusMeshRenderer.material.color = Constants.POWERUP_STRONG_COLOR;
+                break;
+            case (int)Powerup.PowerupType.DIZZY:
+                currentPieceGameObjTrotusMeshRenderer.material.color = Constants.POWERUP_DIZZY_COLOR;
+                break;
+        }
+        currentPieceGameObjTrotus.SetActive(true);
+    }
+
+    public void HidePowerupTrotus()
+    {
+        currentPieceGameObjTrotus.SetActive(false);
     }
 
     public bool IsDiagonalMovement(CustomPiece.MovementTypeEnum movement)
@@ -272,11 +326,11 @@ public class PieceHandler : MonoBehaviour
 
         GlobalSingleton.GetInstance().SetTimeAsync(50, (o) =>
         {
-     
+
             //check accuracy
             accuracy = (gameManager.IsFrontCamera() ? Constants.ACCURECY_FRONT_CAMERA
             : Constants.ACCURECY_TOP_CAMERA);
-           
+
 
             lastStep = movementVectorDictionary[movement];
             stepsToMove = (n * accuracy);
@@ -319,12 +373,14 @@ public class PieceHandler : MonoBehaviour
             currentPiece.currentPoint.j + n * movementVectorDictionary[movement].Point.j);
     }
 
-    public bool IsPointOnPath(Point point) {
+    public bool IsPointOnPath(Point point)
+    {
         if (Path != null)
         {
             for (int i = 0; i < Path.Length; i++)
             {
-                if (Path[i].i == point.i && Path[i].j == point.j) {
+                if (Path[i].i == point.i && Path[i].j == point.j)
+                {
                     return true;
                 }
             }
@@ -392,6 +448,14 @@ public class PieceHandler : MonoBehaviour
 
     public void RestoreToPos(Point p, Vector3 position, bool keepChildYPos)
     {
+        //stop movement
+        if (stepsToMove > 0)
+        {
+            stepsToMove = 0;
+            CheckNextSteps();
+        }
+
+        //refresh values
         currentPiece.currentPoint = p;
         currentPieceGameObj.transform.position = new Vector3(position.x, 1f, position.z);
         currentPieceGameObj.transform.localRotation = Quaternion.identity;
@@ -399,11 +463,11 @@ public class PieceHandler : MonoBehaviour
 
         Vector3 childPosInParent = Vector3.zero;
         float currentChildYPos = currentPieceGameObj.transform.GetChild(0).transform.localPosition.y;
-        if (keepChildYPos && currentChildYPos<=1f && currentChildYPos>= 0)
+        if (keepChildYPos && currentChildYPos <= 1f && currentChildYPos >= 0)
         {
             childPosInParent = new Vector3(0f, currentChildYPos, 0f);
         }
-        currentPieceGameObjChild.transform.localPosition = childPosInParent; 
+        currentPieceGameObjChild.transform.localPosition = childPosInParent;
     }
 
     public void DestroyPiece()

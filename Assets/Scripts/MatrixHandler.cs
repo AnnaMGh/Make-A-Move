@@ -46,7 +46,7 @@ public class MatrixHandler : MonoBehaviour
     private GameObject prefabEnabler;
     private GameObject prefabBreakable;
     private GameObject[] prefabPowerup;
-  
+
 
     private Material[] crackMaterial;
 
@@ -122,7 +122,8 @@ public class MatrixHandler : MonoBehaviour
         }
     }
 
-    public bool IsOnBreakableBox(Point point) {
+    public bool IsOnBreakableBox(Point point)
+    {
 
         if (breakableArray != null)
         {
@@ -206,7 +207,7 @@ public class MatrixHandler : MonoBehaviour
         //bool andActive = inMatrix && (justInMatrix ? true : matrixOfCubes[p.i, p.j].GetComponent<Renderer>().material.color.a > 0);
         // bool andActive = inMatrix && (justInMatrix ? true : matrixOfCubes[p.i, p.j].GetComponent<Renderer>().enabled && !matrixOfCubes[p.i, p.j].needEnabler);
         bool andActive = inMatrix
-            && (checkEnabler?!matrixOfCubes[p.i, p.j].needEnabler:true)
+            && (checkEnabler ? !matrixOfCubes[p.i, p.j].needEnabler : true)
             && (justInMatrix ? true : matrixOfCubes[p.i, p.j].GetComponent<Renderer>().enabled);
         return inMatrix && andActive;
     }
@@ -317,8 +318,9 @@ public class MatrixHandler : MonoBehaviour
             matrixOfCubes[point.i, point.j].enabledStatus = false;
             matrixOfCubes[point.i, point.j].SetCubeType(Cube.CubeType.TYPE_UNAVAILABLE);
         }
-        else {
-            matrixOfCubes[point.i, point.j].SetBreakableMaterial(crackMaterial[index-1]);
+        else
+        {
+            matrixOfCubes[point.i, point.j].SetBreakableMaterial(crackMaterial[index - 1]);
             matrixOfCubes[point.i, point.j].SetCubeType(Cube.CubeType.TYPE_BREAKABLE);
         }
     }
@@ -329,7 +331,8 @@ public class MatrixHandler : MonoBehaviour
         matrixOfCubes[point.i, point.j].ChangeCubeStatus(status, color);
     }
 
-    public void ChangePowerupCamera(bool isCamera3D) {
+    public void ChangePowerupCamera(bool isCamera3D)
+    {
         if (powerupArray != null)
         {
             foreach (Powerup power in powerupArray)
@@ -357,7 +360,7 @@ public class MatrixHandler : MonoBehaviour
         block.GameObj.GetComponent<Interactable>().SetObject(block);
     }
 
-    private void AddEnabler(int nr,Enabler enabler)
+    private void AddEnabler(int nr, Enabler enabler)
     {
         enabler.SetGameObject(Instantiate(prefabEnabler,
             matrixOfCubes[enabler.enablerPoint.i, enabler.enablerPoint.j].transform.position
@@ -369,7 +372,7 @@ public class MatrixHandler : MonoBehaviour
         matrixOfCubes[enabler.cubePoint.i, enabler.cubePoint.j].GetComponent<Renderer>().material.color = enabler.color;
     }
 
-    private void AddBreakable(int nr,Breakable breakable)
+    private void AddBreakable(int nr, Breakable breakable)
     {
         breakable.SetGameObject(Instantiate(prefabBreakable,
             matrixOfCubes[breakable.point.i, breakable.point.j].transform.position
@@ -380,12 +383,12 @@ public class MatrixHandler : MonoBehaviour
 
         ChangeBreakableStatus(breakable.GetBreakableIndex(), breakable.point);
     }
-    
-    private void AddPowerup(int nr,Powerup powerup)
+
+    private void AddPowerup(int nr, Powerup powerup)
     {
         powerup.SetGameObject(Instantiate(prefabPowerup[powerup.type],
             matrixOfCubes[powerup.point.i, powerup.point.j].transform.position
-            + new Vector3(0f, 1f, 0f), 
+            + new Vector3(0f, 1f, 0f),
             Quaternion.identity));
         powerup.ChangeGameObjectName(nr);
         powerup.SetObjectScript(powerup);
@@ -397,7 +400,7 @@ public class MatrixHandler : MonoBehaviour
         GameObject prefabPiece = (GameObject)Resources.Load("Prefabs/" + CustomPiece.prefabName, typeof(GameObject));
         enemy.SetGameObject(Instantiate(prefabPiece,
             matrixOfCubes[enemy.point.i, enemy.point.j].transform.position
-            + new Vector3(0f, 1f, 0f), 
+            + new Vector3(0f, 1f, 0f),
             Quaternion.identity));
         enemy.GameObj.GetComponent<PieceHandler>().ChangeEnemyCustomPiece(enemy.TypePiece);
     }
@@ -410,6 +413,30 @@ public class MatrixHandler : MonoBehaviour
             newPieceAvailable = null;
         }
 
+    }
+
+    public void RemoveBlock(Block block, bool destoryGameObject)
+    {
+        if (blockArray != null && block!=null)
+        {
+            Block[] newBlocks = new Block[blockArray.Length - 1];
+            int j = 0;
+            for (int i = 0; i < blockArray.Length; i++)
+            {
+               
+                if (!blockArray[i].ToString().Equals(block.ToString()))
+                {
+                    newBlocks[j] = blockArray[i];
+                    newBlocks[j].ChangeGameObjectName(j);
+                    j++;
+                }
+            }
+            blockArray = newBlocks;
+            if (block.GameObj != null && destoryGameObject)
+            {
+                Destroy(block.GameObj);
+            }
+        }
     }
 
     private void RemoveBlocks()
@@ -454,18 +481,19 @@ public class MatrixHandler : MonoBehaviour
     {
         if (powerupArray != null)
         {
-            Powerup[] newPowerups = new Powerup[powerupArray.Length-1];
-            int j= 0;
-            for (int i=0; i< powerupArray.Length; i++)
+            Powerup[] newPowerups = new Powerup[powerupArray.Length - 1];
+            int j = 0;
+            for (int i = 0; i < powerupArray.Length; i++)
             {
                 if (!powerupArray[i].Equals(powerup))
                 {
                     newPowerups[j] = powerupArray[i];
+                    newPowerups[j].ChangeGameObjectName(j);
                     j++;
                 }
             }
-            powerupArray = newPowerups;   
-            Destroy(powerup.GameObj);  
+            powerupArray = newPowerups;
+            Destroy(powerup.GameObj);
         }
     }
 
@@ -475,7 +503,7 @@ public class MatrixHandler : MonoBehaviour
         {
             foreach (Powerup obj in powerupArray)
             {
-                 Destroy(obj.GameObj);
+                Destroy(obj.GameObj);
             }
         }
         powerupArray = null;
@@ -486,7 +514,7 @@ public class MatrixHandler : MonoBehaviour
         {
             foreach (Enemy obj in enemyArray)
             {
-                 Destroy(obj.GameObj);
+                Destroy(obj.GameObj);
             }
         }
         enemyArray = null;
@@ -602,7 +630,7 @@ public class MatrixHandler : MonoBehaviour
                 AddBreakable(i, breakableArray[i]);
             }
         }
-        
+
         //powerup
         if (powerupArray != null && powerupArray.Length > 0)
         {
@@ -610,8 +638,8 @@ public class MatrixHandler : MonoBehaviour
             {
                 AddPowerup(i, powerupArray[i]);
             }
-        } 
-        
+        }
+
         //enemy
         if (enemyArray != null && enemyArray.Length > 0)
         {

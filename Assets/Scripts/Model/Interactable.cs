@@ -225,21 +225,18 @@ public class Interactable : MonoBehaviour
 
                     particles.Play();
                     particles.gameObject.SetActive(true);
+                    this.gameObject.layer = 2; // to be ignored by raycast
                     this.gameObject.transform.GetChild(0).gameObject.SetActive(false);
+                    this.gameObject.transform.GetChild(0).gameObject.layer = 2; // to be ignored by raycast
                     this.gameObject.transform.GetChild(1).gameObject.SetActive(false);
+                    this.gameObject.transform.GetChild(1).gameObject.layer = 2; // to be ignored by raycast
                     this.gameObject.GetComponent<Collider>().enabled = false;
                     this.gameObject.GetComponent<Renderer>().enabled = false;
 
                     goDown = false;
-                    gameManager.OnBlock(false, null, -3); //refresh current position
+                    gameManager.OnPolish(0);
+                    gameManager.OnBlock(false, (Block)receivedObject, -3);
                     collideOrTrigger = false;
-
-                    Destroy(gameObject, 1f);
-                    GlobalSingleton.GetInstance().SetTimeAsync(100, (async) =>
-                    {
-                        gameManager.OnBlock(false, (Block)receivedObject, -3); //refresh current position
-                    });
-
                 }
                 else {
                     //check if block might be moved
@@ -284,14 +281,18 @@ public class Interactable : MonoBehaviour
                 this.gameObject.GetComponent<Renderer>().enabled = false;
 
                 goDown = false;
-                gameManager.OnBlock(false, null, -2); //refresh current position
+                gameManager.OnPolish(0);
+                gameManager.OnBlock(false, (Block)receivedObject, -2);
                 collideOrTrigger = false;
+                /* goDown = false;
+                 gameManager.OnBlock(false, null, -2); //refresh current position
+                 collideOrTrigger = false;
 
-                Destroy(gameObject, 1f);
-                GlobalSingleton.GetInstance().SetTimeAsync(100, (async) =>
-                {
-                    gameManager.OnBlock(false, (Block)receivedObject, -2); //refresh current position
-                });
+                 Destroy(gameObject, 1f);
+                 GlobalSingleton.GetInstance().SetTimeAsync(100, (async) =>
+                 {
+                     gameManager.OnBlock(false, (Block)receivedObject, -2); //refresh current position
+                 });*/
             }
             else
             {
@@ -409,6 +410,11 @@ public class Interactable : MonoBehaviour
                 AudioSource audio = this.gameObject.transform.GetChild(1).GetComponent<AudioSource>();
                 audio.Play();
             }
+
+            //deactivate mesh
+            this.gameObject.transform.GetChild(0).gameObject.SetActive(false);
+            this.gameObject.transform.GetChild(0).gameObject.GetComponent<Renderer>().enabled = false;
+            this.gameObject.GetComponent<Collider>().enabled = false;
 
             gameManager.OnPowerup(powerup);
 

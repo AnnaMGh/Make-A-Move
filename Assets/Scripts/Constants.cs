@@ -77,4 +77,7 @@ public class Constants
     public static Color MATRIX_BOX_BLACK_COLOR = new Color(0f, 0f, 0f, 1f);
     public static Color ARROW_ENABLED_COLOR = new Color(1f, 1f, 1f, 1f);
     public static Color ARROW_DISABLED_COLOR = new Color(0.9f, 0.9f, 0.9f, 0.9f);
+    public static Color POWERUP_DOUBLE_FULL_COLOR = new Color(0.9f, 0.8f, 0.4f, 1f);
+    public static Color POWERUP_STRONG_COLOR = new Color(0.8f, 0.6f, 0.6f, 1f);
+    public static Color POWERUP_DIZZY_COLOR = new Color(0.1f, 0.3f, 0.0f, 1f);
 }

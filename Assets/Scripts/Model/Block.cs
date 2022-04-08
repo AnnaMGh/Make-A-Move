@@ -70,4 +70,14 @@ public class Block
     {
         this.gameObj.name = Interactable.InteractableType.BLOCK.ToString() +"_" + nr;
     }
+
+    public override string ToString() {
+        string str = "";
+        if (this.gameObj != null)
+        {
+            str += gameObj.name + " - ";
+        }
+        str+="(" +oldPoint.i + "," + oldPoint.j + ")";
+        return str;
+    }
 }

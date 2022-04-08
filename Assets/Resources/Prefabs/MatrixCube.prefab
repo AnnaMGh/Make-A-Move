@@ -45,7 +45,7 @@ GameObject:
   - component: {fileID: 2693753197272596863}
   - component: {fileID: 2693753197272596862}
   - component: {fileID: 8860943422150459071}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: MatrixCube
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -147,6 +147,7 @@ MonoBehaviour:
     j: 0
   enabledStatus: 0
   needEnabler: 0
+  isBreaked: 0
 --- !u!1 &4423991405739432748
 GameObject:
   m_ObjectHideFlags: 0
@@ -4975,7 +4976,7 @@ GameObject:
   - component: {fileID: 2240597347701478610}
   - component: {fileID: 672235921783004002}
   - component: {fileID: 396299240679698230}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: Pillar
   m_TagString: Untagged
   m_Icon: {fileID: 0}

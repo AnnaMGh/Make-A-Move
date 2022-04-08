@@ -37,7 +37,7 @@ public class TutorialHandler : MonoBehaviour
         INTRODUCE_ENABLER, INTRODUCE_ENABLER_BUTTON,
         POWERUP_DOUBLE_FULL_INTRODUCE, POWERUP_DOUBLE_FULL_LOST, POWERUP_DOUBLE_FULL_PAWN,
         POWERUP_DOUBLE_FULL_KNIGHT, POWERUP_DOUBLE_FULL_ROOK_BISHOP_QUEEN, POWERUP_DOUBLE_FULL_KING,
-        POWERUP_STRONG_INTRODUCE, POWERUP_STRONG_KNIGHT, POWERUP_DIZZY_INTRODUCE, POWERUP_DIZZY_INTRODUCE_02
+        POWERUP_STRONG_INTRODUCE, POWERUP_STRONG_KNIGHT, POWERUP_STRONG_KING, POWERUP_DIZZY_INTRODUCE, POWERUP_DIZZY_INTRODUCE_02
 
     };
 
@@ -321,6 +321,13 @@ public class TutorialHandler : MonoBehaviour
                 TutorialTitle.POWERUP_STRONG_KNIGHT,
                 new Tutorial(TutorialTitle.POWERUP_STRONG_KNIGHT.ToString(),
             "STRONG POWERUP doesn't apply to KNIGHT",
+                Vector3.right,
+                false)
+            }, 
+            {
+                TutorialTitle.POWERUP_STRONG_KING,
+                new Tutorial(TutorialTitle.POWERUP_STRONG_KING.ToString(),
+            "STRONG POWERUP is lost after the 1st interaction with a BLOCK, (exept for KING where is lost after the 2nd interaction)",
                 Vector3.right,
                 false)
             },
