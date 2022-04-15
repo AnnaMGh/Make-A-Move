@@ -11,6 +11,35 @@ public class PieceHandler : MonoBehaviour
     public Step LastStep { get { return lastStep; } }
     public Point[] Path { get; private set; }
     public GameManager gameManager;
+
+    private Dictionary<Cube, CustomPiece.MovementTypeEnum> possibleNextMoves;
+    private Dictionary<Block, CustomPiece.MovementTypeEnum> possibleNextBlocks;
+
+    public Dictionary<Cube, CustomPiece.MovementTypeEnum> PossibleNextMoves
+    {
+        get
+        {
+            if (possibleNextMoves == null)
+            {
+                possibleNextMoves = new Dictionary<Cube, CustomPiece.MovementTypeEnum>();
+            }
+            return possibleNextMoves;
+        }
+        private set { }
+    }
+    public Dictionary<Block, CustomPiece.MovementTypeEnum> PossibleNextBlocks
+    {
+        get
+        {
+            if (possibleNextBlocks == null)
+            {
+                possibleNextBlocks = new Dictionary<Block, CustomPiece.MovementTypeEnum>();
+            }
+            return possibleNextBlocks;
+        }
+        private set { }
+    }
+
     //[SerializeField]
     //public Point currentPoint;
 
@@ -36,6 +65,8 @@ public class PieceHandler : MonoBehaviour
     private Delegates.ObjectDelegate movementFinishedDelegate;
 
     private AudioClip movementClip;
+
+    public bool isEnemy { get; private set; }
 
 
     // Start is called before the first frame update
@@ -174,7 +205,7 @@ public class PieceHandler : MonoBehaviour
         }
     }
 
-    public void ChangeCustomPiece(CustomPiece.PiecesTypeEnum type, bool isEnemy, bool withSound)
+    public void ChangeCustomPiece(CustomPiece.PiecesTypeEnum type, bool withSound)
     {
         //activate new collider
         currentPieceGameObjChildBCs[(int)type].enabled = true;
@@ -233,8 +264,7 @@ public class PieceHandler : MonoBehaviour
         // currentPieceGameObjChildLOD.RecalculateBounds();
 
         //change material
-        int colorId = (isEnemy ? 1 - PlayerPrefs.GetInt(Constants.KEY_COLOR) : PlayerPrefs.GetInt(Constants.KEY_COLOR));
-        currentPieceGameObjChildMR.material = (colorId == 0 ? currentPiece.materialWhite : currentPiece.materialBlack);
+        ChangeColor();
 
         //positon a bit higer to have the fall effect
         gameObject.transform.Translate(0f, 0.25f, 0f, Space.World);
@@ -251,20 +281,24 @@ public class PieceHandler : MonoBehaviour
     {
         currentPieceGameObj.transform.localScale = new Vector3(0.5f, 0.5f, 0.5f);
         currentPieceGameOjChildI.enabled = true;
-        ChangeCustomPiece(type, false, false);
+        ChangeCustomPiece(type, false);
     }
 
     public void ChangeEnemyCustomPiece(CustomPiece.PiecesTypeEnum type)
     {
         //currentPieceGameObj.transform.localScale = new Vector3(0.5f, 0.5f, 0.5f);
         currentPieceGameOjChildI.enabled = true;
-        ChangeCustomPiece(type, true, false);
+        isEnemy = true;
+        ChangeCustomPiece(type, false);
     }
 
     public void ChangeColor()
     {
         //change color material
-        currentPieceGameObjChildMR.material = (PlayerPrefs.GetInt(Constants.KEY_COLOR) == 0 ? currentPiece.materialWhite : currentPiece.materialBlack);
+        int colorId = (isEnemy ? 1 - PlayerPrefs.GetInt(Constants.KEY_COLOR) : PlayerPrefs.GetInt(Constants.KEY_COLOR));
+        currentPieceGameObjChildMR.material = (colorId == 0 ? currentPiece.materialWhite : currentPiece.materialBlack);
+
+        // currentPieceGameObjChildMR.material = (PlayerPrefs.GetInt(Constants.KEY_COLOR) == 0 ? currentPiece.materialWhite : currentPiece.materialBlack);
     }
 
     public void ShowPowerupTrotus(int powerupType)

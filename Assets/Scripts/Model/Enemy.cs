@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 
 [System.Serializable]
-public class Enemy 
+public class Enemy
 {
     public CustomPiece.PiecesTypeEnum TypePiece { get { return (CustomPiece.PiecesTypeEnum)type; } }
     public Point Point { get { return point; } }
@@ -16,6 +16,7 @@ public class Enemy
 
     private Vector3 positon;
     private GameObject gameObj;
+    public PieceHandler EnemyPieceHandler { get; private set; }
 
     public Enemy()
     {
@@ -40,6 +41,19 @@ public class Enemy
     public void SetGameObject(GameObject gameObj)
     {
         this.gameObj = gameObj;
+        this.EnemyPieceHandler = this.gameObj.GetComponent<PieceHandler>();
+        this.gameObj.transform.GetChild(0).GetComponent<Interactable>().interactableType = Interactable.InteractableType.ENEMY;
+        this.EnemyPieceHandler.CurrentPiece.currentPoint = new Point(point.i, point.j);
+    }
+
+    public void ChangeCustomPiece()
+    {
+        this.EnemyPieceHandler.ChangeEnemyCustomPiece(TypePiece);
+    }
+
+    public void ChangeColor()
+    {
+        this.EnemyPieceHandler.ChangeColor();
     }
 
     public Enemy GetPiece(Vector3 pos)

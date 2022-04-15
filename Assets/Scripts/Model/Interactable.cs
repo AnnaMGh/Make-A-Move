@@ -128,6 +128,11 @@ public class Interactable : MonoBehaviour
                     {
                         HandlePowerups();
                         break;
+                    } 
+                case InteractableType.ENEMY:
+                    {
+                        HandleEnemy();
+                        break;
                     }
             }
         }
@@ -184,7 +189,7 @@ public class Interactable : MonoBehaviour
         collideOrTrigger = true;
         gameObject.SetActive(false);
         gameManager.OnNewPieceAvailable(this.gameObject.transform.parent.GetComponent<PieceHandler>().CurrentPiece.pieceType);
-    }
+    } 
 
     private void HandleBlock(Collider collider, bool fromCollision)
     {
@@ -420,5 +425,12 @@ public class Interactable : MonoBehaviour
 
             collideOrTrigger = false;
         }
+    }
+
+    private void HandleEnemy()
+    {
+        collideOrTrigger = true;
+        gameObject.SetActive(false);
+        gameManager.OnEnemy(this.gameObject.transform.parent.GetComponent<PieceHandler>().CurrentPiece.pieceType);
     }
 }
