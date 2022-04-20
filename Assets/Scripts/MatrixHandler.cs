@@ -403,6 +403,8 @@ public class MatrixHandler : MonoBehaviour
             + new Vector3(0f, 1f, 0f),
             Quaternion.identity));
         enemy.ChangeCustomPiece();
+        enemy.ChangeGameObjectName(nr);
+        enemy.SetObjectScript(enemy);
     }
 
     private void RemoveNewPieceAvailable()
@@ -476,7 +478,7 @@ public class MatrixHandler : MonoBehaviour
         }
         breakableArray = null;
     }
-
+    
     public void RemovePowerup(Powerup powerup)
     {
         if (powerupArray != null)
@@ -508,6 +510,27 @@ public class MatrixHandler : MonoBehaviour
         }
         powerupArray = null;
     }
+
+    public void RemoveEnemy(Enemy enemy)
+    {
+        if (enemyArray != null)
+        {
+            Enemy[] newEnemy = new Enemy[enemyArray.Length - 1];
+            int j = 0;
+            for (int i = 0; i < enemyArray.Length; i++)
+            {
+                if (!enemyArray[i].Equals(enemy))
+                {
+                    newEnemy[j] = enemyArray[i];
+                    newEnemy[j].ChangeGameObjectName(j);
+                    j++;
+                }
+            }
+            enemyArray = newEnemy;
+            Destroy(enemy.GameObj);
+        }
+    }
+
     private void RemoveEnemies()
     {
         if (enemyArray != null)

@@ -46,14 +46,34 @@ public class Enemy
         this.EnemyPieceHandler.CurrentPiece.currentPoint = new Point(point.i, point.j);
     }
 
+    public void ChangeGameObjectName(int nr)
+    {
+        this.gameObj.name = Interactable.InteractableType.ENEMY.ToString() + "_" + nr;
+    }
+
+    public void SetObjectScript(Enemy obj)
+    {
+        gameObj.transform.GetChild(0).GetComponent<Interactable>().SetObject(obj);
+    }
+
     public void ChangeCustomPiece()
     {
-        this.EnemyPieceHandler.ChangeEnemyCustomPiece(TypePiece);
+        this.EnemyPieceHandler.ChangeEnemyCustomPiece(TypePiece, delegatPointUpdate=> {
+            point = (Point)delegatPointUpdate;
+        });
     }
+
 
     public void ChangeColor()
     {
         this.EnemyPieceHandler.ChangeColor();
+    }
+
+    public void Hide() {
+        this.gameObj.transform.GetChild(0).gameObject.SetActive(false);
+        this.gameObj.transform.GetChild(2).gameObject.SetActive(false);
+        this.gameObj.transform.GetChild(3).gameObject.SetActive(false);
+        this.gameObj.transform.GetChild(4).gameObject.SetActive(false);
     }
 
     public Enemy GetPiece(Vector3 pos)

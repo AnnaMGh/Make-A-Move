@@ -63,6 +63,7 @@ public class Constants
     public static Color DEFAULT_ALERT_BG_COLOR = new Color(0.6f, 0.6f, 0.6f, 0.6f);
     public static Color DEFAULT_ALERT_TXT_COLOR = new Color(1f, 1f, 1f, 1f);
     public static Color MATRIX_BOX_NEXT_COLOR = new Color(0f, 0.55f, 0.5f, 1f);
+    public static Color MATRIX_BOX_NEXT_ENEMY_COLOR = new Color(0.55f, 0f, 0.2f, 1f);
     public static Color MATRIX_BOX_START_COLOR = new Color(0.2f, 0.1f, 0.4f, 1f);
     public static Color MATRIX_BOX_START_NEXT_COLOR = new Color(0.15f, 0.35f, 0.45f, 1f);
     public static Color MATRIX_BOX_FINISH_COLOR = new Color(0.06f, 0.3f, 0.06f, 1f);

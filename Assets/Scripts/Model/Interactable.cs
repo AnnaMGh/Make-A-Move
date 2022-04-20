@@ -423,14 +423,39 @@ public class Interactable : MonoBehaviour
 
             gameManager.OnPowerup(powerup);
 
-            collideOrTrigger = false;
+            //collideOrTrigger = false;
         }
     }
 
     private void HandleEnemy()
     {
-        collideOrTrigger = true;
-        gameObject.SetActive(false);
-        gameManager.OnEnemy(this.gameObject.transform.parent.GetComponent<PieceHandler>().CurrentPiece.pieceType);
+        if (!collideOrTrigger)
+        {
+            collideOrTrigger = true;
+
+            Enemy enemy = (Enemy)receivedObject;
+
+            //check if enemy is in the path
+            if (enemy==null || !gameManager.GetPieceHandler().IsPointOnPath(enemy.point))
+            {
+                collideOrTrigger = false;
+                return;
+            }
+
+            //make sound
+            if (PlayerPrefs.GetInt(Constants.KEY_SOUND) == 1)
+            {
+                AudioSource audio = this.gameObject.transform.GetChild(1).GetComponent<AudioSource>();
+                audio.Play();
+            }
+
+            //disable graphics
+            enemy.Hide();
+
+            gameManager.OnEnemy(enemy);
+            
+            
+            //collideOrTrigger = false;
+        }
     }
 }

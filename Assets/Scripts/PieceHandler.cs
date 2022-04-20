@@ -15,6 +15,9 @@ public class PieceHandler : MonoBehaviour
     private Dictionary<Cube, CustomPiece.MovementTypeEnum> possibleNextMoves;
     private Dictionary<Block, CustomPiece.MovementTypeEnum> possibleNextBlocks;
 
+    public bool IsPieceTurn { get; set; }
+    public bool IsLastPieceTurn { get; set; }
+
     public Dictionary<Cube, CustomPiece.MovementTypeEnum> PossibleNextMoves
     {
         get
@@ -53,6 +56,7 @@ public class PieceHandler : MonoBehaviour
     private Interactable currentPieceGameOjChildI;
     private AudioSource currentPieceGameObjAudio;
     private GameObject currentPieceGameObjTrotus;
+    private GameObject currentPieceGameObjGem;
     private MeshRenderer currentPieceGameObjTrotusMeshRenderer;
     private CustomPiece currentPiece;
     private Dictionary<CustomPiece.MovementTypeEnum, Step> movementVectorDictionary;
@@ -62,6 +66,7 @@ public class PieceHandler : MonoBehaviour
     private int stepsToMove;
     private Step lastStep = new Step();
 
+    private Delegates.ObjectDelegate movementEnemyFinishedDelegate;
     private Delegates.ObjectDelegate movementFinishedDelegate;
 
     private AudioClip movementClip;
@@ -93,9 +98,11 @@ public class PieceHandler : MonoBehaviour
         currentPieceGameObjAudio = currentPieceGameObj.transform.GetChild(1).GetComponent<AudioSource>();
         currentPieceGameObjTrotus = currentPieceGameObj.transform.GetChild(3).gameObject;
         currentPieceGameObjTrotusMeshRenderer = currentPieceGameObjTrotus.GetComponent<MeshRenderer>();
+        currentPieceGameObjGem = currentPieceGameObj.transform.GetChild(4).gameObject;
         currentPiece = new CustomPiece();
 
         currentPieceGameObjTrotus.SetActive(false);
+        currentPieceGameObjGem.SetActive(false);
 
         //create movement dictionary
         movementVectorDictionary = new Dictionary<CustomPiece.MovementTypeEnum, Step>
@@ -199,14 +206,29 @@ public class PieceHandler : MonoBehaviour
         {
             lastStep.SplitPos = false;
             gameObject.transform.position = new Vector3((float)Math.Round(gameObject.transform.position.x, 0), gameObject.transform.position.y, (float)Math.Round(gameObject.transform.position.z));
-            currentPieceGameObjChildBCs[(int)currentPiece.pieceType].isTrigger = false;
-            currentPieceGameObjChildRB.useGravity = true;
+
+            if (isEnemy)
+            {
+                currentPieceGameObjChildBCs[(int)currentPiece.pieceType].isTrigger = true;
+                currentPieceGameObjChildRB.useGravity = false;
+                //update point
+                movementEnemyFinishedDelegate?.Invoke(currentPiece.currentPoint); 
+            }
+            else
+            {
+                currentPieceGameObjChildBCs[(int)currentPiece.pieceType].isTrigger = false;
+                currentPieceGameObjChildRB.useGravity = true;
+            }
             movementFinishedDelegate?.Invoke(true);
         }
     }
 
     public void ChangeCustomPiece(CustomPiece.PiecesTypeEnum type, bool withSound)
     {
+
+        //enable gem
+        currentPieceGameObjGem.SetActive(isEnemy);
+
         //activate new collider
         currentPieceGameObjChildBCs[(int)type].enabled = true;
         currentPieceGameObjChildBCs[(int)currentPiece.pieceType].isTrigger = false;
@@ -284,11 +306,12 @@ public class PieceHandler : MonoBehaviour
         ChangeCustomPiece(type, false);
     }
 
-    public void ChangeEnemyCustomPiece(CustomPiece.PiecesTypeEnum type)
+    public void ChangeEnemyCustomPiece(CustomPiece.PiecesTypeEnum type, Delegates.ObjectDelegate objectDelegate)
     {
         //currentPieceGameObj.transform.localScale = new Vector3(0.5f, 0.5f, 0.5f);
         currentPieceGameOjChildI.enabled = true;
         isEnemy = true;
+        movementEnemyFinishedDelegate = objectDelegate;
         ChangeCustomPiece(type, false);
     }
 

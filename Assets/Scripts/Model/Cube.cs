@@ -5,7 +5,7 @@ using UnityEngine;
 [System.Serializable]
 public class Cube : MonoBehaviour
 {
-    public enum CubeType { TYPE_NORMAL, TYPE_NEXT, TYPE_UNAVAILABLE, TYPE_START, TYPE_FINISH, TYPE_NEW_PIECE, TYPE_BLOCK, TYPE_BREAKABLE }
+    public enum CubeType { TYPE_NORMAL, TYPE_NEXT, TYPE_NEXT_ENEMY, TYPE_UNAVAILABLE, TYPE_START, TYPE_FINISH, TYPE_NEW_PIECE, TYPE_BLOCK, TYPE_BREAKABLE }
 
 
     public Point point;
@@ -181,10 +181,15 @@ public class Cube : MonoBehaviour
                     break;
                 }
             case CubeType.TYPE_NEXT:
+            case CubeType.TYPE_NEXT_ENEMY:
                 {
                     cubeColor = Constants.MATRIX_BOX_NEXT_COLOR;
                     cubeMaterial = baseMaterial;
-
+                    if (type.Equals(CubeType.TYPE_NEXT_ENEMY))
+                    {
+                        cubeColor = Constants.MATRIX_BOX_NEXT_ENEMY_COLOR;
+                    }
+                    
                     if (previousType == CubeType.TYPE_FINISH || previousType == CubeType.TYPE_START)
                     {
                         particleVisibility = true;
