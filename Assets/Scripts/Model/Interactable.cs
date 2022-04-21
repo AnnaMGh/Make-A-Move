@@ -452,6 +452,7 @@ public class Interactable : MonoBehaviour
             //disable graphics
             enemy.Hide();
 
+            enemy.enabled = false;
             gameManager.OnEnemy(enemy);
             
             

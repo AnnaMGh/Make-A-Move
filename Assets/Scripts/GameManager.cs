@@ -654,47 +654,29 @@ public class GameManager : MonoBehaviour
         return pieceHandler;
     }
 
+   
+
     private void CalculateCurrentPieceTurn()
     {
         if (pieceHandler.IsPieceTurn)
         {
-            //if was the player and has enemy => next is the enemy
-            pieceHandler.IsPieceTurn = false;
-            if (matrixHandler.EnemyArray != null && matrixHandler.EnemyArray.Length > 0)
-            {
-
-                int randomIndex = UnityEngine.Random.Range(0, matrixHandler.EnemyArray.Length);
-                SetCurrentPieceTurn(matrixHandler.EnemyArray[randomIndex].EnemyPieceHandler);
-                /*for (int i = 0; i < matrixHandler.EnemyArray.Length; i++)
-                {
-                    if (matrixHandler.EnemyArray[i].EnemyPieceHandler.IsLastPieceTurn)
-                    {
-                        //disable last
-                        matrixHandler.EnemyArray[i].EnemyPieceHandler.IsLastPieceTurn = false;
-                        int nextOne = i + 1;
-                        if (nextOne >= matrixHandler.EnemyArray.Length)
-                        {
-                            nextOne = 0;
-                        }
-                        //enable current
-                        SetCurrentPieceTurn(matrixHandler.EnemyArray[nextOne].EnemyPieceHandler);
-                        break;
-                    }
-                }*/
-            }
-            else
+            Enemy nextEnemy = matrixHandler.GetNextRandomEnabledEnemy();
+            if (nextEnemy == null)
             {
                 //if was the player and does't have enemy => next is the player
                 SetCurrentPieceTurn(pieceHandler);
+
+            }
+            else {
+                //if was the player and has enemy => next is the enemy
+                pieceHandler.IsPieceTurn = false;
+                SetCurrentPieceTurn(nextEnemy.EnemyPieceHandler);
             }
         }
         else
         {
             SetCurrentPieceTurn(pieceHandler);
         }
-
-        Debug.Log("Piece turn: " + (GetCurrentPieceTurn().isEnemy ? "enemy" : "player"));
-
     }
 
     private void SetCurrentPieceTurn(PieceHandler pieceHandlerTurn)
@@ -815,22 +797,6 @@ public class GameManager : MonoBehaviour
             }
         }
     }
-
-    /* private bool SetAndCheckNextMovesOnPoint(CustomPiece.MovementTypeEnum type, int stepsToPoint)
-     {
-         Point point = pieceHandler.GetPoint(type, stepsToPoint);
-         if (matrixHandler.CheckIfCanStep(false, true, point))
-         {
-             int possibleNextBlocksNr = pieceHandler.PossibleNextBlocks.Count;
-
-             CheckNextMovesOnPoint(point, type, stepsToPoint);
-
-             return (possibleNextBlocksNr == pieceHandler.PossibleNextBlocks.Count
-                 && pieceHandler.PossibleNextMoves.ContainsKey(matrixHandler.MatrixOfCubes[point.i, point.j]));
-         }
-
-         return false;
-     }*/
 
     private bool SetAndCheckNextMovesOnPoint(PieceHandler receivedPieceHandler,
         CustomPiece.MovementTypeEnum type, int stepsToPoint)
@@ -1391,13 +1357,24 @@ public class GameManager : MonoBehaviour
     public void OnEnemy(Enemy enemy)
     {
         enemyIconHandler.NewTook();
-
-     
+        CleanNextMovesAndBlocks(enemy.EnemyPieceHandler.PossibleNextMoves, enemy.EnemyPieceHandler.PossibleNextBlocks);
 
         //remove after sound done
         GlobalSingleton.GetInstance().SetTimeAsync(1000, obj =>
         {
+            //retain and clean enemy moves
+            Dictionary<Cube, CustomPiece.MovementTypeEnum> enemyPossibleNextMoves = enemy.EnemyPieceHandler.PossibleNextMoves;
+            Dictionary<Block, CustomPiece.MovementTypeEnum> enemyPossibleNextBlocks = enemy.EnemyPieceHandler.PossibleNextBlocks;
+            CleanNextMovesAndBlocks(enemyPossibleNextMoves, enemyPossibleNextBlocks);
+
+            //remove enemy
             matrixHandler.RemoveEnemy(enemy);
+
+            //clean enemy, recalculate current piece  recalculate moves
+            Debug.Log("after enemy removed: " + enemyPossibleNextBlocks.ToString() 
+                + ", " + enemyPossibleNextMoves.ToString());
+            CleanNextMovesAndBlocks(enemyPossibleNextMoves, enemyPossibleNextBlocks);
+            if (GetCurrentPieceTurn().isEnemy) { CalculateCurrentPieceTurn(); }
             CheckNextAllMoves();
         });
     }
@@ -1710,7 +1687,7 @@ public class GameManager : MonoBehaviour
                 //need async  to be sure that all the movements are finished (when moves a cube)
                 GlobalSingleton.GetInstance().SetTimeAsync(100, (async) =>
                     {
-                        int movesSpent = (receivedPieceHandler.isEnemy?0:1);
+                        int movesSpent = (receivedPieceHandler.isEnemy ? 0 : 1);
                         bool b = true;
                         //todo check if the onPowerup is called before this
                         if (CurrentPowerup != null && !justTookedPowerup)

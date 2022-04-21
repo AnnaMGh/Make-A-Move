@@ -211,6 +211,7 @@ public class PieceHandler : MonoBehaviour
             {
                 currentPieceGameObjChildBCs[(int)currentPiece.pieceType].isTrigger = true;
                 currentPieceGameObjChildRB.useGravity = false;
+                currentPieceGameObjChildRB.isKinematic = true;
                 //update point
                 movementEnemyFinishedDelegate?.Invoke(currentPiece.currentPoint); 
             }
@@ -218,6 +219,7 @@ public class PieceHandler : MonoBehaviour
             {
                 currentPieceGameObjChildBCs[(int)currentPiece.pieceType].isTrigger = false;
                 currentPieceGameObjChildRB.useGravity = true;
+                currentPieceGameObjChildRB.isKinematic = false;
             }
             movementFinishedDelegate?.Invoke(true);
         }
@@ -231,8 +233,20 @@ public class PieceHandler : MonoBehaviour
 
         //activate new collider
         currentPieceGameObjChildBCs[(int)type].enabled = true;
-        currentPieceGameObjChildBCs[(int)currentPiece.pieceType].isTrigger = false;
-        currentPieceGameObjChildRB.useGravity = true;
+        //currentPieceGameObjChildBCs[(int)currentPiece.pieceType].isTrigger = false;
+       // currentPieceGameObjChildRB.useGravity = true;
+
+        if (isEnemy)
+        {
+            currentPieceGameObjChildBCs[(int)currentPiece.pieceType].isTrigger = true;
+            currentPieceGameObjChildRB.useGravity = false;
+            currentPieceGameObjChildRB.isKinematic = true;
+        }
+        else {
+            currentPieceGameObjChildBCs[(int)currentPiece.pieceType].isTrigger = false;
+            currentPieceGameObjChildRB.useGravity = true;
+            currentPieceGameObjChildRB.isKinematic = false;
+        }
 
         //if is interactible disable gravity
         /*if (currentPieceGameOjChildI.enabled) {

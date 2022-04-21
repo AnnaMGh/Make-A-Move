@@ -407,6 +407,55 @@ public class MatrixHandler : MonoBehaviour
         enemy.SetObjectScript(enemy);
     }
 
+    public Enemy GetNextRandomEnabledEnemy()
+    {
+        Enemy nextEnemy = null;
+
+        //try to find random enabled enemy
+        if (EnemyArray != null && EnemyArray.Length > 0)
+        {
+            //get only available enemies
+            Dictionary<int, Enemy> dicPossibleIndex = new Dictionary<int, Enemy>();
+            int iPossibleIndex = 0;
+            for (int i = 0; i < EnemyArray.Length; i++)
+            {
+                if (EnemyArray[i].enabled)
+                {
+                    dicPossibleIndex.Add(iPossibleIndex,EnemyArray[i]);
+                    iPossibleIndex++;
+                }
+            }
+            //check if there are enemies enabled
+            if (dicPossibleIndex.Count > 0)
+            {
+                int randomIndex = UnityEngine.Random.Range(0, dicPossibleIndex.Count);
+                nextEnemy = dicPossibleIndex[randomIndex];
+            }
+
+
+
+            //if we want them to be in order and not random
+            /*for (int i = 0; i < matrixHandler.EnemyArray.Length; i++)
+               {
+                   if (matrixHandler.EnemyArray[i].EnemyPieceHandler.IsLastPieceTurn)
+                   {
+                       //disable last
+                       matrixHandler.EnemyArray[i].EnemyPieceHandler.IsLastPieceTurn = false;
+                       int nextOne = i + 1;
+                       if (nextOne >= matrixHandler.EnemyArray.Length)
+                       {
+                           nextOne = 0;
+                       }
+                       //enable current
+                       SetCurrentPieceTurn(matrixHandler.EnemyArray[nextOne].EnemyPieceHandler);
+                       break;
+                   }
+               }*/
+        }
+
+        return nextEnemy;
+    }
+
     private void RemoveNewPieceAvailable()
     {
         if (newPieceAvailable != null)
