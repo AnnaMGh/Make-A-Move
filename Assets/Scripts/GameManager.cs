@@ -46,7 +46,7 @@ public class GameManager : MonoBehaviour
     public GameObjectHolder gameObjectHolder;
     public GameAdHandler gameAdHandler;
 
-    private PieceHandler pieceHandler;
+    private PieceHandler playerPieceHandler;
     private PiecesHandler piecesHandler;
     private ArrowHandler arrowHandler;
     private MatrixHandler matrixHandler;
@@ -93,6 +93,8 @@ public class GameManager : MonoBehaviour
     private bool checkingNextMovesInProgress = false;
 
     private PieceHandler currentPieceHandlerToMove;
+
+    private TakePlayerEnemy takePlayerEnemy;
 
 
     private void OnGUI()
@@ -259,10 +261,10 @@ public class GameManager : MonoBehaviour
                 Cube cube = GetCubeFromName(raycastHit.collider.name);
                 //Debug.Log("MoveToTouchedCubePosition Cube Possible: " + pieceHandler.PossibleNextMoves.ListToString());
 
-                if (pieceHandler.PossibleNextMoves.ContainsKey(cube))
+                if (playerPieceHandler.PossibleNextMoves.ContainsKey(cube))
                 {
                     //Debug.Log("MoveToTouchedCubePosition Found: " + cube.ToString());
-                    OnClickArrow(cube.StepsToPoint, (int)pieceHandler.PossibleNextMoves[cube]);
+                    OnClickArrow(cube.StepsToPoint, (int)playerPieceHandler.PossibleNextMoves[cube]);
                 }
             }
             else if (raycastHit.collider.name.Contains(Interactable.InteractableType.BLOCK.ToString()))
@@ -273,10 +275,10 @@ public class GameManager : MonoBehaviour
                 Block block = GetBlockFromName(raycastHit.collider.name);
                 Cube cube = matrixHandler.MatrixOfCubes[block.oldPoint.i, block.oldPoint.j];
                 //Debug.Log("MoveToTouchedCubePosition Block Cube: " + raycastHit.collider.name);
-                if (pieceHandler.PossibleNextMoves.ContainsKey(cube))
+                if (playerPieceHandler.PossibleNextMoves.ContainsKey(cube))
                 {
                     // Debug.Log("MoveToTouchedCubePosition Found: " + cube.ToString());
-                    OnClickArrow(cube.StepsToPoint, (int)pieceHandler.PossibleNextMoves[cube]);
+                    OnClickArrow(cube.StepsToPoint, (int)playerPieceHandler.PossibleNextMoves[cube]);
                 }
             }
         }
@@ -426,11 +428,11 @@ public class GameManager : MonoBehaviour
         piecesHandler.ChangePiecessAvailability(false, null);
         arrowHandler.ChangeArrowsAvailability(false, null);
 
-        pieceHandler.ChangeCustomPiece(CustomPiece.PiecesTypeEnum.TYPE_PAWN, false);
-        pieceHandler.CurrentPiece.currentPoint = new Point(matrixHandler.StartPoint.i, matrixHandler.StartPoint.j);
-        pieceHandler.RestoreToCurrentPos();
+        playerPieceHandler.ChangeCustomPiece(CustomPiece.PiecesTypeEnum.TYPE_PAWN, false);
+        playerPieceHandler.CurrentPiece.currentPoint = new Point(matrixHandler.StartPoint.i, matrixHandler.StartPoint.j);
+        playerPieceHandler.RestoreToCurrentPos();
         piecesHandler.ChangePiecessAvailability(true, matrixHandler.PiecesAvailable);
-        arrowHandler.ChangeArrowsAvailability(true, pieceHandler.CurrentPiece.movementType);
+        arrowHandler.ChangeArrowsAvailability(true, playerPieceHandler.CurrentPiece.movementType);
 
         //
         levelFinished = false;
@@ -440,10 +442,10 @@ public class GameManager : MonoBehaviour
 
         //unblock next movement
         moveEnabled = true;
-        arrowHandler.ChangeArrowsColor(Constants.ARROW_ENABLED_COLOR, pieceHandler.CurrentPiece.movementType);
+        arrowHandler.ChangeArrowsColor(Constants.ARROW_ENABLED_COLOR, playerPieceHandler.CurrentPiece.movementType);
 
         //mark player as current piece to move
-        SetCurrentPieceTurn(pieceHandler);
+        SetCurrentPieceTurn(playerPieceHandler);
         //check next moves (for player and enemy)
         CheckNextAllMoves();
 
@@ -460,7 +462,7 @@ public class GameManager : MonoBehaviour
                (objTutorial1) =>
             {
                 tutorialHandler.ShowTutorial(TutorialHandler.TutorialTitle.INTRODUCE_PIECE,
-                    cameraMain.WorldToScreenPoint(pieceHandler.CurrentPieceGameObj.transform.position),
+                    cameraMain.WorldToScreenPoint(playerPieceHandler.CurrentPieceGameObj.transform.position),
                    (objTutorial2) =>
                 {
                     tutorialHandler.ShowTutorial(TutorialHandler.TutorialTitle.INTRODUCE_TARGET,
@@ -468,7 +470,7 @@ public class GameManager : MonoBehaviour
                        (objTutorial3) =>
                     {
                         Cube nextPossibleMoveCube = new Cube();
-                        foreach (KeyValuePair<Cube, CustomPiece.MovementTypeEnum> c in pieceHandler.PossibleNextMoves)
+                        foreach (KeyValuePair<Cube, CustomPiece.MovementTypeEnum> c in playerPieceHandler.PossibleNextMoves)
                         {
                             nextPossibleMoveCube = c.Key;
                             break;
@@ -651,38 +653,38 @@ public class GameManager : MonoBehaviour
 
     public PieceHandler GetPieceHandler()
     {
-        return pieceHandler;
+        return playerPieceHandler;
     }
 
-   
+
 
     private void CalculateCurrentPieceTurn()
     {
-        if (pieceHandler.IsPieceTurn)
+        if (playerPieceHandler.IsPieceTurn)
         {
             Enemy nextEnemy = matrixHandler.GetNextRandomEnabledEnemy();
             if (nextEnemy == null)
             {
                 //if was the player and does't have enemy => next is the player
-                SetCurrentPieceTurn(pieceHandler);
-
+                SetCurrentPieceTurn(playerPieceHandler);
             }
-            else {
+            else
+            {
                 //if was the player and has enemy => next is the enemy
-                pieceHandler.IsPieceTurn = false;
+                playerPieceHandler.IsPieceTurn = false;
                 SetCurrentPieceTurn(nextEnemy.EnemyPieceHandler);
             }
         }
         else
         {
-            SetCurrentPieceTurn(pieceHandler);
+            SetCurrentPieceTurn(playerPieceHandler);
         }
     }
 
     private void SetCurrentPieceTurn(PieceHandler pieceHandlerTurn)
     {
         //reset player piece handler
-        pieceHandler.IsPieceTurn = false;
+        playerPieceHandler.IsPieceTurn = false;
 
         //reset enemies piece handler
         if (matrixHandler.EnemyArray != null && matrixHandler.EnemyArray.Length > 0)
@@ -691,22 +693,56 @@ public class GameManager : MonoBehaviour
             {
                 matrixHandler.EnemyArray[i].EnemyPieceHandler.IsLastPieceTurn = false;
                 matrixHandler.EnemyArray[i].EnemyPieceHandler.IsPieceTurn = false;
+                matrixHandler.EnemyArray[i].EnemyPieceHandler.ChangeGemColor(Constants.ENEMY_GEM_NEUTRAL_COLOR);
             }
         }
 
         currentPieceHandlerToMove = pieceHandlerTurn;
         currentPieceHandlerToMove.IsPieceTurn = true;
+        currentPieceHandlerToMove.ChangeGemColor(Constants.ENEMY_GEM_CURRENT_COLOR);
+
+        Debug.Log("Piece turn get: " + (currentPieceHandlerToMove.isEnemy ? "enemy" : "player"));
     }
 
-    private PieceHandler GetCurrentPieceTurn()
+    public PieceHandler GetCurrentPieceTurn()
     {
-        Debug.Log("Piece turn get: " + (currentPieceHandlerToMove.isEnemy ? "enemy" : "player"));
         return currentPieceHandlerToMove;
+    }
+
+    private CustomPiece.MovementTypeEnum GetEnemyNextMovement()
+    {
+        CustomPiece.MovementTypeEnum nextMovement;
+        if (takePlayerEnemy != null
+        && takePlayerEnemy.ReceivedPieceHandler.Equals(GetCurrentPieceTurn()))
+        {
+            //make enemy take the player
+            nextMovement = takePlayerEnemy.Type;
+            //clean takePlayerEnemy
+            takePlayerEnemy = null;
+        }
+        else
+        {
+            int randomIndex = UnityEngine.Random.Range(0, GetCurrentPieceTurn().PossibleNextMoves.Count);
+            CustomPiece.MovementTypeEnum randomMovement = 0;
+            int index = 0;
+            foreach (Cube c in GetCurrentPieceTurn().PossibleNextMoves.Keys)
+            {
+                if (index == randomIndex)
+                {
+                    randomMovement = GetCurrentPieceTurn().PossibleNextMoves[c];
+                    break;
+                }
+                index++;
+            }
+            nextMovement = randomMovement;
+        }
+
+        return nextMovement;
     }
 
     private void CheckNextAllMoves()
     {
-        if (GetCurrentPieceTurn().Equals(pieceHandler))
+        if (GetCurrentPieceTurn().Equals(playerPieceHandler))
         {
             CheckNextEnemiesMoves();
             CheckNextPlayerMoves();
@@ -716,24 +752,47 @@ public class GameManager : MonoBehaviour
             CheckNextPlayerMoves();
             CheckNextEnemiesMoves();
         }
-
     }
-    private void CheckNextEnemiesMoves()
+
+    private void CleanAllNextMovesAndBlocks()
+    {
+        //clean player next moves
+        CleanNextMovesAndBlocks(playerPieceHandler.PossibleNextMoves,
+            playerPieceHandler.PossibleNextBlocks);
+
+        //clean enemies next moves
+        CleanEnemiesNextMovesAndBlocks();
+    }
+
+    private void CleanEnemiesNextMovesAndBlocks()
     {
         if (matrixHandler.EnemyArray != null && matrixHandler.EnemyArray.Length > 0)
         {
             foreach (Enemy enemy in matrixHandler.EnemyArray)
             {
-                CheckNextMoves(enemy.EnemyPieceHandler);
+                CleanNextMovesAndBlocks(enemy.EnemyPieceHandler.PossibleNextMoves,
+                    enemy.EnemyPieceHandler.PossibleNextBlocks);
+            }
+        }
+    }
+
+    private void CheckNextEnemiesMoves()
+    {
+        if (matrixHandler.EnemyArray != null && matrixHandler.EnemyArray.Length > 0)
+        {
+            CleanEnemiesNextMovesAndBlocks();
+            foreach (Enemy enemy in matrixHandler.EnemyArray)
+            {
+                CheckNextMoves(enemy.EnemyPieceHandler, false);
             }
         }
     }
     private void CheckNextPlayerMoves()
     {
-        CheckNextMoves(pieceHandler);
+        CheckNextMoves(playerPieceHandler, true);
     }
 
-    private void CheckNextMoves(PieceHandler receivedPieceHandler)
+    private void CheckNextMoves(PieceHandler receivedPieceHandler, bool withClean)
     {
         if (checkingNextMovesInProgress)
         {
@@ -742,7 +801,12 @@ public class GameManager : MonoBehaviour
         checkingNextMovesInProgress = true;
 
         //clean cubes and blocks
-        CleanNextMovesAndBlocks(receivedPieceHandler.PossibleNextMoves, receivedPieceHandler.PossibleNextBlocks);
+        if (withClean)
+        {
+            CleanNextMovesAndBlocks(receivedPieceHandler.PossibleNextMoves,
+          receivedPieceHandler.PossibleNextBlocks);
+        }
+
 
         //check new ones
         foreach (CustomPiece.MovementTypeEnum type in receivedPieceHandler.CurrentPiece.movementType)
@@ -820,6 +884,21 @@ public class GameManager : MonoBehaviour
         //add cube
         matrixHandler.MatrixOfCubes[point.i, point.j].StepsToPoint = stepsToPoint;
         receivedPieceHandler.PossibleNextMoves.Add(matrixHandler.MatrixOfCubes[point.i, point.j], type);
+
+        // if enemy can take player, store the enemy and movement
+        if (GetCurrentPieceTurn().isEnemy
+            && receivedPieceHandler.isEnemy
+            && point.i == playerPieceHandler.CurrentPiece.currentPoint.i
+            && point.j == playerPieceHandler.CurrentPiece.currentPoint.j
+            )
+        {
+            takePlayerEnemy = new TakePlayerEnemy(receivedPieceHandler, type);
+            SetCurrentPieceTurn(receivedPieceHandler);
+
+            //make danger glow
+            currentPieceHandlerToMove.ChangeGemColor(Constants.ENEMY_GEM_DANGER_COLOR);
+        }
+
 
         //add block and check if cube remains in list
         CheckNextBlocks(receivedPieceHandler, point, type, stepsToPoint);
@@ -952,7 +1031,7 @@ public class GameManager : MonoBehaviour
     private void GameOver(string subtitle)
     {
         //clean cubes and blocks
-        CleanNextMovesAndBlocks(pieceHandler.PossibleNextMoves, pieceHandler.PossibleNextBlocks);
+        CleanNextMovesAndBlocks(playerPieceHandler.PossibleNextMoves, playerPieceHandler.PossibleNextBlocks);
 
         gameOverHandler.ChangeTitleSubtitle("Game Over!", subtitle);
         gameOverHandler.ShowPanel();
@@ -985,7 +1064,7 @@ public class GameManager : MonoBehaviour
         {
             LastPowerupInUse = null;
         }
-        pieceHandler.HidePowerupTrotus();
+        playerPieceHandler.HidePowerupTrotus();
     }
 
     private CustomPiece.MovementTypeEnum GetDizzyMovement(PieceHandler receivedPieceHandler, CustomPiece.MovementTypeEnum mov)
@@ -1162,10 +1241,10 @@ public class GameManager : MonoBehaviour
         Debug.Log("OnBlock");
         if (sendPieceBackMovement > -1) // return (hit the block)
         {
-            pieceHandler.MakeMovement((CustomPiece.MovementTypeEnum)sendPieceBackMovement, 0, (obj) =>
+            playerPieceHandler.MakeMovement((CustomPiece.MovementTypeEnum)sendPieceBackMovement, 0, (obj) =>
             {
-                pieceHandler.RestoreToPos(pieceHandler.CurrentPiece.currentPoint,
-                    matrixHandler.MatrixOfCubes[pieceHandler.CurrentPiece.currentPoint.i, pieceHandler.CurrentPiece.currentPoint.j].transform.position,
+                playerPieceHandler.RestoreToPos(playerPieceHandler.CurrentPiece.currentPoint,
+                    matrixHandler.MatrixOfCubes[playerPieceHandler.CurrentPiece.currentPoint.i, playerPieceHandler.CurrentPiece.currentPoint.j].transform.position,
                     true);
                 RecalculateAndCheckMoves(0);
                 moveEnabled = true;
@@ -1185,7 +1264,7 @@ public class GameManager : MonoBehaviour
         {
             // check if last powerup was the strong powerup
             // and it was tooked by king (to check if half of the king's strong powerup was used)
-            if (pieceHandler.CurrentPiece.pieceType.Equals(CustomPiece.PiecesTypeEnum.TYPE_KING))
+            if (playerPieceHandler.CurrentPiece.pieceType.Equals(CustomPiece.PiecesTypeEnum.TYPE_KING))
             {
                 lastPowerupWasStrongOnABoxByKing = true;
             }
@@ -1194,13 +1273,13 @@ public class GameManager : MonoBehaviour
             && CurrentPowerup != null && CurrentPowerup == LastPowerupInUse)
             {
                 if (!lastMoveWasPowerupStrongOnABox
-                    && pieceHandler.CurrentPiece.pieceType.Equals(CustomPiece.PiecesTypeEnum.TYPE_KING))
+                    && playerPieceHandler.CurrentPiece.pieceType.Equals(CustomPiece.PiecesTypeEnum.TYPE_KING))
                 {
                     lastMoveWasPowerupStrongOnABox = true;
                 }
                 else if ((lastMoveWasPowerupStrongOnABox
-                    && pieceHandler.CurrentPiece.pieceType.Equals(CustomPiece.PiecesTypeEnum.TYPE_KING))
-                    || !pieceHandler.CurrentPiece.pieceType.Equals(CustomPiece.PiecesTypeEnum.TYPE_KING))
+                    && playerPieceHandler.CurrentPiece.pieceType.Equals(CustomPiece.PiecesTypeEnum.TYPE_KING))
+                    || !playerPieceHandler.CurrentPiece.pieceType.Equals(CustomPiece.PiecesTypeEnum.TYPE_KING))
                 {
                     CleanPowerup(true);
                 }
@@ -1247,7 +1326,7 @@ public class GameManager : MonoBehaviour
         {
             //Debug.Log("OnPolish - Enter");
             //restore movement if damaged (outside and inside)
-            pieceHandler.RestoreToCurrentPos();
+            playerPieceHandler.RestoreToCurrentPos();
             if (matrixHandler.MovesAvailable > 0)
             {
                 //check next moves
@@ -1256,7 +1335,7 @@ public class GameManager : MonoBehaviour
             }
             else
             {
-                CleanNextMovesAndBlocks(pieceHandler.PossibleNextMoves, pieceHandler.PossibleNextBlocks);
+                CleanNextMovesAndBlocks(playerPieceHandler.PossibleNextMoves, playerPieceHandler.PossibleNextBlocks);
             }
             //Debug.Log("OnPolish - Done");
         });
@@ -1296,7 +1375,7 @@ public class GameManager : MonoBehaviour
         justTookedPowerup = true;
         CurrentPowerup = powerup;
         powerupsIcons[powerup.type].SetActive(true);
-        pieceHandler.ShowPowerupTrotus(powerup.type);
+        playerPieceHandler.ShowPowerupTrotus(powerup.type);
 
         //remove after sound done
         GlobalSingleton.GetInstance().SetTimeAsync(1000, obj =>
@@ -1311,7 +1390,7 @@ public class GameManager : MonoBehaviour
             {
                 moveEnabled = false;
 
-                Point p = pieceHandler.GetSetPointByPointDirection(powerup.point, new Point(0, 1), 2);
+                Point p = playerPieceHandler.GetSetPointByPointDirection(powerup.point, new Point(0, 1), 2);
 
                 tutorialHandler.ShowTutorial(TutorialHandler.TutorialTitle.POWERUP_DOUBLE_FULL_PAWN,
                     cameraMain.WorldToScreenPoint(matrixHandler.MatrixOfCubes[p.i, p.j].transform.position),
@@ -1354,29 +1433,37 @@ public class GameManager : MonoBehaviour
 
     }
 
-    public void OnEnemy(Enemy enemy)
+    public void OnEnemy(Enemy enemy, bool didPlayerTookTheEnemy)
     {
-        enemyIconHandler.NewTook();
-        CleanNextMovesAndBlocks(enemy.EnemyPieceHandler.PossibleNextMoves, enemy.EnemyPieceHandler.PossibleNextBlocks);
-
-        //remove after sound done
-        GlobalSingleton.GetInstance().SetTimeAsync(1000, obj =>
+        if (didPlayerTookTheEnemy)
         {
-            //retain and clean enemy moves
-            Dictionary<Cube, CustomPiece.MovementTypeEnum> enemyPossibleNextMoves = enemy.EnemyPieceHandler.PossibleNextMoves;
-            Dictionary<Block, CustomPiece.MovementTypeEnum> enemyPossibleNextBlocks = enemy.EnemyPieceHandler.PossibleNextBlocks;
-            CleanNextMovesAndBlocks(enemyPossibleNextMoves, enemyPossibleNextBlocks);
+            enemyIconHandler.NewTook();
+            CleanNextMovesAndBlocks(enemy.EnemyPieceHandler.PossibleNextMoves, enemy.EnemyPieceHandler.PossibleNextBlocks);
 
-            //remove enemy
-            matrixHandler.RemoveEnemy(enemy);
+            //remove after sound done
+            GlobalSingleton.GetInstance().SetTimeAsync(1000, obj =>
+            {
+                //retain and clean enemy moves
+                Dictionary<Cube, CustomPiece.MovementTypeEnum> enemyPossibleNextMoves = enemy.EnemyPieceHandler.PossibleNextMoves;
+                Dictionary<Block, CustomPiece.MovementTypeEnum> enemyPossibleNextBlocks = enemy.EnemyPieceHandler.PossibleNextBlocks;
+                CleanNextMovesAndBlocks(enemyPossibleNextMoves, enemyPossibleNextBlocks);
 
-            //clean enemy, recalculate current piece  recalculate moves
-            Debug.Log("after enemy removed: " + enemyPossibleNextBlocks.ToString() 
-                + ", " + enemyPossibleNextMoves.ToString());
-            CleanNextMovesAndBlocks(enemyPossibleNextMoves, enemyPossibleNextBlocks);
-            if (GetCurrentPieceTurn().isEnemy) { CalculateCurrentPieceTurn(); }
-            CheckNextAllMoves();
-        });
+                //remove enemy
+                matrixHandler.RemoveEnemy(enemy);
+
+                //clean enemy, recalculate current piece  recalculate moves
+                Debug.Log("after enemy removed: " + enemyPossibleNextBlocks.ToString()
+                    + ", " + enemyPossibleNextMoves.ToString());
+                CleanNextMovesAndBlocks(enemyPossibleNextMoves, enemyPossibleNextBlocks);
+                if (GetCurrentPieceTurn().isEnemy) { CalculateCurrentPieceTurn(); }
+                CheckNextAllMoves();
+            });
+        }
+        else
+        {
+            GameOver("");
+        }
+
     }
 
     public void OnOrbit(Vector3 direction)
@@ -1481,17 +1568,17 @@ public class GameManager : MonoBehaviour
 
         //create piece
         GameObject prefabPiece = (GameObject)Resources.Load("Prefabs/" + CustomPiece.prefabName, typeof(GameObject));
-        pieceHandler = Instantiate(prefabPiece, new Vector3(0, 1, 0), Quaternion.identity).GetComponent<PieceHandler>();
-        pieceHandler.gameObject.tag = "Player";
-        pieceHandler.gameObject.transform.GetChild(0).tag = "Player";
+        playerPieceHandler = Instantiate(prefabPiece, new Vector3(0, 1, 0), Quaternion.identity).GetComponent<PieceHandler>();
+        playerPieceHandler.gameObject.tag = "Player";
+        playerPieceHandler.gameObject.transform.GetChild(0).tag = "Player";
 
         //hide all arrows and pieces
         arrowHandler.ChangeArrowsAvailability(false, null);
         piecesHandler.ChangePiecessAvailability(false, null);
 
         //change values
-        pieceHandler.ChangeCustomPiece(CustomPiece.PiecesTypeEnum.TYPE_PAWN, false);
-        arrowHandler.ChangeArrowsAvailability(true, pieceHandler.CurrentPiece.movementType);
+        playerPieceHandler.ChangeCustomPiece(CustomPiece.PiecesTypeEnum.TYPE_PAWN, false);
+        arrowHandler.ChangeArrowsAvailability(true, playerPieceHandler.CurrentPiece.movementType);
 
         //make matrix
         int level = System.Convert.ToInt32(txtMenuLevel.GetParsedText());
@@ -1511,6 +1598,9 @@ public class GameManager : MonoBehaviour
 
     public void OnClickRestart()
     {
+        //clean old next moves
+        CleanAllNextMovesAndBlocks();
+
         //make sound
         globalAudioHandler.PlaySound(GlobalAudioHandler.AudioType.GAME);
 
@@ -1533,7 +1623,7 @@ public class GameManager : MonoBehaviour
 
         gameAdHandler.HideBannerAd();
         matrixHandler.DestroyMatrix();
-        pieceHandler.DestroyPiece();
+        playerPieceHandler.DestroyPiece();
         InitiateUI();
     }
 
@@ -1556,7 +1646,7 @@ public class GameManager : MonoBehaviour
         settingsHandler.ChangeColor(color);
         piecesHandler.ChangePiecessAvailability(false, null);
         piecesHandler.ChangePiecessAvailability(true, matrixHandler.PiecesAvailable);
-        pieceHandler.ChangeColor();
+        playerPieceHandler.ChangeColor();
 
         //change enemies colors
         if (matrixHandler.EnemyArray != null && matrixHandler.EnemyArray.Length > 0)
@@ -1650,12 +1740,11 @@ public class GameManager : MonoBehaviour
         //restore position if damaged (outside and inside)
         receivedPieceHandler.RestoreToCurrentPos();
 
-
         if (CurrentPowerup != null)
         {
             if (CurrentPowerup.type == (int)Powerup.PowerupType.DIZZY)
             {
-                mov = GetDizzyMovement(pieceHandler, mov);
+                mov = GetDizzyMovement(playerPieceHandler, mov);
             }
         }
 
@@ -1768,33 +1857,21 @@ public class GameManager : MonoBehaviour
                             moveEnabled = true;
                             arrowHandler.ChangeArrowsColor(Constants.ARROW_ENABLED_COLOR, receivedPieceHandler.CurrentPiece.movementType);
 
-                            //move the enemy
+                            //calculate next enemy
                             CalculateCurrentPieceTurn();
 
                             //check next possible moves
-                            //Debug.Log("OnClickArrow - CheckNextMoves");
-
                             CheckNextAllMoves();
 
                             //make enemy move
                             if (GetCurrentPieceTurn().isEnemy)
                             {
-                                if (GetCurrentPieceTurn().PossibleNextMoves != null && GetCurrentPieceTurn().PossibleNextMoves.Count > 0)
+                                if (GetCurrentPieceTurn().PossibleNextMoves != null
+                                && GetCurrentPieceTurn().PossibleNextMoves.Count > 0)
                                 {
-                                    int randomIndex = UnityEngine.Random.Range(0, GetCurrentPieceTurn().PossibleNextMoves.Count);
-                                    int randomMovementIndex = 0;
-                                    int index = 0;
-                                    foreach (Cube c in GetCurrentPieceTurn().PossibleNextMoves.Keys)
-                                    {
-                                        if (index == randomIndex)
-                                        {
-                                            randomMovementIndex = (int)GetCurrentPieceTurn().PossibleNextMoves[c];
-                                            break;
-                                        }
-                                        index++;
-                                    }
+                                    //make movement
                                     moveEnabled = true;
-                                    OnClickArrow(1, randomMovementIndex);
+                                    OnClickArrow(1, (int)GetEnemyNextMovement());
                                 }
                             }
                         }
@@ -1814,7 +1891,7 @@ public class GameManager : MonoBehaviour
         {
             alertHandler.ShowAlert("Take the DOUBLE_FULL POWERUP with the PAWN");
         }
-        else if (matrixHandler.ChangesAvailable > 0 && matrixHandler.IsPieceChangeAvailable(index) && (int)pieceHandler.CurrentPiece.pieceType != index)
+        else if (matrixHandler.ChangesAvailable > 0 && matrixHandler.IsPieceChangeAvailable(index) && (int)playerPieceHandler.CurrentPiece.pieceType != index)
         {
             //disable movement while changing piece
             moveEnabled = false;
@@ -1823,7 +1900,7 @@ public class GameManager : MonoBehaviour
             if (CurrentPowerup != null)
             {
                 if ((CurrentPowerup.type == (int)Powerup.PowerupType.DOUBLE_FULL
-                     && !pieceHandler.CurrentPiece.pieceType.Equals(CustomPiece.PiecesTypeEnum.TYPE_KING))
+                     && !playerPieceHandler.CurrentPiece.pieceType.Equals(CustomPiece.PiecesTypeEnum.TYPE_KING))
                    ||
                    CurrentPowerup.type == (int)Powerup.PowerupType.DIZZY)
                 {
@@ -1833,7 +1910,7 @@ public class GameManager : MonoBehaviour
                 }
                 else if (CurrentPowerup.type == (int)Powerup.PowerupType.STRONG
                    && lastPowerupWasStrongOnABoxByKing
-                   && pieceHandler.CurrentPiece.pieceType.Equals(CustomPiece.PiecesTypeEnum.TYPE_KING))
+                   && playerPieceHandler.CurrentPiece.pieceType.Equals(CustomPiece.PiecesTypeEnum.TYPE_KING))
                 {
                     // if as strong powerup and it was used before by the king
                     // then piece was changed but powerup not used
@@ -1847,17 +1924,17 @@ public class GameManager : MonoBehaviour
 
 
             //update changes left
-            arrowHandler.ChangeArrowsAvailability(false, pieceHandler.CurrentPiece.movementType);
-            pieceHandler.ChangeCustomPiece((CustomPiece.PiecesTypeEnum)index, true);
-            arrowHandler.ChangeArrowsAvailability(true, pieceHandler.CurrentPiece.movementType);
+            arrowHandler.ChangeArrowsAvailability(false, playerPieceHandler.CurrentPiece.movementType);
+            playerPieceHandler.ChangeCustomPiece((CustomPiece.PiecesTypeEnum)index, true);
+            arrowHandler.ChangeArrowsAvailability(true, playerPieceHandler.CurrentPiece.movementType);
             matrixHandler.RecalculateChanges(1);
             txtChanges.SetText(matrixHandler.ChangesAvailable.ToString());
 
             //check if on breakable box
-            if (matrixHandler.GetBreakableBox(pieceHandler.CurrentPiece.currentPoint) != null)
+            if (matrixHandler.GetBreakableBox(playerPieceHandler.CurrentPiece.currentPoint) != null)
             {
-                OnBreakable(matrixHandler.GetBreakableBox(pieceHandler.CurrentPiece.currentPoint));
-                pieceHandler.MakePieceFallThrough();
+                OnBreakable(matrixHandler.GetBreakableBox(playerPieceHandler.CurrentPiece.currentPoint));
+                playerPieceHandler.MakePieceFallThrough();
                 GlobalSingleton.GetInstance().SetTimeAsync(150, (obj) =>
                 {
                     GameOver("- Woops this should not happened! -");
@@ -1866,7 +1943,7 @@ public class GameManager : MonoBehaviour
             }
 
             //restore movement if damaged (outside and inside)
-            pieceHandler.RestoreToCurrentPos();
+            playerPieceHandler.RestoreToCurrentPos();
             //check next moves
             CheckNextAllMoves();
             //enable movement

@@ -442,18 +442,40 @@ public class Interactable : MonoBehaviour
                 return;
             }
 
-            //make sound
-            if (PlayerPrefs.GetInt(Constants.KEY_SOUND) == 1)
+            //check if player took the enemy or otherwise
+            if (gameManager.GetCurrentPieceTurn().isEnemy)
             {
-                AudioSource audio = this.gameObject.transform.GetChild(1).GetComponent<AudioSource>();
-                audio.Play();
+                //enemy took the player
+
+                //make sound
+                if (PlayerPrefs.GetInt(Constants.KEY_SOUND) == 1)
+                {
+                    AudioSource audio = this.gameObject.transform.GetChild(1).GetComponent<AudioSource>();
+                    audio.Play();
+                }
+
+                gameManager.OnEnemy(enemy, false);
+            }
+            else
+            {
+                //player took the enemy
+
+                //make sound
+                if (PlayerPrefs.GetInt(Constants.KEY_SOUND) == 1)
+                {
+                    AudioSource audio = this.gameObject.transform.GetChild(1).GetComponent<AudioSource>();
+                    audio.Play();
+                }
+
+                //disable graphics
+                enemy.Hide();
+
+                enemy.enabled = false;
+                gameManager.OnEnemy(enemy, true);
             }
 
-            //disable graphics
-            enemy.Hide();
 
-            enemy.enabled = false;
-            gameManager.OnEnemy(enemy);
+            
             
             
             //collideOrTrigger = false;

@@ -11,8 +11,8 @@ public class EnemyIconHandler : MonoBehaviour
 
     private float fillingPercentToGo; 
     private float fillingPercentCurrent;
-    private int enemiesOnLevel;
-    private int enemiesTook;
+    private float enemiesOnLevel;
+    private float enemiesTook;
 
     // Start is called before the first frame update
     void Awake()

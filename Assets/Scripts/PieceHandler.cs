@@ -56,8 +56,9 @@ public class PieceHandler : MonoBehaviour
     private Interactable currentPieceGameOjChildI;
     private AudioSource currentPieceGameObjAudio;
     private GameObject currentPieceGameObjTrotus;
-    private GameObject currentPieceGameObjGem;
     private MeshRenderer currentPieceGameObjTrotusMeshRenderer;
+    private GameObject currentPieceGameObjGem;
+    private MeshRenderer currentPieceGameObjGemMeshRenderer;
     private CustomPiece currentPiece;
     private Dictionary<CustomPiece.MovementTypeEnum, Step> movementVectorDictionary;
     private Dictionary<CustomPiece.PiecesTypeEnum, CustomPiece> customPiecesDictionary;
@@ -99,6 +100,7 @@ public class PieceHandler : MonoBehaviour
         currentPieceGameObjTrotus = currentPieceGameObj.transform.GetChild(3).gameObject;
         currentPieceGameObjTrotusMeshRenderer = currentPieceGameObjTrotus.GetComponent<MeshRenderer>();
         currentPieceGameObjGem = currentPieceGameObj.transform.GetChild(4).gameObject;
+        currentPieceGameObjGemMeshRenderer = currentPieceGameObjGem.GetComponent<MeshRenderer>();
         currentPiece = new CustomPiece();
 
         currentPieceGameObjTrotus.SetActive(false);
@@ -358,6 +360,11 @@ public class PieceHandler : MonoBehaviour
     public void HidePowerupTrotus()
     {
         currentPieceGameObjTrotus.SetActive(false);
+    }
+
+    public void ChangeGemColor(Color color) {
+        currentPieceGameObjGemMeshRenderer.material.color = color;
+
     }
 
     public bool IsDiagonalMovement(CustomPiece.MovementTypeEnum movement)
