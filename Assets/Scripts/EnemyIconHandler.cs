@@ -5,11 +5,11 @@ using UnityEngine.UI;
 
 public class EnemyIconHandler : MonoBehaviour
 {
- 
+
     private GameObject gameObjGlowing;
     private Image gameObjFilling;
 
-    private float fillingPercentToGo; 
+    private float fillingPercentToGo;
     private float fillingPercentCurrent;
     private float enemiesOnLevel;
     private float enemiesTook;
@@ -36,7 +36,8 @@ public class EnemyIconHandler : MonoBehaviour
         }
     }
 
-    private void ResetPercent() {
+    private void ResetPercent()
+    {
         enemiesOnLevel = 0;
         enemiesTook = 0;
         fillingPercentToGo = 1;
@@ -45,17 +46,24 @@ public class EnemyIconHandler : MonoBehaviour
         gameObjFilling.fillAmount = fillingPercentCurrent;
     }
 
-    public void SetEnemiesOnLevel(int receivedEnemiesOnLevel) {
+    public void SetEnemiesOnLevel(int receivedEnemiesOnLevel)
+    {
         ResetPercent();
         enemiesOnLevel = receivedEnemiesOnLevel;
     }
 
-    public void NewTook() {
+    public void NewTook()
+    {
         enemiesTook++;
-        
+
         //calculate new percent
         float percentDiff = enemiesTook / enemiesOnLevel;
         fillingPercentToGo = 1 - percentDiff;
+    }
+
+    public bool AreAllEnemiesTook()
+    {
+        return (enemiesOnLevel > 0 && enemiesTook == enemiesOnLevel);
     }
 
 }

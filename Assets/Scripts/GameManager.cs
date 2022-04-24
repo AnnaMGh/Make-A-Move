@@ -709,6 +709,30 @@ public class GameManager : MonoBehaviour
         return currentPieceHandlerToMove;
     }
 
+    private bool WillEnemyMove()
+    {
+        //choose if this tour is passed 75% probability of moving
+        int probability = UnityEngine.Random.Range(0, 101);
+        if (probability < 75)
+        {
+            return true;
+        }
+        return false;
+    }
+
+    private void EnemyWillNotMove()
+    {
+        GlobalSingleton.GetInstance().SetTimeAsync(1000,
+                                               objDelegateEnemyPassTour =>
+                                               {
+                                                   //calculate which piece is next
+                                                   CalculateCurrentPieceTurn();
+
+                                                   //check next possible moves
+                                                   CheckNextAllMoves();
+                                               });
+    }
+
     private CustomPiece.MovementTypeEnum GetEnemyNextMovement()
     {
         CustomPiece.MovementTypeEnum nextMovement;
@@ -1598,7 +1622,7 @@ public class GameManager : MonoBehaviour
 
     public void OnClickRestart()
     {
-        //clean old next moves
+        //clean cubes and blocks
         CleanAllNextMovesAndBlocks();
 
         //make sound
@@ -1759,7 +1783,7 @@ public class GameManager : MonoBehaviour
             arrowHandler.ChangeArrowsColor(Constants.ARROW_DISABLED_COLOR, receivedPieceHandler.CurrentPiece.movementType);
 
             //keep last powerup in use
-            if (CurrentPowerup != null)
+            if (!receivedPieceHandler.isEnemy && CurrentPowerup != null)
             {
                 if (CurrentPowerup.type == (int)Powerup.PowerupType.DOUBLE_FULL)
                 {
@@ -1776,40 +1800,47 @@ public class GameManager : MonoBehaviour
                 //need async  to be sure that all the movements are finished (when moves a cube)
                 GlobalSingleton.GetInstance().SetTimeAsync(100, (async) =>
                     {
+
                         int movesSpent = (receivedPieceHandler.isEnemy ? 0 : 1);
-                        bool b = true;
-                        //todo check if the onPowerup is called before this
-                        if (CurrentPowerup != null && !justTookedPowerup)
-                        {
-                            if (CurrentPowerup.type == (int)Powerup.PowerupType.DOUBLE_FULL)
-                            {
 
-                                if (receivedPieceHandler.CurrentPiece.pieceType.Equals(CustomPiece.PiecesTypeEnum.TYPE_KNIGHT))
-                                {
-                                    b = false;
-                                    movesSpent = 0;
-                                }
-                                if (!receivedPieceHandler.CurrentPiece.pieceType.Equals(CustomPiece.PiecesTypeEnum.TYPE_KING))
-                                {
-                                    CleanPowerup(true);
-                                }
-                            }
-                            else if (CurrentPowerup.type == (int)Powerup.PowerupType.DIZZY)
-                            {
-
-                                b = true;
-                                movesSpent = (CurrentPowerup.nrOfFreeMovesAvailable > 0 ? 0 : 1);
-                                CurrentPowerup.nrOfFreeMovesAvailable--;
-                                if (CurrentPowerup.nrOfFreeMovesAvailable <= 0)
-                                {
-                                    CleanPowerup(true);
-                                }
-                            }
-                            justTookedPowerup = !b;
-                        }
-                        else
+                        //check powerups
+                        if (!receivedPieceHandler.isEnemy)
                         {
-                            justTookedPowerup = false;
+
+                            bool b = true;
+                            //todo check if the onPowerup is called before this
+                            if (CurrentPowerup != null && !justTookedPowerup)
+                            {
+                                if (CurrentPowerup.type == (int)Powerup.PowerupType.DOUBLE_FULL)
+                                {
+
+                                    if (receivedPieceHandler.CurrentPiece.pieceType.Equals(CustomPiece.PiecesTypeEnum.TYPE_KNIGHT))
+                                    {
+                                        b = false;
+                                        movesSpent = 0;
+                                    }
+                                    if (!receivedPieceHandler.CurrentPiece.pieceType.Equals(CustomPiece.PiecesTypeEnum.TYPE_KING))
+                                    {
+                                        CleanPowerup(true);
+                                    }
+                                }
+                                else if (CurrentPowerup.type == (int)Powerup.PowerupType.DIZZY)
+                                {
+
+                                    b = true;
+                                    movesSpent = (CurrentPowerup.nrOfFreeMovesAvailable > 0 ? 0 : 1);
+                                    CurrentPowerup.nrOfFreeMovesAvailable--;
+                                    if (CurrentPowerup.nrOfFreeMovesAvailable <= 0)
+                                    {
+                                        CleanPowerup(true);
+                                    }
+                                }
+                                justTookedPowerup = !b;
+                            }
+                            else
+                            {
+                                justTookedPowerup = false;
+                            }
                         }
 
 
@@ -1825,11 +1856,18 @@ public class GameManager : MonoBehaviour
                         {
                             levelFinished = true;
                             //clean cubes and blocks
-                            CleanNextMovesAndBlocks(receivedPieceHandler.PossibleNextMoves, receivedPieceHandler.PossibleNextBlocks);
+                            CleanAllNextMovesAndBlocks();
 
                             gameAdHandler.HideBannerAd();
                             int bestScore = GlobalSingleton.GetInstance().GetLevelStarDictionaryValue(matrixHandler.CurrentLevel);
                             int currentStars = matrixHandler.CalculateStars();
+
+                            //if player took all the enemies => 3 starts granted
+                            if (enemyIconHandler.AreAllEnemiesTook())
+                            {
+                                currentStars = 3;
+                            }
+
                             if (bestScore < currentStars)
                             {
                                 bestScore = currentStars;
@@ -1857,7 +1895,7 @@ public class GameManager : MonoBehaviour
                             moveEnabled = true;
                             arrowHandler.ChangeArrowsColor(Constants.ARROW_ENABLED_COLOR, receivedPieceHandler.CurrentPiece.movementType);
 
-                            //calculate next enemy
+                            //calculate which piece is next
                             CalculateCurrentPieceTurn();
 
                             //check next possible moves
@@ -1869,9 +1907,21 @@ public class GameManager : MonoBehaviour
                                 if (GetCurrentPieceTurn().PossibleNextMoves != null
                                 && GetCurrentPieceTurn().PossibleNextMoves.Count > 0)
                                 {
-                                    //make movement
-                                    moveEnabled = true;
-                                    OnClickArrow(1, (int)GetEnemyNextMovement());
+                                    //choose if this tour is passed 75% probability of moving
+                                    if (WillEnemyMove())
+                                    {
+                                        //make movement
+                                        moveEnabled = true;
+                                        OnClickArrow(1, (int)GetEnemyNextMovement());
+                                    }
+                                    else
+                                    {
+                                        EnemyWillNotMove();
+                                    }
+                                }
+                                else
+                                {
+                                    EnemyWillNotMove();
                                 }
                             }
                         }

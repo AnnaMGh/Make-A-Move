@@ -240,9 +240,11 @@ public class PieceHandler : MonoBehaviour
 
         if (isEnemy)
         {
-            currentPieceGameObjChildBCs[(int)currentPiece.pieceType].isTrigger = true;
-            currentPieceGameObjChildRB.useGravity = false;
-            currentPieceGameObjChildRB.isKinematic = true;
+            GlobalSingleton.GetInstance().SetTimeAsync(1000, objDelelgateMakeEnemyTrigger=>{
+                currentPieceGameObjChildBCs[(int)currentPiece.pieceType].isTrigger = true;
+                currentPieceGameObjChildRB.useGravity = false;
+                currentPieceGameObjChildRB.isKinematic = true;
+            });
         }
         else {
             currentPieceGameObjChildBCs[(int)currentPiece.pieceType].isTrigger = false;
@@ -328,6 +330,12 @@ public class PieceHandler : MonoBehaviour
         currentPieceGameOjChildI.enabled = true;
         isEnemy = true;
         movementEnemyFinishedDelegate = objectDelegate;
+
+        //just to make the piece fall on table
+        currentPieceGameObjChildBCs[(int)currentPiece.pieceType].isTrigger = false;
+        currentPieceGameObjChildRB.useGravity = true;
+        currentPieceGameObjChildRB.isKinematic = false;
+
         ChangeCustomPiece(type, false);
     }
 
