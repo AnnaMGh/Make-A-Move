@@ -44,7 +44,7 @@ public class GameManager : MonoBehaviour
     public Image imgBg;
     public ParticleSystem particles;
     public GameObjectHolder gameObjectHolder;
-    public GameAdHandler gameAdHandler;
+    // public GameAdHandler gameAdHandler;
 
     private PieceHandler playerPieceHandler;
     private PiecesHandler piecesHandler;
@@ -78,7 +78,7 @@ public class GameManager : MonoBehaviour
 
     //test GUI variables
     string vvvalue = "not set";
-    //string crash = "Crash";
+    // string crash = "Crash";
 
     //Dictionary<Cube, CustomPiece.MovementTypeEnum> possibleNextMoves = new Dictionary<Cube, CustomPiece.MovementTypeEnum>();
     //Dictionary<Block, CustomPiece.MovementTypeEnum> possibleNextBlocks = new Dictionary<Block, CustomPiece.MovementTypeEnum>();
@@ -197,9 +197,9 @@ public class GameManager : MonoBehaviour
 
 
         //todo test tutorial
-        PlayerPrefs.SetInt(Constants.KEY_TUTORIAL_STATE, 0);
-        PlayerPrefs.SetString(Constants.KEY_TUTORIAL_STATE_CSV, "");
-        HardcodeToLevel(50);
+        //PlayerPrefs.SetInt(Constants.KEY_TUTORIAL_STATE, 0);
+        //PlayerPrefs.SetString(Constants.KEY_TUTORIAL_STATE_CSV, "");
+        //HardcodeToLevel(50);
         //end todo
 
 
@@ -384,13 +384,13 @@ public class GameManager : MonoBehaviour
 
         //check level
         int level = PlayerPrefs.GetInt(Constants.KEY_LAST_LEVEL);
-        bool currentLevelFinished = (GlobalSingleton.GetInstance().GetLevelStarDictionaryValue(level) > 0);
+        /*bool currentLevelFinished = (GlobalSingleton.GetInstance().GetLevelStarDictionaryValue(level) > 0);
         bool existNextLevel = (level < GlobalSingleton.GetInstance().GetLevelAssetsTexts(false).Length);
         if (currentLevelFinished && existNextLevel)
         {
             level++;
             PlayerPrefs.SetInt(Constants.KEY_LAST_LEVEL, level);
-        }
+        }*/
         txtMenuLevel.SetText(level.ToString());
         btnArrowL.gameObject.SetActive((level > 1));
         btnArrowR.gameObject.SetActive(false);
@@ -411,7 +411,7 @@ public class GameManager : MonoBehaviour
 
     private void InitializeLevel(string from)
     {
-        gameAdHandler.ShowBannerAd();
+        // gameAdHandler.ShowBannerAd();
 
         txtCurrentLevel.SetText(matrixHandler.CurrentLevel.ToString());
         txtTooks.SetText("0");
@@ -1054,20 +1054,24 @@ public class GameManager : MonoBehaviour
 
     private void GameOver(string subtitle)
     {
+        //Debug.LogWarning(String.Format("GameOver"));
         //clean cubes and blocks
         CleanNextMovesAndBlocks(playerPieceHandler.PossibleNextMoves, playerPieceHandler.PossibleNextBlocks);
 
         gameOverHandler.ChangeTitleSubtitle("Game Over!", subtitle);
         gameOverHandler.ShowPanel();
 
-        canvas.enabled = false;
+        canvas.enabled = true;
+        globalAudioHandler.PlaySound(GlobalAudioHandler.AudioType.GAME_OVER);
+
+        /*canvas.enabled = false;
         gameAdHandler.ShowInterstitialAd((objAd) =>
         {
             canvas.enabled = true;
 
             //make sound
             globalAudioHandler.PlaySound(GlobalAudioHandler.AudioType.GAME_OVER);
-        });
+        });*/
     }
 
     public bool IsFrontCamera()
@@ -1329,7 +1333,7 @@ public class GameManager : MonoBehaviour
                 true);*/
         }
 
-        OnPolish(0);
+        OnPolish(100);
 
         /*GlobalSingleton.GetInstance().SetTimeAsync(50, (obj) =>
         {
@@ -1645,7 +1649,7 @@ public class GameManager : MonoBehaviour
         //make sound
         globalAudioHandler.PlaySound(GlobalAudioHandler.AudioType.SILENCE);
 
-        gameAdHandler.HideBannerAd();
+        // gameAdHandler.HideBannerAd();
         matrixHandler.DestroyMatrix();
         playerPieceHandler.DestroyPiece();
         InitiateUI();
@@ -1653,7 +1657,7 @@ public class GameManager : MonoBehaviour
 
     public void OnClickBack(PanelHandler panel)
     {
-        gameAdHandler.ShowBannerAd();
+        // gameAdHandler.ShowBannerAd();
         panel.HidePanel();
     }
 
@@ -1697,21 +1701,21 @@ public class GameManager : MonoBehaviour
         if (gameFinished)
         {
             gameFinishedHandler.ShowPanel();
-            gameAdHandler.HideBannerAd();
+            // gameAdHandler.HideBannerAd();
 
             //make sound
             globalAudioHandler.PlaySound(GlobalAudioHandler.AudioType.FINISH);
         }
         else
         {
-            if (UnityEngine.Random.Range(0, 10) < 5)
+            /*if (UnityEngine.Random.Range(0, 10) < 5)
             {
                 canvas.enabled = false;
                 gameAdHandler.ShowInterstitialAd((objAd) =>
                 {
                     canvas.enabled = true;
                 });
-            }
+            }*/
             matrixHandler.GoLevel(matrixHandler.CurrentLevel + 1, (obj) =>
             {
                 InitializeLevel(Constants.TYPE_NEXT);
@@ -1723,7 +1727,7 @@ public class GameManager : MonoBehaviour
     {
         if (GlobalSingleton.GetInstance().gamePaused) { return; }
 
-        gameAdHandler.HideBannerAd();
+        // gameAdHandler.HideBannerAd();
         settingsHandler.ShowPanel(30);
     }
 
@@ -1858,7 +1862,7 @@ public class GameManager : MonoBehaviour
                             //clean cubes and blocks
                             CleanAllNextMovesAndBlocks();
 
-                            gameAdHandler.HideBannerAd();
+                            // gameAdHandler.HideBannerAd();
                             int bestScore = GlobalSingleton.GetInstance().GetLevelStarDictionaryValue(matrixHandler.CurrentLevel);
                             int currentStars = matrixHandler.CalculateStars();
 

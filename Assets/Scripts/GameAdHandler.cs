@@ -1,11 +1,12 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using GoogleMobileAds.Api;
+// using GoogleMobileAds.Api;
 using System;
 
 public class GameAdHandler : MonoBehaviour
 {
+   /* 
     private float TIME_THRESHOLD = 2.5f * 60; //2.5 Min in seconds
 
     private InterstitialAd interstitial;
@@ -229,6 +230,10 @@ public class GameAdHandler : MonoBehaviour
     }
 
     #endregion
+
+
+
+    */
 
 
 }

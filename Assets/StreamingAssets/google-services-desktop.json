@@ -1,43 +1,26 @@
 {
   "project_info": {
-    "project_number": "383111176083",
-    "project_id": "make-a-move-4fc2c",
-    "storage_bucket": "make-a-move-4fc2c.appspot.com"
+    "project_number": "1091234291004",
+    "project_id": "makeamove-eaf00",
+    "storage_bucket": "makeamove-eaf00.firebasestorage.app"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:383111176083:android:b30a376e292da43e1d1266",
+        "mobilesdk_app_id": "1:1091234291004:android:53edf5b054eb581017d239",
         "android_client_info": {
-          "package_name": "com.Triumvirate.MAM.android"
+          "package_name": "com.triumvirate.mam"
         }
       },
-      "oauth_client": [
-        {
-          "client_id": "383111176083-2udb41gb8tref8veri4pvqepjslqgn0l.apps.googleusercontent.com",
-          "client_type": 3
-        }
-      ],
+      "oauth_client": [],
       "api_key": [
         {
-          "current_key": "AIzaSyAMqacgGwliFCC9mn6QC6uZDlkC5A7JQpA"
+          "current_key": "AIzaSyC1N5RQ22ddHuR1kP-jI2_mQSOazhlKrJw"
         }
       ],
       "services": {
         "appinvite_service": {
-          "other_platform_oauth_client": [
-            {
-              "client_id": "383111176083-2udb41gb8tref8veri4pvqepjslqgn0l.apps.googleusercontent.com",
-              "client_type": 3
-            },
-            {
-              "client_id": "383111176083-bqih8rfr68qoqnb5qc6nq59pr7eblb81.apps.googleusercontent.com",
-              "client_type": 2,
-              "ios_info": {
-                "bundle_id": "com.Triumvirate.MAM.ios"
-              }
-            }
-          ]
+          "other_platform_oauth_client": []
         }
       }
     }
