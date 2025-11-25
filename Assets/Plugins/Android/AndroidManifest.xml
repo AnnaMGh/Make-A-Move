@@ -4,7 +4,23 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.unity3d.player"
     xmlns:tools="http://schemas.android.com/tools">
+	
+    <!-- Force-remove Advertising ID permission added transitively by Google libs -->
+    <uses-permission
+        android:name="com.google.android.gms.permission.AD_ID"
+        tools:node="remove"/>
+			
     <application>
+		
+        <!-- Remove AdMob / Ad Manager metadata if present -->
+        <meta-data android:name="com.google.android.gms.ads.APPLICATION_ID" tools:node="remove"/>
+        <meta-data android:name="com.google.android.gms.ads.AD_MANAGER_APP" tools:node="remove"/>
+        <meta-data android:name="com.google.android.gms.ads.DELAY_APP_MEASUREMENT_INIT" tools:node="remove"/>
+
+		
+          <!-- If you keep Firebase Analytics/Crashlytics but do NOT want ad id usage -->
+        <meta-data android:name="google_analytics_adid_collection_enabled" android:value="false"/>
+
         <activity android:name="com.unity3d.player.UnityPlayerActivity"
 			      android:allowBackup="false"
                   android:theme="@style/UnityThemeSelector">
